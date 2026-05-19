@@ -2,4 +2,4 @@
 ## TEAM MEMBERS
 - Denis Gamolya
 - Katarina Malenovic
--
+-Shiyi Sun
