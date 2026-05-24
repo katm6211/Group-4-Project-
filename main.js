@@ -70,7 +70,9 @@ const config = {
         Launcher,
         CinematicPrototype,
         CoreGameplayPrototype,
-        SceneFlowPrototype
+        SceneFlowPrototype,
+        StartCinematic,
+        CinematicMainMenu
     ],
     title: "Prototype Launcher"
 };
