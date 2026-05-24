@@ -69,7 +69,8 @@ class StartCinematic extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#151923");
 
-        this.fadeRect = this.add.image(800, 270, "logoDraft").setScale(0.8)
+        this.fadeRect = this.add.image(1000, 750, "gamelogonamedraft").setScale(0.8)
+        this.fadeRect = this.add.image(800, 200, "logoDraft").setScale(0.8)
         this.fadeRect.setOrigin(0,0);
         this.fadeRect.setDepth(500);
         this.fadeRect.setAlpha(0);

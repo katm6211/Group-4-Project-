@@ -5,6 +5,7 @@ class Launcher extends Phaser.Scene {
 
     preload() {
         this.load.image("logoDraft", "./imageAssets/logoDraft.png");
+        this.load.image("gamelogonamedraft", "./imageAssets/gamelogonamedraft.png");
     }
 
     create() {
