@@ -3,6 +3,10 @@ class Launcher extends Phaser.Scene {
         super("Launcher");
     }
 
+    preload() {
+        this.load.image("logoDraft", "./imageAssets/logoDraft.png");
+    }
+
     create() {
         this.cameras.main.setBackgroundColor("#111318");
 
@@ -72,7 +76,8 @@ const config = {
         CoreGameplayPrototype,
         SceneFlowPrototype,
         StartCinematic,
-        CinematicMainMenu
+        CinematicMainMenu,
+        SettingsOverlay
     ],
     title: "Prototype Launcher"
 };

@@ -69,19 +69,30 @@ class StartCinematic extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#151923");
 
-        this.add.rectangle(960, 540, 300, 600, 0x00f230);
-        this.fadeRect = this.add.rectangle(0,0,1920,1080,0x0000000)
+        this.fadeRect = this.add.image(800, 270, "logoDraft").setScale(0.8)
         this.fadeRect.setOrigin(0,0);
         this.fadeRect.setDepth(500);
-        this.fadeRect.setAlpha(1);
+        this.fadeRect.setAlpha(0);
 
         // fade in: ↑ become transparent
         this.tweens.add({
             targets: this.fadeRect,
-            alpha: 0,
+            alpha: 1,
             duration: 1000,
             ease:"Linear"
         });
+        //fade out to main menu after 2 second
+        this.time.delayedCall(2000, () => {
+            this.tweens.add({
+                targets: this.fadeRect,
+                alpha: 0,
+                duration: 1000,
+                ease: "Linear",
+                onComplete: () => {
+                    this.scene.start("CinematicMainMenu");
+                }
+            })
+        })
 
 
         // return to prototype launcher
@@ -110,8 +121,6 @@ class CinematicMainMenu extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#151923");
 
-        const w = screen.width;
-        const h = screen.height;
 
         // return to prototype launcher
         const backButton = this.add.rectangle(165, 72, 230, 64, 0x242a35)
@@ -145,6 +154,9 @@ class CinematicMainMenu extends Phaser.Scene {
             color: "#f5f1e8"
         }).setOrigin(0.5);
 
+
+        const w = screen.width;
+        const h = screen.height;
         const buttonX = w / 1.8;
         const buttonWidth = 340;
         const buttonHeight = 86;
@@ -199,6 +211,8 @@ class CinematicMainMenu extends Phaser.Scene {
                 fontSize: "28px",
                 color: "#f5f1e8"
             }).setOrigin(0.5);
+
+            this.scene.launch("SettingsOverlay");
         });
 
         // credits button currently does nothing
@@ -225,4 +239,28 @@ class CinematicMainMenu extends Phaser.Scene {
         });
         
     }
+}
+class SettingsOverlay extends Phaser.Scene {
+    constructor() {
+        super("SettingsOverlay");
+    }
+
+    create() {
+        this.cameras.main.setBackgroundColor("rgba(0,0,0,0.5)");
+
+
+    const closeButton = this.add.text(960, 680, "Close", {
+            fontFamily: "Arial",
+            fontSize: "32px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5).setInteractive();
+
+        closeButton.on("pointerdown", () => {
+            this.scene.stop();
+        });
+
+
+
+    }
+
 }
