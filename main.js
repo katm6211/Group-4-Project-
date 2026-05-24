@@ -17,7 +17,7 @@ class Launcher extends Phaser.Scene {
             color: "#f5f1e8"
         }).setOrigin(0.5);
 
-        this.add.text(960, 250, "Choose a prototype to run", {
+        this.add.text(960, 250, "Select a prototype", {
             fontFamily: "Arial",
             fontSize: "32px",
             color: "#b8c4d4"
