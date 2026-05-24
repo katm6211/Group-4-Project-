@@ -69,21 +69,20 @@ class StartCinematic extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#151923");
 
-        this.fadeRect = this.add.image(1200, 530, "gamelogonamedraft").setScale(1.0)
-        this.fadeRect = this.add.image(680, 400, "logoDraft").setScale(1.5)
+        this.fadeRect = this.add.image( 600, 300, 'logoDraft').setScale(1.5)
         this.fadeRect.setOrigin(0,0);
         this.fadeRect.setDepth(500);
         this.fadeRect.setAlpha(0);
 
         // fade in: ↑ become transparent
         this.tweens.add({
-            targets: [this.fadeRect, ],
+            targets: this.fadeRect,
             alpha: 1,
-            duration: 2000,
+            duration: 4000,
             ease:"Linear"
         });
         //fade out to main menu after 2 second
-        this.time.delayedCall(2000, () => {
+        this.time.delayedCall(5000, () => {
             this.tweens.add({
                 targets: this.fadeRect,
                 alpha: 0,
@@ -149,7 +148,7 @@ class CinematicMainMenu extends Phaser.Scene {
         
 
     
-        this.add.text(960, 220, "CMPM 120 Final Game", {
+        this.add.text(960, 150, "CMPM 120 Final Game", {
             fontFamily: "Arial",
             fontSize: "72px",
             color: "#f5f1e8"
