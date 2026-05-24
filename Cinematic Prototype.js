@@ -75,12 +75,13 @@ class StartCinematic extends Phaser.Scene {
         this.fadeRect.setDepth(500);
         this.fadeRect.setAlpha(1);
 
+        // fade in: ↑ become transparent
         this.tweens.add({
             targets: this.fadeRect,
             alpha: 0,
             duration: 1000,
             ease:"Linear"
-        })
+        });
 
 
         // return to prototype launcher
@@ -109,6 +110,9 @@ class CinematicMainMenu extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#151923");
 
+        const w = screen.width;
+        const h = screen.height;
+
         // return to prototype launcher
         const backButton = this.add.rectangle(165, 72, 230, 64, 0x242a35)
         .setStrokeStyle(3, 0x6f7c91)
@@ -121,37 +125,104 @@ class CinematicMainMenu extends Phaser.Scene {
         }).setOrigin(0.5);    
 
         backButton.on("pointerdown", () => {
-        this.scene.start("Launcher");
+            // fade out before going back to launcher
+            this.tweens.add({
+                targets: this.fadeRect,
+                alpha:1,
+                duration:1000,
+                ease:"Linear",
+                onComplete: () => {
+                    this.scene.start("Launcher");
+                }
+            });
         });
         
 
     
-        this.add.text(960, 220, "Main Menu", {
+        this.add.text(960, 220, "CMPM 120 Final Game", {
             fontFamily: "Arial",
             fontSize: "72px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
 
-        
-        const StartGame = this.add.rectangle(165, 72, 230, 64, 0x242a35)
+        const buttonX = w / 1.8;
+        const buttonWidth = 340;
+        const buttonHeight = 86;
+        const buttonGap = 175;
+        const firstButtonY = h / 3.6;
+        const textStyle = {
+            fontFamily: "Arial",
+            fontSize: "34px",
+            color: "#f5f1e8"
+        };
+
+        // start game button currently does nothing
+        const StartGame = this.add.rectangle(buttonX, firstButtonY, buttonWidth, buttonHeight, 0x242a35)
         .setStrokeStyle(3, 0x6f7c91)
         .setInteractive({ useHandCursor: true });
         
-        this.add.text(165, 72, "Start Game", {
-        fontFamily: "Arial",
-        fontSize: "28px",
-        color: "#f5f1e8"
-        }).setOrigin(0.5);    
+        this.add.text(buttonX, firstButtonY, "Start Game", textStyle).setOrigin(0.5); 
+           
+        StartGame.on("pointerover", () => {
+            StartGame.setFillStyle(0x334155);
+        });
+        StartGame.on("pointerout", () => {
+            StartGame.setFillStyle(0x242a35);
+        });
 
         StartGame.on("pointerdown", () => {
-            this.add.text(960, 540, "Currently a Prototype...", {
+            this.add.text(w/2 - 150, firstButtonY, "Currently a Prototype...", {
                 fontFamily: "Arial",
                 fontSize: "28px",
                 color: "#f5f1e8"
             }).setOrigin(0.5);
         });
 
+        // settings button currently does nothing
+        const settingsY = firstButtonY + buttonGap;
+        const Settings = this.add.rectangle(buttonX, settingsY, buttonWidth, buttonHeight, 0x242a35)
+        .setStrokeStyle(3, 0x6f7c91)
+        .setInteractive({ useHandCursor: true });
+        
+        this.add.text(buttonX, settingsY, "Settings", textStyle).setOrigin(0.5);    
 
+        Settings.on("pointerover", () => {
+            Settings.setFillStyle(0x334155);
+        });
+        Settings.on("pointerout", () => {
+            Settings.setFillStyle(0x242a35);
+        });
+
+        Settings.on("pointerdown", () => {
+            this.add.text(w/2 - 150, settingsY, "Currently a Prototype...", {
+                fontFamily: "Arial",
+                fontSize: "28px",
+                color: "#f5f1e8"
+            }).setOrigin(0.5);
+        });
+
+        // credits button currently does nothing
+        const creditsY = settingsY + buttonGap;
+        const Credits = this.add.rectangle(buttonX, creditsY, buttonWidth, buttonHeight, 0x242a35)
+        .setStrokeStyle(3, 0x6f7c91)
+        .setInteractive({ useHandCursor: true });
+        
+        this.add.text(buttonX, creditsY, "Credits", textStyle).setOrigin(0.5); 
+           
+        Credits.on("pointerover", () => {
+            Credits.setFillStyle(0x334155);
+        });
+        Credits.on("pointerout", () => {
+            Credits.setFillStyle(0x242a35);
+        });
+
+        Credits.on("pointerdown", () => {
+            this.add.text(w/2 - 150, creditsY, "Currently a Prototype...", {
+                fontFamily: "Arial",
+                fontSize: "28px",
+                color: "#f5f1e8"
+            }).setOrigin(0.5);
+        });
         
     }
 }
