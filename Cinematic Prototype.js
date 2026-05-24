@@ -69,7 +69,7 @@ class StartCinematic extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#151923");
 
-        this.fadeRect = this.add.image(1000, 750, "gamelogonamedraft").setScale(0.8)
+        this.fadeRect = this.add.image(1000, 750, "gamelogonamedraft").setScale(1.5)
         this.fadeRect = this.add.image(800, 200, "logoDraft").setScale(0.8)
         this.fadeRect.setOrigin(0,0);
         this.fadeRect.setDepth(500);
@@ -249,7 +249,18 @@ class SettingsOverlay extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("rgba(0,0,0,0.5)");
 
+        this.add.rectangle(960, 540, 600, 400, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91);
 
+            this.add.text(960, 380, "Settings", {
+                fontFamily: "Arial",
+                fontSize: "48px",
+                color: "#f5f1e8"
+            }).setOrigin(0.5);
+
+
+
+    
     const closeButton = this.add.text(960, 680, "Close", {
             fontFamily: "Arial",
             fontSize: "32px",
