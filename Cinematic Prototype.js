@@ -71,7 +71,7 @@ class StartCinematic extends Phaser.Scene {
 
         //this.fadeRect = this.add.image(1000, 750, "gamelogonamedraft").setScale(1.3)
         this.fadeRect = this.add.image(300, 200, "logoDraft").setScale(2.1)
-        this.fadeRect.setOrigin(0,0);
+        this.fadeRect.setOrigin(0, 0);
         this.fadeRect.setDepth(500);
         this.fadeRect.setAlpha(0);
 
@@ -80,7 +80,7 @@ class StartCinematic extends Phaser.Scene {
             targets: this.fadeRect,
             alpha: 1,
             duration: 4000,
-            ease:"Linear"
+            ease: "Linear"
         });
         //fade out to main menu after 2 second
         this.time.delayedCall(5000, () => {
@@ -98,17 +98,17 @@ class StartCinematic extends Phaser.Scene {
 
         // return to prototype launcher
         const backButton = this.add.rectangle(165, 72, 230, 64, 0x242a35)
-        .setStrokeStyle(3, 0x6f7c91)
-        .setInteractive({ useHandCursor: true });
-        
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+
         this.add.text(165, 72, "Back", {
-        fontFamily: "Arial",
-        fontSize: "28px",
-        color: "#f5f1e8"
-        }).setOrigin(0.5);    
+            fontFamily: "Arial",
+            fontSize: "28px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
 
         backButton.on("pointerdown", () => {
-        this.scene.start("Launcher");
+            this.scene.start("Launcher");
         });
 
     }
@@ -125,30 +125,30 @@ class CinematicMainMenu extends Phaser.Scene {
 
         // return to prototype launcher
         const backButton = this.add.rectangle(165, 72, 230, 64, 0x242a35)
-        .setStrokeStyle(3, 0x6f7c91)
-        .setInteractive({ useHandCursor: true });
-        
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+
         this.add.text(165, 72, "Back", {
-        fontFamily: "Arial",
-        fontSize: "28px",
-        color: "#f5f1e8"
-        }).setOrigin(0.5);    
+            fontFamily: "Arial",
+            fontSize: "28px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
 
         backButton.on("pointerdown", () => {
             // fade out before going back to launcher
             this.tweens.add({
                 targets: this.fadeRect,
-                alpha:1,
-                duration:1000,
-                ease:"Linear",
+                alpha: 1,
+                duration: 1000,
+                ease: "Linear",
                 onComplete: () => {
                     this.scene.start("Launcher");
                 }
             });
         });
-        
-        const placeholder = this.placeholder =  this.add.image(0, 0, "placeholder").setOrigin(0,0).setDisplaySize(1920, 1080);
-    
+
+        const placeholder = this.placeholder = this.add.image(0, 0, "placeholder").setOrigin(0, 0).setDisplaySize(1920, 1080);
+
         this.add.rectangle(960, 150, 900, 120, 0x000000, 0.55)
             .setStrokeStyle(3, 0xffffff, 0.35);
 
@@ -173,12 +173,17 @@ class CinematicMainMenu extends Phaser.Scene {
         };
 
         // start game button currently does nothing
-        const StartGame = this.add.rectangle(buttonX, firstButtonY, buttonWidth, buttonHeight, 0x242a35)
-        .setStrokeStyle(3, 0x6f7c91)
-        .setInteractive({ useHandCursor: true });
-        
-        this.add.text(buttonX, firstButtonY, "Start Game", textStyle).setOrigin(0.5); 
-           
+        const StartGame = this.add.rectangle(0, 0, buttonWidth, buttonHeight, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+
+        const StartGameText = this.add.text(0, 0, "Start Game", textStyle).setOrigin(0.5);
+
+        const StartGameContainer = this.add.container(buttonX, firstButtonY, [StartGame, StartGameText]).setAlpha(0);
+
+
+
+
         StartGame.on("pointerover", () => {
             StartGame.setFillStyle(0x334155);
         });
@@ -187,7 +192,7 @@ class CinematicMainMenu extends Phaser.Scene {
         });
 
         StartGame.on("pointerdown", () => {
-            this.add.text(w/2 - 150, firstButtonY, "Currently a Prototype...", {
+            this.add.text(w / 2 - 150, firstButtonY, "Currently a Prototype...", {
                 fontFamily: "Arial",
                 fontSize: "28px",
                 color: "#f5f1e8"
@@ -196,11 +201,13 @@ class CinematicMainMenu extends Phaser.Scene {
 
         // settings button opens settings overlay
         const settingsY = firstButtonY + buttonGap;
-        const Settings = this.add.rectangle(buttonX, settingsY, buttonWidth, buttonHeight, 0x242a35)
-        .setStrokeStyle(3, 0x6f7c91)
-        .setInteractive({ useHandCursor: true });
-        
-        this.add.text(buttonX, settingsY, "Settings", textStyle).setOrigin(0.5);    
+        const Settings = this.add.rectangle(0, 0, buttonWidth, buttonHeight, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+
+        const SettingsText = this.add.text(0, 0, "Settings", textStyle).setOrigin(0.5);
+
+        const SettingsContainer = this.add.container(buttonX, settingsY, [Settings, SettingsText]).setAlpha(0);
 
         Settings.on("pointerover", () => {
             Settings.setFillStyle(0x334155);
@@ -210,7 +217,7 @@ class CinematicMainMenu extends Phaser.Scene {
         });
 
         Settings.on("pointerdown", () => {
-            this.add.text(w/2 - 150, settingsY, "Currently a Prototype...", {
+            this.add.text(w / 2 - 150, settingsY, "Currently a Prototype...", {
                 fontFamily: "Arial",
                 fontSize: "28px",
                 color: "#f5f1e8"
@@ -221,12 +228,13 @@ class CinematicMainMenu extends Phaser.Scene {
 
         // credits button currently does nothing
         const creditsY = settingsY + buttonGap;
-        const Credits = this.add.rectangle(buttonX, creditsY, buttonWidth, buttonHeight, 0x242a35)
-        .setStrokeStyle(3, 0x6f7c91)
-        .setInteractive({ useHandCursor: true });
-        
-        this.add.text(buttonX, creditsY, "Credits", textStyle).setOrigin(0.5); 
-           
+        const Credits = this.add.rectangle(0, 0, buttonWidth, buttonHeight, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+
+        const CreditsText = this.add.text(0, 0, "Credits", textStyle).setOrigin(0.5);
+        const CreditsContainer = this.add.container(buttonX, creditsY, [Credits, CreditsText]).setAlpha(0);
+
         Credits.on("pointerover", () => {
             Credits.setFillStyle(0x334155);
         });
@@ -235,13 +243,37 @@ class CinematicMainMenu extends Phaser.Scene {
         });
 
         Credits.on("pointerdown", () => {
-            this.add.text(w/2 - 150, creditsY, "Currently a Prototype...", {
+            this.add.text(w / 2 - 150, creditsY, "Currently a Prototype...", {
                 fontFamily: "Arial",
                 fontSize: "28px",
                 color: "#f5f1e8"
             }).setOrigin(0.5);
         });
-        
+        // fade in buttons
+
+        this.tweens.chain({
+            tweens: [
+                {
+                    targets: StartGameContainer,
+                    alpha: 1,
+                    duration: 1500,
+                    ease: "Linear"
+                },
+                {
+                    targets: SettingsContainer,
+                    alpha: 1,
+                    duration: 1500,
+                    ease: 'Linear'
+                },
+                {
+                    targets: CreditsContainer,
+                    alpha: 1,
+                    duration: 1500,
+                    ease: 'Linear'
+                }
+            ]
+        });
+
     }
 }
 
@@ -258,16 +290,16 @@ class SettingsOverlay extends Phaser.Scene {
         this.add.rectangle(960, 540, 600, 400, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91);
 
-            this.add.text(960, 380, "Settings", {
-                fontFamily: "Arial",
-                fontSize: "48px",
-                color: "#f5f1e8"
-            }).setOrigin(0.5);
+        this.add.text(960, 380, "Settings", {
+            fontFamily: "Arial",
+            fontSize: "48px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
 
 
 
-    
-    const closeButton = this.add.text(960, 680, "Close", {
+
+        const closeButton = this.add.text(960, 680, "Close", {
             fontFamily: "Arial",
             fontSize: "32px",
             color: "#f5f1e8"
