@@ -69,8 +69,8 @@ class StartCinematic extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#151923");
 
-        this.fadeRect = this.add.image(1000, 750, "gamelogonamedraft").setScale(1.3)
-        this.fadeRect = this.add.image(800, 200, "logoDraft").setScale(2.1)
+        //this.fadeRect = this.add.image(1000, 750, "gamelogonamedraft").setScale(1.3)
+        this.fadeRect = this.add.image(300, 200, "logoDraft").setScale(2.1)
         this.fadeRect.setOrigin(0,0);
         this.fadeRect.setDepth(500);
         this.fadeRect.setAlpha(0);
@@ -147,12 +147,15 @@ class CinematicMainMenu extends Phaser.Scene {
             });
         });
         
-
+        this.add.image(0, 0, "placeholder").setOrigin(0,0).setDisplaySize(1920, 1080);
     
+        this.add.rectangle(960, 150, 900, 120, 0x000000, 0.55)
+            .setStrokeStyle(3, 0xffffff, 0.35);
+
         this.add.text(960, 150, "CMPM 120 Final Game", {
             fontFamily: "Arial",
             fontSize: "72px",
-            color: "#f5f1e8"
+            color: "#fefefe"
         }).setOrigin(0.5);
 
 
