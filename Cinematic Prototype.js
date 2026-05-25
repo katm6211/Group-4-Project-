@@ -147,7 +147,7 @@ class CinematicMainMenu extends Phaser.Scene {
             });
         });
         
-        this.add.image(0, 0, "placeholder").setOrigin(0,0).setDisplaySize(1920, 1080);
+        const placeholder = this.placeholder =  this.add.image(0, 0, "placeholder").setOrigin(0,0).setDisplaySize(1920, 1080);
     
         this.add.rectangle(960, 150, 900, 120, 0x000000, 0.55)
             .setStrokeStyle(3, 0xffffff, 0.35);
@@ -161,7 +161,7 @@ class CinematicMainMenu extends Phaser.Scene {
 
         const w = screen.width;
         const h = screen.height;
-        const buttonX = w / 1.8;
+        const buttonX = placeholder.width / 2; // w / 1.8
         const buttonWidth = 340;
         const buttonHeight = 86;
         const buttonGap = 175;
