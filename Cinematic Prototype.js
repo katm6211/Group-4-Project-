@@ -79,11 +79,11 @@ class StartCinematic extends Phaser.Scene {
         this.tweens.add({
             targets: this.fadeRect,
             alpha: 1,
-            duration: 1000,
+            duration: 4000,
             ease:"Linear"
         });
         //fade out to main menu after 2 second
-        this.time.delayedCall(2000, () => {
+        this.time.delayedCall(5000, () => {
             this.tweens.add({
                 targets: this.fadeRect,
                 alpha: 0,
@@ -149,7 +149,7 @@ class CinematicMainMenu extends Phaser.Scene {
         
 
     
-        this.add.text(960, 220, "CMPM 120 Final Game", {
+        this.add.text(960, 150, "CMPM 120 Final Game", {
             fontFamily: "Arial",
             fontSize: "72px",
             color: "#f5f1e8"
