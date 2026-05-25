@@ -69,8 +69,8 @@ class StartCinematic extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#151923");
 
-        this.fadeRect = this.add.image(1000, 750, "gamelogonamedraft").setScale(1.5)
-        this.fadeRect = this.add.image(800, 200, "logoDraft").setScale(0.8)
+        this.fadeRect = this.add.image(1000, 750, "gamelogonamedraft").setScale(1.3)
+        this.fadeRect = this.add.image(800, 200, "logoDraft").setScale(2.1)
         this.fadeRect.setOrigin(0,0);
         this.fadeRect.setDepth(500);
         this.fadeRect.setAlpha(0);
@@ -191,7 +191,7 @@ class CinematicMainMenu extends Phaser.Scene {
             }).setOrigin(0.5);
         });
 
-        // settings button currently does nothing
+        // settings button opens settings overlay
         const settingsY = firstButtonY + buttonGap;
         const Settings = this.add.rectangle(buttonX, settingsY, buttonWidth, buttonHeight, 0x242a35)
         .setStrokeStyle(3, 0x6f7c91)
@@ -241,6 +241,9 @@ class CinematicMainMenu extends Phaser.Scene {
         
     }
 }
+
+// currently does not pause prev scene, just adds overlay on top.
+// currently does not actually change sound settings 
 class SettingsOverlay extends Phaser.Scene {
     constructor() {
         super("SettingsOverlay");
