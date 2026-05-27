@@ -183,7 +183,7 @@ class CinematicMainMenu extends Phaser.Scene {
 
 
 
-
+    
         StartGame.on("pointerover", () => {
             StartGame.setFillStyle(0x334155);
         });
@@ -192,11 +192,7 @@ class CinematicMainMenu extends Phaser.Scene {
         });
 
         StartGame.on("pointerdown", () => {
-            this.add.text(w / 2 - 150, firstButtonY, "Currently a Prototype...", {
-                fontFamily: "Arial",
-                fontSize: "28px",
-                color: "#f5f1e8"
-            }).setOrigin(0.5);
+            this.scene.start("ChaseScene")
         });
 
         // settings button opens settings overlay
@@ -217,16 +213,10 @@ class CinematicMainMenu extends Phaser.Scene {
         });
 
         Settings.on("pointerdown", () => {
-            this.add.text(w / 2 - 150, settingsY, "Currently a Prototype...", {
-                fontFamily: "Arial",
-                fontSize: "28px",
-                color: "#f5f1e8"
-            }).setOrigin(0.5);
-
-            this.scene.launch("SettingsOverlay");
+            openSettingsOverlay(this);
         });
 
-        // credits button currently does nothing
+        // credits button opens credits scene
         const creditsY = settingsY + buttonGap;
         const Credits = this.add.rectangle(0, 0, buttonWidth, buttonHeight, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
@@ -243,14 +233,10 @@ class CinematicMainMenu extends Phaser.Scene {
         });
 
         Credits.on("pointerdown", () => {
-            this.add.text(w / 2 - 150, creditsY, "Currently a Prototype...", {
-                fontFamily: "Arial",
-                fontSize: "28px",
-                color: "#f5f1e8"
-            }).setOrigin(0.5);
+            this.scene.start("CreditsScene");
         });
-        // fade in buttons
 
+        // fade in buttons
         this.tweens.chain({
             tweens: [
                 {
@@ -277,40 +263,3 @@ class CinematicMainMenu extends Phaser.Scene {
     }
 }
 
-// currently does not pause prev scene, just adds overlay on top.
-// currently does not actually change sound settings 
-class SettingsOverlay extends Phaser.Scene {
-    constructor() {
-        super("SettingsOverlay");
-    }
-
-    create() {
-        this.cameras.main.setBackgroundColor("rgba(0,0,0,0.5)");
-
-        this.add.rectangle(960, 540, 600, 400, 0x242a35)
-            .setStrokeStyle(3, 0x6f7c91);
-
-        this.add.text(960, 380, "Settings", {
-            fontFamily: "Arial",
-            fontSize: "48px",
-            color: "#f5f1e8"
-        }).setOrigin(0.5);
-
-
-
-
-        const closeButton = this.add.text(960, 680, "Close", {
-            fontFamily: "Arial",
-            fontSize: "32px",
-            color: "#f5f1e8"
-        }).setOrigin(0.5).setInteractive();
-
-        closeButton.on("pointerdown", () => {
-            this.scene.stop();
-        });
-
-
-
-    }
-
-}

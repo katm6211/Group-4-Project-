@@ -119,6 +119,7 @@ class ChaseScene extends Phaser.Scene {
         // On success: go to PuzzleScene
         // On fail: go to AlienRevealScene (jumpscare)
         this.cameras.main.setBackgroundColor("#0d1117");
+        addSettingsButton(this);
 
         this.add.text(960, 200, "[Scene 1: Chase Scene]", {
             fontFamily: "Arial",
@@ -197,6 +198,7 @@ class PuzzleScene extends Phaser.Scene {
         // Only one exit: interact with the clock to go to ClockScene
         // No fail state in this room
         this.cameras.main.setBackgroundColor("#1a1520");
+        addSettingsButton(this);
 
         this.add.text(960, 200, "[Scene 2: Puzzle Room]", {
             fontFamily: "Arial",
@@ -244,6 +246,7 @@ class ClockScene extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#12101a");
+        addSettingsButton(this);
 
         this.add.text(960, 200, "[Scene 3: Giant Clock]", {
             fontFamily: "Arial",
@@ -303,6 +306,7 @@ class YoungerSelfScene extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#0f1a0f");
+        addSettingsButton(this);
 
         this.add.text(960, 200, "[Scene 4: Younger Self]", {
             fontFamily: "Arial",
