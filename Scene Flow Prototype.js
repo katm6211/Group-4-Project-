@@ -49,6 +49,20 @@ class SceneFlowPrototype extends Phaser.Scene {
             color: "#f5f1e8"
         }).setOrigin(0.5);
         startButton.on("pointerdown", () => this.scene.start("ChaseScene"));
+    
+        const settingsButton = this.add.rectangle(960, 600, 400, 80, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+
+        this.add.text(960, 600, "Settings", {
+            fontFamily: "Arial",
+            fontSize: "36px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
+        
+        settingsButton.on("pointerdown", () => {
+            openSettingsOverlay(this);
+        });
     }
 }
 class CreditsScene extends Phaser.Scene {
