@@ -35,7 +35,7 @@ class SceneFlowPrototype extends Phaser.Scene {
         this.add.text(960, 500, "Credits", {
             fontFamily: "Arial",
             fontSize: "36px",
-            color: "#f5f1e8" 
+            color: "#f5f1e8"
         }).setOrigin(0.5);
 
         creditsButton.on("pointerdown", () => {
@@ -50,8 +50,13 @@ class SceneFlowPrototype extends Phaser.Scene {
             fontSize: "36px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
-        startButton.on("pointerdown", () => this.scene.start("ChaseScene"));
-    
+        // startButton.on("pointerdown", () => this.scene.start("MainTitleScene"));
+
+        startButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("MainTitleScene"));
+        });
+
         const settingsButton = this.add.rectangle(960, 600, 400, 80, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
@@ -61,12 +66,60 @@ class SceneFlowPrototype extends Phaser.Scene {
             fontSize: "36px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
-        
+
         settingsButton.on("pointerdown", () => {
             openSettingsOverlay(this);
         });
     }
 }
+
+class MainTitleScene extends Phaser.Scene {
+    constructor() {
+        super("MainTitleScene"); 
+    }
+
+    create() {
+
+        // Fade in from black when entering the title screen
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
+        this.cameras.main.setBackgroundColor("#18151c");
+
+        // Main Title Text
+        this.add.text(960, 250, "MY GAME TITLE", {
+            fontFamily: "Arial",
+            fontSize: "80px",
+            color: "#ffcc00",
+            fontWeight: "bold"
+        }).setOrigin(0.5);
+
+        this.add.text(960, 360, "Press START to Begin Your Adventure", {
+            fontFamily: "Arial",
+            fontSize: "28px",
+            color: "#b8c4d4"
+        }).setOrigin(0.5);
+
+        // Start Game Button
+        const startButton = this.add.rectangle(960, 550, 300, 70, 0x224466)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+
+        this.add.text(960, 550, "START", {
+            fontFamily: "Arial",
+            fontSize: "32px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
+
+        // Transition out to your gameplay scene (e.g., Chase Scene / Scene 1)
+        startButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => {
+                // Replace 'ChaseScene' with the actual key of your first scene
+                this.scene.start("ChaseScene");
+            });
+        });
+    }
+}
+
 class CreditsScene extends Phaser.Scene {
     constructor() {
         super("CreditsScene");
@@ -179,7 +232,7 @@ class ChaseScene extends Phaser.Scene {
         // Fade out
         failButton.on("pointerdown", () => {
             this.cameras.main.fade(1000, 0, 0, 0);
-            this.time.delayedCall(1000, () => this.scene.start("SceneFlowPrototype")); 
+            this.time.delayedCall(1000, () => this.scene.start("SceneFlowPrototype"));
         });
 
         // test item to ensure the inventory system works

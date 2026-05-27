@@ -80,6 +80,7 @@ const config = {
         StartCinematic,
         CinematicMainMenu,
         SettingsOverlay,
+        MainTitleScene,
         CreditsScene,
         ChaseScene,
         PuzzleScene,
