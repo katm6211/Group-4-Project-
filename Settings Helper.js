@@ -1,3 +1,5 @@
+// helper to call instead of launching scene
+// it gets the scene key of previous scene to pause and launches the overlay on top
 function openSettingsOverlay(scene) {
     const previousScene = scene.scene.key;
 
@@ -8,6 +10,8 @@ function openSettingsOverlay(scene) {
     scene.scene.pause(previousScene);
 }
 
+
+// function to automatically add settings button to a scene
 function addSettingsButton(scene) {
     const settingsButton = scene.add.rectangle(130, 72, 210, 64, 0x242a35)
         .setStrokeStyle(3, 0x6f7c91)
@@ -75,13 +79,13 @@ class SettingsOverlay extends Phaser.Scene {
         const trackX = x - sliderWidth / 2;
         const valueText = this.add.text(x + 265, y, "", {
             fontFamily: "Arial",
-            fontSize: "28px",
+            fontSize: "23px",
             color: "#b8c4d4"
         }).setOrigin(0.5);
 
         this.add.text(x - 265, y, label, {
             fontFamily: "Arial",
-            fontSize: "28px",
+            fontSize: "23px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
 
