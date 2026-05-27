@@ -75,47 +75,72 @@ class SceneFlowPrototype extends Phaser.Scene {
 
 class MainTitleScene extends Phaser.Scene {
     constructor() {
-        super("MainTitleScene"); 
+        super("MainTitleScene");
     }
 
     create() {
 
-        // Fade in from black when entering the title screen
+        // Fade in 
         this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#18151c");
 
         // Main Title Text
-        this.add.text(960, 250, "MY GAME TITLE", {
+        const gameTitle = this.add.text(960, 250, "MY GAME TITLE", {
             fontFamily: "Arial",
             fontSize: "80px",
             color: "#ffcc00",
             fontWeight: "bold"
-        }).setOrigin(0.5);
+        }).setAlpha(0).setOrigin(0.5); 
 
-        this.add.text(960, 360, "Press START to Begin Your Adventure", {
+        const startText = this.add.text(960, 360, "Press START to Begin Your Adventure", {
             fontFamily: "Arial",
             fontSize: "28px",
             color: "#b8c4d4"
-        }).setOrigin(0.5);
+        }).setAlpha(0).setOrigin(0.5);
 
         // Start Game Button
-        const startButton = this.add.rectangle(960, 550, 300, 70, 0x224466)
+        const startButton = this.add.rectangle(0, 0, 300, 70, 0x224466)
             .setStrokeStyle(3, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
 
-        this.add.text(960, 550, "START", {
+        const startButtonText = this.add.text(0, 0, "START", {
             fontFamily: "Arial",
             fontSize: "32px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
 
-        // Transition out to your gameplay scene (e.g., Chase Scene / Scene 1)
+        const startButtonContainer = this.add.container(960, 550, [startButton, startButtonText]).setAlpha(0);
+
+
         startButton.on("pointerdown", () => {
             this.cameras.main.fade(1000, 0, 0, 0);
             this.time.delayedCall(1000, () => {
-                // Replace 'ChaseScene' with the actual key of your first scene
+
                 this.scene.start("ChaseScene");
             });
+        });
+        // Fade in animation tween for text 
+        this.tweens.chain({
+            tweens: [
+                {
+                    targets: gameTitle,
+                    alpha: 1,
+                    duration: 1500,
+                    ease: "Linear"
+                },
+                {
+                    targets: startText,
+                    alpha: 1,
+                    duration: 1500,
+                    ease: 'Linear'
+                },
+                {
+                    targets: startButtonContainer, 
+                    alpha: 1,
+                    duration: 1500,
+                    ease: 'Linear'
+                }
+            ]
         });
     }
 }
