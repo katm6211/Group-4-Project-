@@ -136,6 +136,8 @@ class ChaseScene extends Phaser.Scene {
         // Chase scene: player escapes from aliens, reach next room before timer runs out
         // On success: go to PuzzleScene
         // On fail: go to AlienRevealScene (jumpscare)
+        // Fade in
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#0d1117");
         addSettingsButton(this);
 
