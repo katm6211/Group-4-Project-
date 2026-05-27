@@ -4,6 +4,8 @@ class SceneFlowPrototype extends Phaser.Scene {
     }
 
     create() {
+        // Fade in
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#18151c");
 
         this.add.text(960, 220, "Scene Flow Prototype", {
@@ -57,16 +59,18 @@ class CreditsScene extends Phaser.Scene {
     }
 
     create() {
+        // Fade in
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#18151c")
         this.add.text(960, 200, "Credits", {
             fontFamily: "Arial",
             fontSize: "72px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
-        this.add.text(960, 380, "Production Lead",{
+        this.add.text(960, 380, "Production Lead", {
             fontFamily: "Arial",
-            fontSize:"26px",
-            color:"#75a1d7"
+            fontSize: "26px",
+            color: "#75a1d7"
         }).setOrigin(0.5);
         this.add.text(960, 430, "Denis Gamolya", {
             fontFamily: "Arial",
@@ -93,7 +97,7 @@ class CreditsScene extends Phaser.Scene {
             fontFamily: "Arial",
             fontSize: "38px",
             color: "#f5f1e8"
-        }).setOrigin(0.5);   
+        }).setOrigin(0.5);
         const backButton = this.add.rectangle(165, 72, 230, 64, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
@@ -105,7 +109,7 @@ class CreditsScene extends Phaser.Scene {
         }).setOrigin(0.5);
         backButton.on("pointerdown", () => {
             this.scene.start("Launcher");
-        }); 
+        });
     }
 }
 
@@ -132,6 +136,7 @@ class ChaseScene extends Phaser.Scene {
             color: "#b8c4d4"
         }).setOrigin(0.5);
 
+
         const winButton = this.add.rectangle(620, 550, 400, 80, 0x1a3a2a)
             .setStrokeStyle(3, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
@@ -140,7 +145,11 @@ class ChaseScene extends Phaser.Scene {
             fontSize: "32px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
-        winButton.on("pointerdown", () => this.scene.start("PuzzleScene"));
+        // Fade out 
+        winButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("PuzzleScene"));
+        });
 
         const failButton = this.add.rectangle(1300, 550, 400, 80, 0x3a1a1a)
             .setStrokeStyle(3, 0x6f7c91)
@@ -150,7 +159,11 @@ class ChaseScene extends Phaser.Scene {
             fontSize: "32px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
-        failButton.on("pointerdown", () => this.scene.start("AlienRevealScene"));
+        // Fade out
+        failButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("SceneFlowPrototype"));
+        });
     }
 }
 class PuzzleScene extends Phaser.Scene {
@@ -159,6 +172,8 @@ class PuzzleScene extends Phaser.Scene {
     }
 
     create() {
+        // Fade in
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
         // Player explores the room and finds a giant clock
         // Only one exit: interact with the clock to go to ClockScene
         // No fail state in this room
@@ -184,7 +199,12 @@ class PuzzleScene extends Phaser.Scene {
             fontSize: "32px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
-        clockButton.on("pointerdown", () => this.scene.start("ClockScene"));
+        // Fade out
+        clockButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("ClockScene"));
+        });
+
     }
 }
 
@@ -194,6 +214,8 @@ class ClockScene extends Phaser.Scene {
     }
 
     create() {
+        // Fade in 
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#12101a");
 
         this.add.text(960, 200, "[Scene 3: Giant Clock]", {
@@ -219,7 +241,11 @@ class ClockScene extends Phaser.Scene {
             fontSize: "32px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
-        cwButton.on("pointerdown", () => this.scene.start("PuzzleScene"));
+        // Fade out
+        cwButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("PuzzleScene"));
+        });
 
         const ccwButton = this.add.rectangle(1300, 550, 400, 80, 0x0a1a2a)
             .setStrokeStyle(3, 0x6f7c91)
@@ -229,7 +255,11 @@ class ClockScene extends Phaser.Scene {
             fontSize: "32px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
-        ccwButton.on("pointerdown", () => this.scene.start("YoungerSelfScene"));
+        // Fade out
+        ccwButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("YoungerSelfScene"));
+        });
     }
 }
 class YoungerSelfScene extends Phaser.Scene {
@@ -238,6 +268,8 @@ class YoungerSelfScene extends Phaser.Scene {
     }
 
     create() {
+        // Fade in
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#0f1a0f");
 
         this.add.text(960, 200, "[Scene 4: Younger Self]", {
@@ -263,7 +295,11 @@ class YoungerSelfScene extends Phaser.Scene {
             fontSize: "32px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
-        endButton.on("pointerdown", () => this.scene.start("EndingScene"));
+        // Fade out 
+        endButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("EndingScene"));
+        });
     }
 }
 class AlienRevealScene extends Phaser.Scene {
@@ -272,6 +308,8 @@ class AlienRevealScene extends Phaser.Scene {
     }
 
     create() {
+        // Fade in 
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#1a0000");
 
         // Bad ending: player gets caught by aliens
@@ -298,6 +336,11 @@ class AlienRevealScene extends Phaser.Scene {
             color: "#f5f1e8"
         }).setOrigin(0.5);
         backButton.on("pointerdown", () => this.scene.start("SceneFlowPrototype"));
+        // Fade out 
+        backButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("SceneFlowPrototype"));
+        });
     }
 }
 class EndingScene extends Phaser.Scene {
@@ -306,6 +349,8 @@ class EndingScene extends Phaser.Scene {
     }
 
     create() {
+        // Fade in 
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#0d1a0d");
 
         // Good ending: player escapes the UFO with their younger self
@@ -331,6 +376,11 @@ class EndingScene extends Phaser.Scene {
             color: "#f5f1e8"
         }).setOrigin(0.5);
         creditsButton.on("pointerdown", () => this.scene.start("CreditsScene"));
+        // Fade out 
+        creditsButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("CreditsScene"));
+        });
 
         const titleButton = this.add.rectangle(1300, 550, 400, 80, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
@@ -340,6 +390,10 @@ class EndingScene extends Phaser.Scene {
             fontSize: "32px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
-        titleButton.on("pointerdown", () => this.scene.start("SceneFlowPrototype"));
+        // Fade out
+        titleButton.on("pointerdown", () => {
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("SceneFlowPrototype"));
+        });
     }
 }
