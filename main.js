@@ -79,7 +79,8 @@ const config = {
         SceneFlowPrototype,
         StartCinematic,
         CinematicMainMenu,
-        SettingsOverlay
+        SettingsOverlay,
+        CreditsScene
     ],
     title: "Prototype Launcher"
 };
