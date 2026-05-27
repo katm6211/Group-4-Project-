@@ -80,7 +80,13 @@ const config = {
         StartCinematic,
         CinematicMainMenu,
         SettingsOverlay,
-        CreditsScene
+        CreditsScene,
+        ChaseScene,
+        PuzzleScene,
+        ClockScene,
+        YoungerSelfScene,
+        AlienRevealScene,
+        EndingScene
     ],
     title: "Prototype Launcher"
 };
