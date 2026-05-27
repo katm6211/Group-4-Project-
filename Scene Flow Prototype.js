@@ -35,7 +35,7 @@ class SceneFlowPrototype extends Phaser.Scene {
         this.add.text(960, 500, "Credits", {
             fontFamily: "Arial",
             fontSize: "36px",
-            color: "#f5f1e8"
+            color: "#f5f1e8" 
         }).setOrigin(0.5);
 
         creditsButton.on("pointerdown", () => {
@@ -123,6 +123,7 @@ class ChaseScene extends Phaser.Scene {
         // On success: go to PuzzleScene
         // On fail: go to AlienRevealScene (jumpscare)
         this.cameras.main.setBackgroundColor("#0d1117");
+        addSettingsButton(this);
 
         this.add.text(960, 200, "[Scene 1: Chase Scene]", {
             fontFamily: "Arial",
@@ -162,7 +163,40 @@ class ChaseScene extends Phaser.Scene {
         // Fade out
         failButton.on("pointerdown", () => {
             this.cameras.main.fade(1000, 0, 0, 0);
-            this.time.delayedCall(1000, () => this.scene.start("SceneFlowPrototype"));
+            this.time.delayedCall(1000, () => this.scene.start("SceneFlowPrototype")); 
+        });
+
+        // test item to ensure the inventory system works
+        const testItem = this.add.text(960, 430, "test_item", {
+            fontFamily: "Arial",
+            fontSize: "30px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        // make the item collect only once
+        testItem.on("pointerdown", () => {
+            addInventoryItem("test_item");
+            testItem.disableInteractive();
+            this.tweens.add({
+                targets: testItem,
+                alpha: 0,
+                duration: 500,
+                onComplete: () => testItem.destroy()
+            });
+        });
+
+        // button to access inventory
+        const inventoryButton = this.add.rectangle(110, 1010, 170, 58, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+        this.add.text(110, 1010, "Inventory", {
+            fontFamily: "Arial",
+            fontSize: "24px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
+        inventoryButton.on("pointerdown", () => {
+            this.scene.launch("Inventory");
+            this.scene.bringToTop("Inventory");
         });
     }
 }
@@ -178,6 +212,7 @@ class PuzzleScene extends Phaser.Scene {
         // Only one exit: interact with the clock to go to ClockScene
         // No fail state in this room
         this.cameras.main.setBackgroundColor("#1a1520");
+        addSettingsButton(this);
 
         this.add.text(960, 200, "[Scene 2: Puzzle Room]", {
             fontFamily: "Arial",
@@ -205,6 +240,20 @@ class PuzzleScene extends Phaser.Scene {
             this.time.delayedCall(1000, () => this.scene.start("ClockScene"));
         });
 
+
+        // button to access inventory
+        const inventoryButton = this.add.rectangle(110, 1010, 170, 58, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+        this.add.text(110, 1010, "Inventory", {
+            fontFamily: "Arial",
+            fontSize: "24px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
+        inventoryButton.on("pointerdown", () => {
+            this.scene.launch("Inventory");
+            this.scene.bringToTop("Inventory");
+        });
     }
 }
 
@@ -217,6 +266,7 @@ class ClockScene extends Phaser.Scene {
         // Fade in 
         this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#12101a");
+        addSettingsButton(this);
 
         this.add.text(960, 200, "[Scene 3: Giant Clock]", {
             fontFamily: "Arial",
@@ -260,6 +310,21 @@ class ClockScene extends Phaser.Scene {
             this.cameras.main.fade(1000, 0, 0, 0);
             this.time.delayedCall(1000, () => this.scene.start("YoungerSelfScene"));
         });
+
+
+        // button to access inventory
+        const inventoryButton = this.add.rectangle(110, 1010, 170, 58, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+        this.add.text(110, 1010, "Inventory", {
+            fontFamily: "Arial",
+            fontSize: "24px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
+        inventoryButton.on("pointerdown", () => {
+            this.scene.launch("Inventory");
+            this.scene.bringToTop("Inventory");
+        });
     }
 }
 class YoungerSelfScene extends Phaser.Scene {
@@ -271,6 +336,7 @@ class YoungerSelfScene extends Phaser.Scene {
         // Fade in
         this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#0f1a0f");
+        addSettingsButton(this);
 
         this.add.text(960, 200, "[Scene 4: Younger Self]", {
             fontFamily: "Arial",
@@ -299,6 +365,21 @@ class YoungerSelfScene extends Phaser.Scene {
         endButton.on("pointerdown", () => {
             this.cameras.main.fade(1000, 0, 0, 0);
             this.time.delayedCall(1000, () => this.scene.start("EndingScene"));
+        });
+
+
+        // button to access inventory
+        const inventoryButton = this.add.rectangle(110, 1010, 170, 58, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+        this.add.text(110, 1010, "Inventory", {
+            fontFamily: "Arial",
+            fontSize: "24px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
+        inventoryButton.on("pointerdown", () => {
+            this.scene.launch("Inventory");
+            this.scene.bringToTop("Inventory");
         });
     }
 }
