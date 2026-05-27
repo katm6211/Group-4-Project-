@@ -92,7 +92,7 @@ class MainTitleScene extends Phaser.Scene {
             fontWeight: "bold"
         }).setAlpha(0).setOrigin(0.5); 
 
-        const startText = this.add.text(960, 360, "Press START to Begin Your Adventure", {
+        const startText = this.add.text(960, 360, "Press START to Begin", {
             fontFamily: "Arial",
             fontSize: "28px",
             color: "#b8c4d4"
