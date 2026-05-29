@@ -29,12 +29,20 @@ Sound effects or voice clips triggered in response to player input or game event
 Dynamically-generated sounds (as opposed to sounds saved in asset files) created using a library like Tone.jsLinks to an external site..
 Layering of several synchronized audio loops that create a space of dynamically recomposable sounds from a small library of audio asset files.
 [Something else proposed by your team]
-- Visual: We have a sprite sheet in the core mechanic and the each of the puzzles are visually mapped out/prototyped. 
 
-- Motion: Dynamic motion (physics) is exercised through the sprite. For now, you can control the sprite through 
-Some kind of smooth motion must be used in your game's core mechanic. It might be based on kinematic (tweens) or dynamic (physics) movement or even some ad-hoc form of motion created by code that incrementally modifies the scene a tiny bit each animation frame (such as displaying character dialog as if it were being typed out incrementally).
-Progression: Your prototype should suggest some notion of progression that happens across instances of your core gameplay sessions. It might be a progression of narrative, difficulty, aesthetics, or another player experience element. Some aspects of your progression might be easy to demonstrate in a core gameplay prototype (e.g. allowing the player to press +/- to increase or decrease enemy attack damage) while others  (e.g. coming to understand fictional characters better over time). If the notion of progression cannot easily be shown in your core gameplay prototype, it should still be described in your documentation. (For example, your description of how your progression works might offer a link to your scene-flow prototype instead with a note like "See [link] for a demo of our narrative progression.")
-- Prefabs: Two or more notions of prefab objects must be used in your prototype's software implementation. Kinds:
+- Visual: We have a sprite sheet in the core mechanic and the each of the puzzles are graphically mapped out/prototyped. The sprite sheet is in spritemovement.js and the graphic visuals for the puzzles are in the core gameplay prototype.js file. 
+
+- Motion: Dynamic motion (physics) is exercised through the sprite. For now, you can control the sprite through buttons on the screen: left, right, and up. There's also modifications of animation frames for the sprite, this is all located in spritemovement.js. 
+
+- Prefabs: We have our design presets expressed as a structured block of data inside our core gameplay prototype.js file that drives repeated UI elements : 
+        const demos = [
+            { label: "1. Handle & Lever", scene: "DemoHandleLever" },
+            { label: "2. Wire Puzzle", scene: "DemoWirePuzzle" },
+            { label: "3. Clock", scene: "DemoClock" },
+            { label: "4. Radio", scene: "DemoRadio" },
+            { label: "5. Core Mechanic", scene: "Sprite"}
+        ];
+Two or more notions of prefab objects must be used in your prototype's software implementation. Kinds:
 Creation of GameObject subclasses that are subclassed again by other objects in your game so as to share code between them.
 Creation of Scene subclasses to model shared design between different sub-types of scenes.
 Design presets expressed in program code (e.g. a block of JSON inside of one of your JavaScript files).

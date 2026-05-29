@@ -39,17 +39,17 @@ function Spritemovement() {
    this.physics.world.gravity.y = 600;
     sprite.setCollideWorldBounds(true);
     sprite.body.onWorldBounds = true;
-    this.input.on('pointerdown', () => {
+    /*this.input.on('pointerdown', () => {
         if (this.sprite.body.blocked.down || this.sprite.body.touching.down) {
             this.sprite.setVelocityY(-900);
         }
-    }); 
+    }); */
     const buttonY = this.scale.height - 60; // Place buttons near the bottom screen edge
 
     // left button
     const leftBtn = this.add.text(100, buttonY, '◀ LEFT', { fill: '#fff', fontSize: '32px', backgroundColor: '#333', padding: 10 })
         .setInteractive()
-        .setScrollFactor(0);
+        .setScrollFactor(0); 
 
     leftBtn.on('pointerdown', () => {
         sprite.setVelocityX(-200);
@@ -82,7 +82,7 @@ function Spritemovement() {
     this.input.on('pointerup', () => {
         sprite.setVelocityX(0);
         sprite.anims.stop();
-    });
+    }); 
 
    /* this.physics.world.on('worldbounds', (body, up, down, left, right) => {
         if (body.gameObject === this.sprite && right) {
