@@ -79,7 +79,7 @@ const config = {
             gravity: { y: 0 },
             debug: false
         }
-    },
+    }, 
     scene: [
         Launcher,
         CinematicPrototype,
