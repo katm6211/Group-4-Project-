@@ -1,32 +1,32 @@
-function Spritemovement(scene) { 
+function Spritemovement() { 
 
     // loading in sprite 
-    const sprite = scene.sprite = scene.physics.add.sprite(bg.x, bg.y, 'sprite').setScale(4);
+    const sprite = this.sprite = this.physics.add.sprite(960, 165, 'sprite').setScale(4);
     // animation for sprite 
-    if (!scene.anims.exists('left'))
-        scene.anims.create({
+    if (!this.anims.exists('left'))
+        this.anims.create({
             key: 'left',
-            frames: scene.anims.generateFrameNumbers('sprite', { start: 0, end: 2 }),
+            frames: this.anims.generateFrameNumbers('sprite', { start: 0, end: 2 }),
             frameRate: 10,
             repeat: -1
         });
 
  
-    if (!scene.anims.exists('right'))
-        scene.anims.create({
+    if (!this.anims.exists('right'))
+        this.anims.create({
             key: 'right',
-            frames: scene.anims.generateFrameNumbers('sprite', { start: 3, end: 5 }),
+            frames: this.anims.generateFrameNumbers('sprite', { start: 3, end: 5 }),
             frameRate: 10,
             repeat: -1
         });
 
     // mouse physics 
-    scene.input.on('pointerup', (pointer) => {
+    this.input.on('pointerup', (pointer) => {
         sprite.body.reset(sprite.x, sprite.y);
         sprite.anims.stop();
     });
-    scene.input.on('pointerdown', (pointer) => {
-        scene.physics.moveToObject(sprite, pointer, 200);
+    this.input.on('pointerdown', (pointer) => {
+        this.physics.moveToObject(sprite, pointer, 200);
 
         if (pointer.x == sprite.x && pointer.y < sprite.y) {
             sprite.anims.play('front', true);
