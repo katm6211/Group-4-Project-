@@ -54,7 +54,7 @@ class Sprite extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
     
-        Spritemovement.call();
+        Spritemovement.call(this);
         
 
     }
