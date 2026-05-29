@@ -88,7 +88,11 @@ const config = {
         YoungerSelfScene,
         AlienRevealScene,
         EndingScene,
-        Inventory
+        Inventory,
+        DemoHandleLever,
+        DemoWirePuzzle,
+        DemoClock,
+        DemoRadio,
     ],
     title: "Prototype Launcher"
 };
