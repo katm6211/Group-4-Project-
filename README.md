@@ -21,3 +21,21 @@ Scene Flow Prototype:
 - Reachability: We encorporated this into our gameplay scenes by displaying two buttons on our interface as placeholders. Each button leads to either a good ending or a bad ending. The scenes that display only one button and go back to the title screen are considered to be part of the bad ending. The good endings allow the player to progress into the next scene and eventually reach the end. Each button is captioned with a description of the different outcomes gameplay-wise.
 
 - Transitions: Each scene contains a transition which fades into black, where the next scene fades out of black. 
+
+Core Gameplay Prototype: 
+- Audio: The prototype uses at least two different kinds of audio. Kinds:
+Continuously looping background sound (e.g. music or environmental audio) from an audio asset file.
+Sound effects or voice clips triggered in response to player input or game events, also from an audio asset file.
+Dynamically-generated sounds (as opposed to sounds saved in asset files) created using a library like Tone.jsLinks to an external site..
+Layering of several synchronized audio loops that create a space of dynamically recomposable sounds from a small library of audio asset files.
+[Something else proposed by your team]
+- Visual: We have a sprite sheet in the core mechanic and the each of the puzzles are visually mapped out/prototyped. 
+
+- Motion: Dynamic motion (physics) is exercised through the sprite. For now, you can control the sprite through 
+Some kind of smooth motion must be used in your game's core mechanic. It might be based on kinematic (tweens) or dynamic (physics) movement or even some ad-hoc form of motion created by code that incrementally modifies the scene a tiny bit each animation frame (such as displaying character dialog as if it were being typed out incrementally).
+Progression: Your prototype should suggest some notion of progression that happens across instances of your core gameplay sessions. It might be a progression of narrative, difficulty, aesthetics, or another player experience element. Some aspects of your progression might be easy to demonstrate in a core gameplay prototype (e.g. allowing the player to press +/- to increase or decrease enemy attack damage) while others  (e.g. coming to understand fictional characters better over time). If the notion of progression cannot easily be shown in your core gameplay prototype, it should still be described in your documentation. (For example, your description of how your progression works might offer a link to your scene-flow prototype instead with a note like "See [link] for a demo of our narrative progression.")
+- Prefabs: Two or more notions of prefab objects must be used in your prototype's software implementation. Kinds:
+Creation of GameObject subclasses that are subclassed again by other objects in your game so as to share code between them.
+Creation of Scene subclasses to model shared design between different sub-types of scenes.
+Design presets expressed in program code (e.g. a block of JSON inside of one of your JavaScript files).
+Design presets expressed in data files (e.g. a block of JSON or other data language like XML or TOML saved in a separate non-JavaScript text file).

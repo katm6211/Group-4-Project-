@@ -31,7 +31,7 @@ function Spritemovement() {
         if (pointer.x == sprite.x && pointer.y < sprite.y) {
             sprite.anims.play('front', true);
         } else if (pointer.x == sprite.x && pointer.y > sprite.y) {
-            sprite.anims.play('back', true);
+            sprite.anims.play('back', true);  
         } else {
             const slope = Math.abs((pointer.y - sprite.y) / (pointer.x - sprite.x))
             if (pointer.x < sprite.x && slope <= 1) {
