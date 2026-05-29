@@ -68,64 +68,6 @@ class DemoHandleLever extends Phaser.Scene {
     constructor() { super("DemoHandleLever"); }
 
     create() {
-        // loading in sprite 
-        const sprite = this.sprite = this.physics.add.sprite(bg.x, bg.y, 'sprite').setScale(4);
-                if (!this.anims.exists('left'))
-            this.anims.create({
-                key: 'left',
-                frames: this.anims.generateFrameNumbers('sprite', { start: 0, end: 2 }),
-                frameRate: 10,
-                repeat: -1
-            });
-
-        if (!this.anims.exists('front'))
-            this.anims.create({
-                key: 'front',
-                frames: this.anims.generateFrameNumbers('sprite', { start: 6, end: 8 }),
-                frameRate: 10,
-                repeat: -1
-            });
-
-        if (!this.anims.exists('right'))
-            this.anims.create({
-                key: 'right',
-                frames: this.anims.generateFrameNumbers('sprite', { start: 3, end: 5 }),
-                frameRate: 10,
-                repeat: -1
-            });
-            
-        if (!this.anims.exists('back'))
-            this.anims.create({
-                key: 'back',
-                frames: this.anims.generateFrameNumbers('sprite', { start: 9, end: 11 }),
-                frameRate: 10,
-                repeat: -1
-            });
-        this.input.on('pointerup', (pointer) => {
-            sprite.body.reset(sprite.x, sprite.y);
-            sprite.anims.stop();
-        });
-        this.input.on('pointerdown', (pointer) => {
-            this.physics.moveToObject(sprite, pointer, 200);
-
-            if (pointer.x == sprite.x && pointer.y < sprite.y) {
-                sprite.anims.play('front', true);
-            } else if (pointer.x == sprite.x && pointer.y > sprite.y) {
-                sprite.anims.play('back', true);
-            } else {
-                const slope = Math.abs((pointer.y - sprite.y) / (pointer.x - sprite.x))
-                if (pointer.x < sprite.x && slope <= 1) {
-                    sprite.anims.play('left', true);
-                } else if (pointer.x > sprite.x && slope <= 1) {
-                    sprite.anims.play('right', true);
-                }
-                if (pointer.y < sprite.y && slope > 1) {
-                    sprite.anims.play('back', true);
-                } else if (pointer.y > sprite.y && slope > 1) {
-                    sprite.anims.play('front', true);
-                }
-            }
-        });
 
         this.cameras.main.setBackgroundColor("#101716");
         this.handlePickedUp = false;
