@@ -97,7 +97,6 @@ const config = {
         AlienRevealScene,
         EndingScene,
         Inventory,
-        Spritemovement,
         DemoHandleLever,
         DemoWirePuzzle,
         DemoClock,
