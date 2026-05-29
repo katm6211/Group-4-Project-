@@ -90,10 +90,12 @@ const config = {
         AlienRevealScene,
         EndingScene,
         Inventory,
+        Spritemovement,
         DemoHandleLever,
         DemoWirePuzzle,
         DemoClock,
         DemoRadio,
+        Sprite,
     ],
     title: "Prototype Launcher"
 };
