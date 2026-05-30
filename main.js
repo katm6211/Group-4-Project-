@@ -8,6 +8,7 @@ class Launcher extends Phaser.Scene {
         this.load.image('placeholder', 'assets/placeholder.png');
         this.load.spritesheet('sprite', 'assets/spritesheet.png', { frameWidth: 29, frameHeight: 38 });
         this.load.audio('bgm', 'assets/backgroundmusic.mp3');
+        this.load.audio('jump', 'assets/jumpsoundeffect.mp3');
 
     }
 
