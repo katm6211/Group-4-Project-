@@ -42,8 +42,6 @@ Layering of several synchronized audio loops that create a space of dynamically 
             { label: "4. Radio", scene: "DemoRadio" },
             { label: "5. Core Mechanic", scene: "Sprite"}
         ];
-Two or more notions of prefab objects must be used in your prototype's software implementation. Kinds:
-Creation of GameObject subclasses that are subclassed again by other objects in your game so as to share code between them.
-Creation of Scene subclasses to model shared design between different sub-types of scenes.
-Design presets expressed in program code (e.g. a block of JSON inside of one of your JavaScript files).
-Design presets expressed in data files (e.g. a block of JSON or other data language like XML or TOML saved in a separate non-JavaScript text file).
+
+- Two or more notions of prefab objects must be used in your prototype's software implementation:
+ In Settings Helper.js there is a MenuButton class and SettingsButton extends MenuButton. MenuButton is a custom GameObject and SettingsButton is a subclass of it. At the top of Settings Helper.js there are also styling presets for the pause menu.

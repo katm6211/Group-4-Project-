@@ -1,3 +1,53 @@
+const Menu_Button_Text = {
+    fontFamily: "Arial",
+    fontSize: "26px",
+    color: "#f5f1e8"
+};
+
+const Settings_Title = {
+    fontFamily: "Arial",
+    fontSize: "48px",
+    color: "#f5f1e8"
+};
+
+const Settings_Label = {
+    fontFamily: "Arial",
+    fontSize: "23px",
+    color: "#f5f1e8"
+};
+
+const Settings_Value = {
+    fontFamily: "Arial",
+    fontSize: "23px",
+    color: "#b8c4d4"
+};
+
+class MenuButton extends Phaser.GameObjects.Container {
+    constructor(scene, x, y, label, callback, width = 230, height = 64) {
+        const button = scene.add.rectangle(0, 0, width, height, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+
+        const buttonText = scene.add.text(0, 0, label, Menu_Button_Text).setOrigin(0.5);
+
+        super(scene, x, y, [button, buttonText]);
+
+        button.on("pointerover", () => button.setFillStyle(0x334155));
+        button.on("pointerout", () => button.setFillStyle(0x242a35));
+        button.on("pointerdown", callback);
+
+        scene.add.existing(this);
+    }
+}
+
+class SettingsButton extends MenuButton {
+    constructor(scene) {
+        super(scene, 1775, 72, "Settings", () => {
+            openSettingsOverlay(scene);
+        }, 210, 64);
+    }
+}
+
 // helper to call instead of launching scene
 // it gets the scene key of previous scene to pause and launches the overlay on top
 function openSettingsOverlay(scene) {
@@ -13,19 +63,7 @@ function openSettingsOverlay(scene) {
 
 // function to automatically add settings button to a scene
 function addSettingsButton(scene) {
-    const settingsButton = scene.add.rectangle(130, 72, 210, 64, 0x242a35)
-        .setStrokeStyle(3, 0x6f7c91)
-        .setInteractive({ useHandCursor: true });
-
-    scene.add.text(130, 72, "Settings", {
-        fontFamily: "Arial",
-        fontSize: "26px",
-        color: "#f5f1e8"
-    }).setOrigin(0.5);
-
-    settingsButton.on("pointerdown", () => {
-        openSettingsOverlay(scene);
-    });
+    new SettingsButton(scene);
 }
 
 // Currently does not actually change sound settings.
@@ -47,47 +85,37 @@ class SettingsOverlay extends Phaser.Scene {
         };
         this.registry.set("settingsValues", this.settingsValues);
 
-        this.add.rectangle(960, 540, 700, 500, 0x242a35)
+        this.add.rectangle(960, 540, 700, 560, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91);
 
-        this.add.text(960, 330, "Settings", {
-            fontFamily: "Arial",
-            fontSize: "48px",
-            color: "#f5f1e8"
-        }).setOrigin(0.5);
+        this.add.text(960, 300, "Settings", Settings_Title).setOrigin(0.5);
 
-        this.createVolumeSlider(960, 460, "Sound Volume", "soundVolume");
-        this.createVolumeSlider(960, 560, "Music Volume", "musicVolume");
+        this.createVolumeSlider(960, 430, "Sound Volume", "soundVolume");
+        this.createVolumeSlider(960, 530, "Music Volume", "musicVolume");
 
-        const closeButton = this.add.text(960, 680, "Close", {
-            fontFamily: "Arial",
-            fontSize: "32px",
-            color: "#f5f1e8"
-        }).setOrigin(0.5).setInteractive();
-
-        closeButton.on("pointerdown", () => {
+        new MenuButton(this, 820, 700, "Close", () => {
             if (this.previousScene) {
                 this.scene.resume(this.previousScene);
             }
 
             this.scene.stop();
-        });
+        }, 240, 70);
+
+        new MenuButton(this, 1100, 700, "Main Menu", () => {
+            if (this.previousScene) {
+                this.scene.stop(this.previousScene);
+            }
+
+            this.scene.start("Launcher");
+        }, 240, 70);
     }
 
     createVolumeSlider(x, y, label, settingsKey) {
         const sliderWidth = 360;
         const trackX = x - sliderWidth / 2;
-        const valueText = this.add.text(x + 265, y, "", {
-            fontFamily: "Arial",
-            fontSize: "23px",
-            color: "#b8c4d4"
-        }).setOrigin(0.5);
+        const valueText = this.add.text(x + 265, y, "", Settings_Value).setOrigin(0.5);
 
-        this.add.text(x - 265, y, label, {
-            fontFamily: "Arial",
-            fontSize: "23px",
-            color: "#f5f1e8"
-        }).setOrigin(0.5);
+        this.add.text(x - 265, y, label, Settings_Label).setOrigin(0.5);
 
         const track = this.add.rectangle(x, y, sliderWidth, 10, 0x111318)
             .setStrokeStyle(2, 0x6f7c91)

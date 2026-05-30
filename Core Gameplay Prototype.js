@@ -55,7 +55,7 @@ class Sprite extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#101716");
     
         Spritemovement.call(this);
-        
+        addSettingsButton(this);
 
     }
 } 
@@ -73,6 +73,8 @@ class DemoHandleLever extends Phaser.Scene {
         this.handlePickedUp = false;
         this.leverUsed = false;
 
+        addSettingsButton(this);
+        
         const backButton = this.add.rectangle(165, 72, 230, 64, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
@@ -165,6 +167,8 @@ class DemoWirePuzzle extends Phaser.Scene {
         
         this.cameras.main.setBackgroundColor("#101716");
 
+        addSettingsButton(this);
+        
         const backButton = this.add.rectangle(165, 72, 230, 64, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
@@ -286,6 +290,8 @@ class DemoClock extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
 
+        addSettingsButton(this);
+
         const backButton = this.add.rectangle(165, 72, 230, 64, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
@@ -392,6 +398,8 @@ class DemoRadio extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#101716");
+
+        addSettingsButton(this);
 
         const backButton = this.add.rectangle(165, 72, 230, 64, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
