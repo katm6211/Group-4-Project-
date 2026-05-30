@@ -23,12 +23,7 @@ Scene Flow Prototype:
 - Transitions: Each scene contains a transition which fades into black, where the next scene fades out of black. 
 
 Core Gameplay Prototype: 
-- Audio: The prototype uses at least two different kinds of audio. Kinds:
-Continuously looping background sound (e.g. music or environmental audio) from an audio asset file.
-Sound effects or voice clips triggered in response to player input or game events, also from an audio asset file.
-Dynamically-generated sounds (as opposed to sounds saved in asset files) created using a library like Tone.jsLinks to an external site..
-Layering of several synchronized audio loops that create a space of dynamically recomposable sounds from a small library of audio asset files.
-[Something else proposed by your team]
+- Audio: There's a continuously looping background sound in the core mechanic. And there's a jumping sound effect triggered when the player clicks the jump button. 
 
 - Visual: We have a sprite sheet in the core mechanic and the each of the puzzles are graphically mapped out/prototyped. The sprite sheet is in spritemovement.js and the graphic visuals for the puzzles are in the core gameplay prototype.js file. 
 
@@ -42,9 +37,5 @@ Layering of several synchronized audio loops that create a space of dynamically 
             { label: "4. Radio", scene: "DemoRadio" },
             { label: "5. Core Mechanic", scene: "Sprite"}
         ];
-        
-Two or more notions of prefab objects must be used in your prototype's software implementation. Kinds:
-Creation of GameObject subclasses that are subclassed again by other objects in your game so as to share code between them.
-Creation of Scene subclasses to model shared design between different sub-types of scenes.
-Design presets expressed in program code (e.g. a block of JSON inside of one of your JavaScript files).
-Design presets expressed in data files (e.g. a block of JSON or other data language like XML or TOML saved in a separate non-JavaScript text file).
+    Two or more notions of prefab objects must be used in your prototype's software implementation:
+    In Settings Helper.js there is a MenuButton class and SettingsButton extends MenuButton. MenuButton is a custom GameObject and SettingsButton is a subclass of it. At the top of Settings Helper.js there are also styling presets for the pause menu.
