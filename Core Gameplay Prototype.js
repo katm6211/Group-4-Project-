@@ -56,6 +56,10 @@ class Sprite extends Phaser.Scene {
     
         Spritemovement.call(this);
         addSettingsButton(this);
+        if (!this.game.sound.get('bgm')) {
+            const bgm = this.game.sound.add('bgm', { loop: true });
+            bgm.play();
+        }
 
     }
 } 
