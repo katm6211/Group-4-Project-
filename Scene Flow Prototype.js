@@ -85,7 +85,7 @@ class MainTitleScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#18151c");
 
         // Main Title Text
-        const gameTitle = this.add.text(960, 250, "MY GAME TITLE", {
+        const gameTitle = this.add.text(960, 250, "UFOLOGY", {
             fontFamily: "Arial",
             fontSize: "80px",
             color: "#ffcc00",
