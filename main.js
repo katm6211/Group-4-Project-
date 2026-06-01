@@ -83,8 +83,8 @@ const config = {
         }
     }, 
     scene: [
-        StartCinematic,
         Launcher,
+        StartCinematic,
         CinematicPrototype,
         CoreGameplayPrototype,
         SceneFlowPrototype,

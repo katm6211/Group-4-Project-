@@ -85,12 +85,16 @@ class MainTitleScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#18151c");
 
         // Main Title Text
+<<<<<<< HEAD
         const gameTitle = this.add.text(960, 250, "UFOLOGY", {
+=======
+        const gameTitle = this.add.text(960, 250, "Escape the Spaceship", {
+>>>>>>> e9e156f (revise scene 1)
             fontFamily: "Arial",
             fontSize: "80px",
             color: "#ffcc00",
             fontWeight: "bold"
-        }).setAlpha(0).setOrigin(0.5); 
+        }).setAlpha(0).setOrigin(0.5);
 
         const startText = this.add.text(960, 360, "Press START to Begin", {
             fontFamily: "Arial",

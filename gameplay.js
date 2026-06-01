@@ -4,62 +4,100 @@ class ChaseScene extends Phaser.Scene {
     }
 
     create() {
+        this.escaping = false;
         this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#0d1117");
         addSettingsButton(this);
 
-        this.add.text(960, 200, "[Scene 1: Chase Scene]", {
+        this.add.text(960, 60, "Your goal is ESCAPE!", {
             fontFamily: "Arial",
             fontSize: "64px",
-            color: "#f5f1e8"
+            color: "#8b0000"
         }).setOrigin(0.5);
 
-        this.add.text(960, 320, "Escape from the aliens before time runs out!", {
+        this.add.text(960, 150, "Escape from the aliens before time runs out!", {
             fontFamily: "Arial",
             fontSize: "30px",
             color: "#b8c4d4"
         }).setOrigin(0.5);
 
-        const winButton = this.add.rectangle(620, 550, 400, 80, 0x1a3a2a)
-            .setStrokeStyle(3, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-        this.add.text(620, 550, "Escape (Win)", {
+        this.add.rectangle(960, 1065, 1920, 30, 0x223344);
+
+        const statusText = this.add.text(960, 830, "Find the handle and use it on the lever!", {
             fontFamily: "Arial",
-            fontSize: "32px",
-            color: "#f5f1e8"
+            fontSize: "26px",
+            color: "#b8c4d4",
+            align: "center"
         }).setOrigin(0.5);
-        winButton.on("pointerdown", () => {
+
+        Spritemovement.call(this);
+        const sprite = this.sprite;
+
+        if (!this.game.sound.get("bgm")) {
+            const bgm = this.game.sound.add("bgm", { loop: true });
+            bgm.play();
+        }
+
+        const handleObj = this.add.rectangle(500, 1030, 40, 40, 0xc8a200)
+            .setStrokeStyle(2, 0xffd700);
+        this.add.text(500, 998, "Handle", {
+            fontFamily: "Arial", fontSize: "18px", color: "#ffd700"
+        }).setOrigin(0.5);
+        this.physics.add.existing(handleObj, true);
+
+        this.physics.add.overlap(sprite, handleObj, () => {
+            if (!handleObj.active) return;
+            handleObj.setActive(false).setVisible(false);
+            handleObj.body.enable = false;
+            addInventoryItem("handle");
+            statusText.setText("Handle picked up! Find the lever.");
+        });
+
+        const leverObj = this.add.rectangle(1300, 1010, 40, 80, 0x556677)
+            .setStrokeStyle(2, 0x8899aa)
+            .setInteractive({ useHandCursor: true });
+        const leverLabel = this.add.text(1300, 968, "Lever", {
+            fontFamily: "Arial", fontSize: "18px", color: "#8899aa"
+        }).setOrigin(0.5);
+
+        const door = this.add.rectangle(1820, 920, 80, 250, 0x3a1a1a)
+            .setStrokeStyle(3, 0x6f7c91);
+        this.add.text(1820, 1010, "LOCKED", {
+            fontFamily: "Arial", fontSize: "22px", color: "#b8c4d4"
+        }).setOrigin(0.5);
+
+        const doorZone = this.add.zone(1820, 920, 80, 250);
+        this.physics.add.existing(doorZone, false);
+        doorZone.body.setAllowGravity(false);
+        doorZone.body.enable = false;
+
+        this.physics.add.overlap(sprite, doorZone, () => {
+            if (this.escaping) return;
+            this.escaping = true;
+            sprite.setVelocity(0, 0);
+            window.playerInventory = [];
             this.cameras.main.fade(1000, 0, 0, 0);
             this.time.delayedCall(1000, () => this.scene.start("PuzzleScene"));
         });
 
-        const failButton = this.add.rectangle(1300, 550, 400, 80, 0x3a1a1a)
-            .setStrokeStyle(3, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-        this.add.text(1300, 550, "Caught (Fail)", {
-            fontFamily: "Arial",
-            fontSize: "32px",
-            color: "#f5f1e8"
-        }).setOrigin(0.5);
-        failButton.on("pointerdown", () => {
-            this.cameras.main.fade(1000, 0, 0, 0);
-            this.time.delayedCall(1000, () => this.scene.start("CinematicMainMenu"));
-        });
-
-        const testItem = this.add.text(960, 430, "test_item", {
-            fontFamily: "Arial",
-            fontSize: "30px",
-            color: "#f5f1e8"
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-        testItem.on("pointerdown", () => {
-            addInventoryItem("test_item");
-            testItem.disableInteractive();
+        leverObj.on("pointerdown", () => {
+            if (!window.playerInventory.includes("handle")) {
+                statusText.setText("The lever needs a handle first.");
+                return;
+            }
+            removeInventoryItem("handle");
+            leverObj.disableInteractive();
             this.tweens.add({
-                targets: testItem,
-                alpha: 0,
+                targets: leverObj,
+                angle: 45,
                 duration: 500,
-                onComplete: () => testItem.destroy()
+                ease: "Power2",
+                onComplete: () => {
+                    leverLabel.setText("Lever (used)");
+                    door.setFillStyle(0x1a3a2a);
+                    statusText.setText("The door is open! Run to it!");
+                    doorZone.body.enable = true;
+                }
             });
         });
 

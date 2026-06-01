@@ -47,17 +47,16 @@ function Spritemovement() {
     const buttonY = this.scale.height - 60; // Place buttons near the bottom screen edge
 
     // left button
-    const leftBtn = this.add.text(100, buttonY, '◀ LEFT', { fill: '#fff', fontSize: '32px', backgroundColor: '#333', padding: 10 })
+    const leftBtn = this.add.text(750, buttonY, '◀ LEFT', { fill: '#fff', fontSize: '32px', backgroundColor: '#333', padding: 10 })
         .setInteractive()
-        .setScrollFactor(0); 
+        .setScrollFactor(0);
 
     leftBtn.on('pointerdown', () => {
         sprite.setVelocityX(-200);
         sprite.anims.play('left', true);
     });
 
-    // right button
-    const rightBtn = this.add.text(300, buttonY, 'RIGHT ▶', { fill: '#fff', fontSize: '32px', backgroundColor: '#333', padding: 10 })
+    const rightBtn = this.add.text(1100, buttonY, 'RIGHT ▶', { fill: '#fff', fontSize: '32px', backgroundColor: '#333', padding: 10 })
         .setInteractive()
         .setScrollFactor(0);
 
@@ -66,9 +65,8 @@ function Spritemovement() {
         sprite.anims.play('right', true);
     });
 
-    // jump button
-    const jumpBtn = this.add.text(550, buttonY, '▲ JUMP', { fill: '#fff', fontSize: '32px', backgroundColor: '#a00', padding: 10 }) 
-        .setInteractive() 
+    const jumpBtn = this.add.text(920, buttonY, '▲ JUMP', { fill: '#fff', fontSize: '32px', backgroundColor: '#a00', padding: 10 })
+        .setInteractive()
         .setScrollFactor(0); 
 
     jumpBtn.on('pointerdown', () => { 
