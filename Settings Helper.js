@@ -66,7 +66,14 @@ function addSettingsButton(scene) {
     new SettingsButton(scene);
 }
 
-// Currently does not actually change sound settings.
+function setMusicVolume(scene, volume) {
+    const bgm = scene.sound.get("bgm");
+
+    if (bgm) {
+        bgm.setVolume(volume);
+    }
+}
+
 class SettingsOverlay extends Phaser.Scene {
     constructor() {
         super("SettingsOverlay");
@@ -81,7 +88,7 @@ class SettingsOverlay extends Phaser.Scene {
 
         this.settingsValues = this.registry.get("settingsValues") || {
             soundVolume: 0.7,
-            musicVolume: 0.7
+            musicVolume: 0.5
         };
         this.registry.set("settingsValues", this.settingsValues);
 
@@ -134,6 +141,10 @@ class SettingsOverlay extends Phaser.Scene {
             fill.scaleX = clampedValue;
             knob.x = trackX + sliderWidth * clampedValue;
             valueText.setText(Math.round(clampedValue * 100) + "%");
+
+            if (settingsKey === "musicVolume") {
+                setMusicVolume(this, clampedValue);
+            }
         };
 
         const setValueFromPointer = (pointer) => {
