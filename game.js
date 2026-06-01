@@ -4,8 +4,11 @@ const GAME_SCENE_KEYS = {
     intro: "Game_StartCinematic",
     menu: "Game_CinematicMainMenu",
     handle: "Game_DemoHandleLever",
+    powerBox: "Game_PowerBox",
     wires: "Game_DemoWirePuzzle",
+    clockRoom: "Game_ClockRoom",
     clock: "Game_DemoClock",
+    radioRoom: "Game_RadioRoom",
     radio: "Game_DemoRadio",
     credits: "Game_CreditsScene",
     settings: "Game_SettingsOverlay"
@@ -277,6 +280,7 @@ class Game_DemoHandleLever extends Phaser.Scene {
         this.handlePickedUp = false;
         this.leverUsed = false;
         playGameBgm(this);
+        Spritemovement.call(this);
 
         addGameSettingsButton(this);
 
@@ -360,7 +364,29 @@ class Game_DemoHandleLever extends Phaser.Scene {
         addRoomLabel(this, 1, "Handle and Lever");
         addProgressButton(this, {
             isUnlocked: () => this.leverUsed,
-            onContinue: () => startWithFade(this, GAME_SCENE_KEYS.wires)
+            onContinue: () => startWithFade(this, GAME_SCENE_KEYS.powerBox)
+        });
+    }
+}
+
+class Game_PowerBox extends Phaser.Scene {
+    constructor() {
+        super(GAME_SCENE_KEYS.powerBox);
+    }
+
+    create() {
+        this.cameras.main.setBackgroundColor("#101716");
+        playGameBgm(this);
+        Spritemovement.call(this);
+        addGameSettingsButton(this);
+
+
+        this.add.text(860, 340, "Power box").setFontSize(48)
+        const powerBox = this.add.rectangle(960, 540, 240, 240, 0xffd700)
+            .setInteractive({ useHandCursor: true });
+
+        powerBox.on("pointerdown", () => {
+            startWithFade(this, GAME_SCENE_KEYS.wires);
         });
     }
 }
@@ -472,8 +498,33 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
         addRoomLabel(this, 2, "Wire Puzzle");
         addProgressButton(this, {
             isUnlocked: () => this.wirePuzzleSolved,
-            onContinue: () => startWithFade(this, GAME_SCENE_KEYS.clock)
+            onContinue: () => startWithFade(this, GAME_SCENE_KEYS.clockRoom)
         });
+    }
+}
+
+class Game_ClockRoom extends Phaser.Scene {
+    constructor() {
+        super(GAME_SCENE_KEYS.clockRoom);
+    }
+
+    create() {
+        this.cameras.main.setBackgroundColor("#101716");
+        playGameBgm(this);
+        Spritemovement.call(this);
+        addGameSettingsButton(this);
+
+        this.add.text(860, 200, "Clock").setFontSize(48)
+        const clock = this.add.container(960, 540, [
+            this.add.rectangle(0, 0, 260, 520, 0x8b5a2b),
+            this.add.circle(0, -110, 90, 0xffffff)
+        ]);
+        clock.setSize(260, 520).setInteractive({ useHandCursor: true });
+
+        const openClock = () => {
+            startWithFade(this, GAME_SCENE_KEYS.clock);
+        };
+        clock.on("pointerdown", openClock);
     }
 }
 
@@ -577,7 +628,28 @@ class Game_DemoClock extends Phaser.Scene {
         addRoomLabel(this, 3, "Clock");
         addProgressButton(this, {
             isUnlocked: () => this.clockSolved,
-            onContinue: () => startWithFade(this, GAME_SCENE_KEYS.radio)
+            onContinue: () => startWithFade(this, GAME_SCENE_KEYS.radioRoom)
+        });
+    }
+}
+
+class Game_RadioRoom extends Phaser.Scene {
+    constructor() {
+        super(GAME_SCENE_KEYS.radioRoom);
+    }
+
+    create() {
+        this.cameras.main.setBackgroundColor("#101716");
+        playGameBgm(this);
+        Spritemovement.call(this);
+        addGameSettingsButton(this);
+
+        this.add.text(860, 200, "Radio").setFontSize(48);
+        const radio = this.add.rectangle(960, 540, 240, 240, 0x808080)
+            .setInteractive({ useHandCursor: true });
+
+        radio.on("pointerdown", () => {
+            startWithFade(this, GAME_SCENE_KEYS.radio);
         });
     }
 }
@@ -700,6 +772,7 @@ class Game_CreditsScene extends Phaser.Scene {
         this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#18151c");
         playGameBgm(this);
+        addGameSettingsButton(this);
 
         this.add.text(960, 200, "Credits", {
             fontFamily: "Arial",
@@ -851,8 +924,11 @@ const config = {
         Game_StartCinematic,
         Game_CinematicMainMenu,
         Game_DemoHandleLever,
+        Game_PowerBox,
         Game_DemoWirePuzzle,
+        Game_ClockRoom,
         Game_DemoClock,
+        Game_RadioRoom,
         Game_DemoRadio,
         Game_CreditsScene,
         Game_SettingsOverlay,
