@@ -83,11 +83,11 @@ const config = {
         }
     }, 
     scene: [
+        StartCinematic,
         Launcher,
         CinematicPrototype,
         CoreGameplayPrototype,
         SceneFlowPrototype,
-        StartCinematic,
         CinematicMainMenu,
         SettingsOverlay,
         MainTitleScene,

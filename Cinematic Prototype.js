@@ -66,6 +66,14 @@ class StartCinematic extends Phaser.Scene {
         super("Start Cinematic");
     }
 
+    preload() {
+        this.load.image('logoDraft', 'assets/logodraft4.png');
+        this.load.image('placeholder', 'assets/placeholder.png');
+        this.load.spritesheet('sprite', 'assets/spritesheet.png', { frameWidth: 29, frameHeight: 38 });
+        this.load.audio('bgm', 'assets/backgroundmusic.mp3');
+        this.load.audio('jump', 'assets/jumpsoundeffect.mp3');
+    }
+
     create() {
         this.cameras.main.setBackgroundColor("#151923");
 
@@ -192,7 +200,7 @@ class CinematicMainMenu extends Phaser.Scene {
         });
 
         StartGame.on("pointerdown", () => {
-            this.scene.start("ChaseScene")
+            this.scene.start("MainTitleScene");
         });
 
         // settings button opens settings overlay

@@ -200,7 +200,7 @@ class CreditsScene extends Phaser.Scene {
             color: "#f5f1e8"
         }).setOrigin(0.5);
         backButton.on("pointerdown", () => {
-            this.scene.start("Launcher");
+            this.scene.start("CinematicMainMenu");
         });
     }
 }

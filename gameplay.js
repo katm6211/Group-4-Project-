@@ -43,7 +43,7 @@ class ChaseScene extends Phaser.Scene {
         }).setOrigin(0.5);
         failButton.on("pointerdown", () => {
             this.cameras.main.fade(1000, 0, 0, 0);
-            this.time.delayedCall(1000, () => this.scene.start("SceneFlowPrototype"));
+            this.time.delayedCall(1000, () => this.scene.start("CinematicMainMenu"));
         });
 
         const testItem = this.add.text(960, 430, "test_item", {
@@ -138,42 +138,123 @@ class ClockScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#12101a");
         addSettingsButton(this);
 
-        this.add.text(960, 200, "[Scene 3: Giant Clock]", {
+        this.add.text(960, 100, "[Scene 3: Giant Clock]", {
             fontFamily: "Arial",
             fontSize: "64px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
 
-        this.add.text(960, 320, "Turn the clock hands. Which direction?", {
+        const statusText = this.add.text(960, 880, "Turn the clock hands. Which direction?", {
             fontFamily: "Arial",
-            fontSize: "30px",
-            color: "#b8c4d4"
+            fontSize: "26px",
+            color: "#b8c4d4",
+            align: "center"
         }).setOrigin(0.5);
 
-        const cwButton = this.add.rectangle(620, 550, 400, 80, 0x2a1a0a)
-            .setStrokeStyle(3, 0x6f7c91)
+        const cx = 960, cy = 520, radius = 220;
+
+        this.add.circle(cx, cy, radius, 0x1a1a2e).setStrokeStyle(6, 0x8899aa);
+
+        const graphics = this.add.graphics();
+        graphics.lineStyle(3, 0x8899aa, 0.6);
+        for (let i = 0; i < 12; i++) {
+            const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const x1 = cx + Math.cos(angle) * (radius - 20);
+            const y1 = cy + Math.sin(angle) * (radius - 20);
+            const x2 = cx + Math.cos(angle) * radius;
+            const y2 = cy + Math.sin(angle) * radius;
+            graphics.beginPath();
+            graphics.moveTo(x1, y1);
+            graphics.lineTo(x2, y2);
+            graphics.strokePath();
+        }
+
+        this.handAngle = -Math.PI / 2;
+        const handGraphics = this.add.graphics();
+
+        const drawHand = () => {
+            handGraphics.clear();
+            handGraphics.lineStyle(8, 0xffd700, 1);
+            handGraphics.beginPath();
+            handGraphics.moveTo(cx, cy);
+            handGraphics.lineTo(
+                cx + Math.cos(this.handAngle) * (radius - 30),
+                cy + Math.sin(this.handAngle) * (radius - 30)
+            );
+            handGraphics.strokePath();
+            handGraphics.fillStyle(0xffd700);
+            handGraphics.fillCircle(cx, cy, 12);
+        };
+        drawHand();
+
+        const hitArea = this.add.circle(cx, cy, radius, 0x000000, 0)
             .setInteractive({ useHandCursor: true });
-        this.add.text(620, 550, "Clockwise (back)", {
+        this.input.setDraggable(hitArea);
+
+        const overlay = this.add.rectangle(960, 540, 1920, 1080, 0x000000).setAlpha(0).setDepth(10);
+        const overlayText = this.add.text(960, 540, "", {
             fontFamily: "Arial",
-            fontSize: "32px",
+            fontSize: "40px",
             color: "#f5f1e8"
-        }).setOrigin(0.5);
-        cwButton.on("pointerdown", () => {
-            this.cameras.main.fade(1000, 0, 0, 0);
-            this.time.delayedCall(1000, () => this.scene.start("PuzzleScene"));
+        }).setOrigin(0.5).setAlpha(0).setDepth(11);
+
+        const transition = (label, nextScene) => {
+            overlayText.setText(label);
+            this.tweens.add({
+                targets: [overlay, overlayText],
+                alpha: 1,
+                duration: 600,
+                onComplete: () => {
+                    this.time.delayedCall(400, () => {
+                        this.cameras.main.fade(600, 0, 0, 0);
+                        this.time.delayedCall(600, () => this.scene.start(nextScene));
+                    });
+                }
+            });
+        };
+
+        let lastAngle = null;
+        let totalRotation = 0;
+        let triggered = false;
+
+        this.input.on("dragstart", (pointer, gameObject) => {
+            if (gameObject !== hitArea) return;
+            lastAngle = null;
+            totalRotation = 0;
         });
 
-        const ccwButton = this.add.rectangle(1300, 550, 400, 80, 0x0a1a2a)
-            .setStrokeStyle(3, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-        this.add.text(1300, 550, "Counterclockwise (forward)", {
-            fontFamily: "Arial",
-            fontSize: "32px",
-            color: "#f5f1e8"
-        }).setOrigin(0.5);
-        ccwButton.on("pointerdown", () => {
-            this.cameras.main.fade(1000, 0, 0, 0);
-            this.time.delayedCall(1000, () => this.scene.start("YoungerSelfScene"));
+        this.input.on("drag", (pointer, gameObject) => {
+            if (gameObject !== hitArea || triggered) return;
+            const angle = Math.atan2(pointer.y - cy, pointer.x - cx);
+            if (lastAngle !== null) {
+                let delta = angle - lastAngle;
+                if (delta > Math.PI) delta -= Math.PI * 2;
+                if (delta < -Math.PI) delta += Math.PI * 2;
+                this.handAngle += delta;
+                totalRotation += delta;
+            }
+            lastAngle = angle;
+            drawHand();
+
+            if (totalRotation > Math.PI) {
+                triggered = true;
+                hitArea.disableInteractive();
+                statusText.setText("Clockwise → Going back...");
+                statusText.setColor("#ffaa44");
+                transition("Going back...", "PuzzleScene");
+            } else if (totalRotation < -Math.PI) {
+                triggered = true;
+                hitArea.disableInteractive();
+                statusText.setText("Counterclockwise → Moving forward in time!");
+                statusText.setColor("#44ff44");
+                transition("Moving forward in time...", "YoungerSelfScene");
+            }
+        });
+
+        this.input.on("dragend", (pointer, gameObject) => {
+            if (gameObject !== hitArea || triggered) return;
+            statusText.setText("Turn more to make a choice.");
+            statusText.setColor("#b8c4d4");
         });
 
         const inventoryButton = this.add.rectangle(110, 1010, 170, 58, 0x242a35)
@@ -272,7 +353,7 @@ class AlienRevealScene extends Phaser.Scene {
         }).setOrigin(0.5);
         backButton.on("pointerdown", () => {
             this.cameras.main.fade(1000, 0, 0, 0);
-            this.time.delayedCall(1000, () => this.scene.start("SceneFlowPrototype"));
+            this.time.delayedCall(1000, () => this.scene.start("CinematicMainMenu"));
         });
     }
 }
@@ -321,7 +402,7 @@ class EndingScene extends Phaser.Scene {
         }).setOrigin(0.5);
         titleButton.on("pointerdown", () => {
             this.cameras.main.fade(1000, 0, 0, 0);
-            this.time.delayedCall(1000, () => this.scene.start("SceneFlowPrototype"));
+            this.time.delayedCall(1000, () => this.scene.start("CinematicMainMenu"));
         });
     }
 }
