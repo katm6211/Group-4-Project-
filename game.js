@@ -926,7 +926,6 @@ class Game_SettingsOverlay extends Phaser.Scene {
 
 const config = {
     type: Phaser.AUTO,
-    parent: document.body,
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
