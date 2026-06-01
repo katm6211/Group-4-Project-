@@ -21,7 +21,7 @@ function Spritemovement() {
         });
 
 
-    sprite.setPosition(0 + sprite.displayWidth / 2, 150).setVelocityX(150);
+    sprite.setPosition(0 + sprite.displayWidth / 2, this.scale.height / 2).setVelocityX(150);
     const spriteNewWidth = sprite.displayWidth * 0.5;
     const spriteOffsetX = (sprite.width - spriteNewWidth) / 2;
     sprite.setBodySize(spriteNewWidth, sprite.displayHeight);
