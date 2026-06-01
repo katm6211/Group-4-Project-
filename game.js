@@ -3,7 +3,7 @@
 const GAME_SCENE_KEYS = {
     intro: "Game_StartCinematic",
     menu: "Game_CinematicMainMenu",
-    handle: "Game_DemoHandleLever",
+    handle: "Game_ChaseScene",
     powerBox: "Game_PowerBox",
     wires: "Game_DemoWirePuzzle",
     clockRoom: "Game_ClockRoom",
@@ -91,7 +91,7 @@ function addGameSettingsButton(scene) {
 function playGameBgm(scene) {
     const settingsValues = scene.registry.get("settingsValues") || {
         soundVolume: 1.0,
-        musicVolume: 0.5
+        musicVolume: 0.2
     };
     scene.registry.set("settingsValues", settingsValues);
 
@@ -270,101 +270,121 @@ class Game_CinematicMainMenu extends Phaser.Scene {
     }
 }
 
-class Game_DemoHandleLever extends Phaser.Scene {
+class Game_ChaseScene extends Phaser.Scene {
     constructor() {
-        super(GAME_SCENE_KEYS.handle);
+        super("Game_ChaseScene");
     }
 
     create() {
-        this.cameras.main.setBackgroundColor("#101716");
-        this.handlePickedUp = false;
-        this.leverUsed = false;
-        playGameBgm(this);
-        Spritemovement.call(this);
-
+        this.escaping = false;
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
+        this.cameras.main.setBackgroundColor("#0d1117");
         addGameSettingsButton(this);
+        playGameBgm(this);
 
-        this.add.text(960, 100, "Demo 1: Handle & Lever", {
-            fontFamily: "Arial", fontSize: "44px", color: "#f5f1e8"
+        this.add.text(960, 60, "Your goal is ESCAPE!", {
+            fontFamily: "Arial",
+            fontSize: "64px",
+            color: "#8b0000"
         }).setOrigin(0.5);
 
-        const statusText = this.add.text(960, 800, "Find the handle and use it on the lever to open the door.", {
-            fontFamily: "Arial", fontSize: "26px", color: "#b8c4d4", align: "center"
+        this.add.text(960, 150, "Escape from the aliens before time runs out!", {
+            fontFamily: "Arial",
+            fontSize: "30px",
+            color: "#b8c4d4"
         }).setOrigin(0.5);
 
-        const handle = this.add.rectangle(400, 580, 80, 80, 0xc8a200)
-            .setStrokeStyle(3, 0xffd700)
-            .setInteractive({ useHandCursor: true });
-        const handleLabel = this.add.text(400, 650, "Handle\n(click to pick up)", {
-            fontFamily: "Arial", fontSize: "20px", color: "#ffd700", align: "center"
+        this.add.rectangle(960, 1065, 1920, 30, 0x223344);
+
+        const statusText = this.add.text(960, 830, "Find the handle and use it on the lever!", {
+            fontFamily: "Arial",
+            fontSize: "26px",
+            color: "#b8c4d4",
+            align: "center"
         }).setOrigin(0.5);
 
-        handle.on("pointerdown", () => {
-            if (this.handlePickedUp) return;
-            this.handlePickedUp = true;
+        Spritemovement.call(this);
+        const sprite = this.sprite;
+
+        if (!this.game.sound.get("bgm")) {
+            const bgm = this.game.sound.add("bgm", { loop: true });
+            bgm.play();
+        }
+
+        const handleObj = this.add.rectangle(500, 1030, 40, 40, 0xc8a200)
+            .setStrokeStyle(2, 0xffd700);
+        this.add.text(500, 998, "Handle", {
+            fontFamily: "Arial", fontSize: "18px", color: "#ffd700"
+        }).setOrigin(0.5);
+        this.physics.add.existing(handleObj, true);
+
+        this.physics.add.overlap(sprite, handleObj, () => {
+            if (!handleObj.active) return;
+            handleObj.setActive(false).setVisible(false);
+            handleObj.body.enable = false;
             addInventoryItem("handle");
-            this.tweens.add({
-                targets: [handle, handleLabel],
-                alpha: 0,
-                duration: 400,
-                onComplete: () => {
-                    handle.destroy();
-                    handleLabel.destroy();
-                }
-            });
-            statusText.setText("You picked up the handle!\nNow use it on the lever.");
+            statusText.setText("Handle picked up! Find the lever.");
         });
 
-        const lever = this.add.rectangle(1400, 580, 60, 160, 0x556677)
-            .setStrokeStyle(3, 0x8899aa)
+        const leverObj = this.add.rectangle(1300, 1010, 40, 80, 0x556677)
+            .setStrokeStyle(2, 0x8899aa)
             .setInteractive({ useHandCursor: true });
-        this.add.text(1400, 680, "Lever\n(click to use)", {
-            fontFamily: "Arial", fontSize: "20px", color: "#8899aa", align: "center"
+        const leverLabel = this.add.text(1300, 968, "Lever", {
+            fontFamily: "Arial", fontSize: "18px", color: "#8899aa"
         }).setOrigin(0.5);
 
-        lever.on("pointerdown", () => {
-            if (this.leverUsed) return;
+        const door = this.add.rectangle(1820, 920, 80, 250, 0x3a1a1a)
+            .setStrokeStyle(3, 0x6f7c91);
+        this.add.text(1820, 1010, "LOCKED", {
+            fontFamily: "Arial", fontSize: "22px", color: "#b8c4d4"
+        }).setOrigin(0.5);
+
+        const doorZone = this.add.zone(1820, 920, 80, 250);
+        this.physics.add.existing(doorZone, false);
+        doorZone.body.setAllowGravity(false);
+        doorZone.body.enable = false;
+
+        this.physics.add.overlap(sprite, doorZone, () => {
+            if (this.escaping) return;
+            this.escaping = true;
+            sprite.setVelocity(0, 0);
+            window.playerInventory = [];
+            this.cameras.main.fade(1000, 0, 0, 0);
+            this.time.delayedCall(1000, () => this.scene.start("Game_PowerBox"));
+        });
+
+        leverObj.on("pointerdown", () => {
             if (!window.playerInventory.includes("handle")) {
-                statusText.setText("The lever is missing its handle.\nFind the handle first.");
+                statusText.setText("The lever needs a handle first.");
                 return;
             }
-
-            this.leverUsed = true;
             removeInventoryItem("handle");
+            leverObj.disableInteractive();
             this.tweens.add({
-                targets: lever,
+                targets: leverObj,
                 angle: 45,
                 duration: 500,
                 ease: "Power2",
                 onComplete: () => {
-                    statusText.setText("The door is open! You can proceed.");
+                    leverLabel.setText("Lever (used)");
                     door.setFillStyle(0x1a3a2a);
-                    doorLabel.setText("Door\n(OPEN)");
+                    statusText.setText("The door is open! Run to it!");
+                    doorZone.body.enable = true;
                 }
             });
         });
-
-        const door = this.add.rectangle(1750, 540, 100, 220, 0x3a1a1a)
-            .setStrokeStyle(3, 0x6f7c91);
-        const doorLabel = this.add.text(1750, 650, "Door\n(locked)", {
-            fontFamily: "Arial", fontSize: "20px", color: "#b8c4d4", align: "center"
-        }).setOrigin(0.5);
 
         const inventoryButton = this.add.rectangle(110, 1010, 170, 58, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
         this.add.text(110, 1010, "Inventory", {
-            fontFamily: "Arial", fontSize: "24px", color: "#f5f1e8"
+            fontFamily: "Arial",
+            fontSize: "24px",
+            color: "#f5f1e8"
         }).setOrigin(0.5);
         inventoryButton.on("pointerdown", () => {
             this.scene.launch("Inventory");
             this.scene.bringToTop("Inventory");
-        });
-
-        addRoomLabel(this, 1, "Handle and Lever");
-        addProgressButton(this, {
-            isUnlocked: () => this.leverUsed,
-            onContinue: () => startWithFade(this, GAME_SCENE_KEYS.powerBox)
         });
     }
 }
@@ -923,7 +943,7 @@ const config = {
     scene: [
         Game_StartCinematic,
         Game_CinematicMainMenu,
-        Game_DemoHandleLever,
+        Game_ChaseScene,
         Game_PowerBox,
         Game_DemoWirePuzzle,
         Game_ClockRoom,
