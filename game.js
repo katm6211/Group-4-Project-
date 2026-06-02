@@ -313,7 +313,7 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         startGame.on("pointerout", () => startGame.setFillStyle(0x242a35));
         startGame.on("pointerdown", () => {
             window.playerInventory = [];
-            this.scene.start(GAME_SCENE_KEYS.handle);
+            this.scene.start("Game_ChasingScene");
         });
 
         const settingsY = firstButtonY + buttonGap;
@@ -395,6 +395,52 @@ class Game_ChaseScene extends Phaser.Scene {
             }
         });
 
+        this.failing = false;
+
+        this.add.rectangle(40, 540, 80, 1080, 0xff0000, 0.25).setDepth(5);
+        this.add.rectangle(1880, 540, 80, 1080, 0xff0000, 0.25).setDepth(5);
+        this.add.rectangle(960, 30, 1920, 60, 0xff0000, 0.25).setDepth(5);
+        this.add.rectangle(960, 1050, 1920, 60, 0xff0000, 0.25).setDepth(5);
+
+        this.time.addEvent({
+            delay: 2000,
+            loop: true,
+            callback: () => {
+                if (!this.failing && !this.escaping) this.cameras.main.shake(300, 0.003);
+            }
+        });
+
+        let timeLeft = 11;
+        const timerText = this.add.text(960, 250, '11', {
+            fontFamily: 'Arial',
+            fontSize: '64px',
+            color: '#ff4444'
+        }).setOrigin(0.5).setDepth(10);
+
+        const alienEnter = () => {
+            const alien = this.add.rectangle(0, groundY - 50, 60, 100, 0x22cc44)
+                .setStrokeStyle(2, 0x00ff00).setDepth(5);
+            this.events.on('update', (time, delta) => {
+                if (this.failing || this.escaping) return;
+                alien.x += 500 * (delta / 1000);
+                if (alien.x >= sprite.x - 30) {
+                    this.failing = true;
+                    this.cameras.main.shake(200, 0.02);
+                    this.cameras.main.fade(500, 0, 0, 0);
+                    this.time.delayedCall(500, () => this.scene.start('Game_FailScene'));
+                }
+            });
+        };
+
+        this.time.addEvent({
+            delay: 1000,
+            repeat: 10,
+            callback: () => {
+                timeLeft--;
+                timerText.setText(timeLeft.toString());
+                if (timeLeft <= 0) alienEnter();
+            }
+        });
 
         const handleObj = this.add.rectangle(500, groundY - 20, 40, 40, 0xc8a200)
             .setStrokeStyle(2, 0xffd700);
@@ -473,10 +519,19 @@ class Game_PowerBox extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
+        this.physics.world.setBounds(0, 0, 1920, 1274);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
-        addInventoryButton(this);
 
+        this.input.removeAllListeners('pointerdown');
+        this.input.on('pointerdown', (pointer) => {
+            const sprite = this.sprite;
+            if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
+                const dy = Math.min(sprite.y - pointer.y, 600);
+                sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
+                this.sound.play('jump');
+            }
+        });
 
         this.add.text(860, 340, "Power box").setFontSize(48)
         const powerBox = this.add.rectangle(960, 540, 240, 240, 0xffd700)
@@ -609,40 +664,31 @@ class Game_ClockRoom extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
+        this.physics.world.setBounds(0, 0, 1920, 1274);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
-        addInventoryButton(this);
 
-        this.add.image(960, 540, "grayBackground").setScale(2.1);
-        this.add.image(960, 540, "border").setScale(2.1);
-        this.add.image(965, 544, "grandfatherClock").setScale(11).setSize(260, 520)
-
-        const hasClockKey = () => window.playerInventory.includes("clock_key");
-        const door = this.add.rectangle(1810, 640, 140, 360, hasClockKey() ? 0xffffff : 0x000000)
-            .setStrokeStyle(3, hasClockKey() ? 0x000000 : 0xffffff)
-            .setInteractive({ useHandCursor: true });
-        this.physics.add.existing(door, true);
-
-        door.on("pointerdown", () => {
-            if (!hasClockKey() || !this.physics.overlap(this.sprite, door))
-                return;
-
-            removeInventoryItem("clock_key");
-            startWithFade(this, GAME_SCENE_KEYS.radioRoom);
+        this.input.removeAllListeners('pointerdown');
+        this.input.on('pointerdown', (pointer) => {
+            const sprite = this.sprite;
+            if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
+                const dy = Math.min(sprite.y - pointer.y, 600);
+                sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
+                this.sound.play('jump');
+            }
         });
 
-        // create clickable hitbox around the clock
-        const clockArea = this.add.zone(965, 540, 260, 520).setInteractive({ useHandCursor: true });
-        this.add.rectangle(965, 540, 260, 520).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
-        this.physics.add.existing(clockArea, true);
+        this.add.text(860, 200, "Clock").setFontSize(48)
+        const clock = this.add.container(960, 540, [
+            this.add.rectangle(0, 0, 260, 520, 0x8b5a2b),
+            this.add.circle(0, -110, 90, 0xffffff)
+        ]);
+        clock.setSize(260, 520).setInteractive({ useHandCursor: true });
 
-        // add zoom as if walking in toward clock?
-        clockArea.on("pointerdown", () => {
-            if (!this.physics.overlap(this.sprite, clockArea))
-                return;
-
-                startWithFade(this, GAME_SCENE_KEYS.clock);
-            });
+        const openClock = () => {
+            startWithFade(this, GAME_SCENE_KEYS.clock);
+        };
+        clock.on("pointerdown", openClock);
     }
 }
 
@@ -776,9 +822,19 @@ class Game_RadioRoom extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
+        this.physics.world.setBounds(0, 0, 1920, 1274);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
-        addInventoryButton(this);
+
+        this.input.removeAllListeners('pointerdown');
+        this.input.on('pointerdown', (pointer) => {
+            const sprite = this.sprite;
+            if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
+                const dy = Math.min(sprite.y - pointer.y, 600);
+                sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
+                this.sound.play('jump');
+            }
+        });
 
         this.add.text(860, 200, "Radio").setFontSize(48);
         const radio = this.add.rectangle(960, 540, 240, 240, 0x808080)
@@ -896,6 +952,115 @@ class Game_DemoRadio extends Phaser.Scene {
             unlockedLabel: "Finish Game",
             isUnlocked: () => this.frequency === correctFrequency,
             onContinue: () => showCompletionPanel(this)
+        });
+    }
+}
+
+class Game_ChasingScene extends Phaser.Scene {
+    constructor() {
+        super("Game_ChasingScene");
+    }
+
+    create() {
+        this.cameras.main.setBackgroundColor("#0d1117");
+        this.transitioning = false;
+
+        const groundY = 810;
+        this.add.rectangle(960, groundY + 10, 1920, 20, 0x223344);
+        this.physics.world.gravity.y = 600;
+        this.physics.world.setBounds(0, 0, 1920, 1274);
+
+        this.add.rectangle(1870, groundY - 100, 60, 200, 0x1a3a2a).setStrokeStyle(3, 0x44ff44);
+        const doorZone = this.add.zone(1870, groundY - 100, 60, 200);
+        this.physics.add.existing(doorZone, true);
+
+        const sprite = this.physics.add.sprite(200, 400, 'sprite').setScale(4);
+        if (!this.anims.exists('right'))
+            this.anims.create({
+                key: 'right',
+                frames: this.anims.generateFrameNumbers('sprite', { start: 0, end: 2 }),
+                frameRate: 10,
+                repeat: -1
+            });
+        sprite.anims.play('right');
+        const sw = sprite.displayWidth * 0.5;
+        sprite.setBodySize(sw, sprite.displayHeight);
+        sprite.setOffset((sprite.width - sw) / 2, 0);
+        sprite.setCollideWorldBounds(true);
+        sprite.setVelocityX(0);
+
+        this.input.on('pointerdown', (pointer) => {
+            if (pointer.y < sprite.y - 80 && (sprite.body.blocked.down || sprite.body.touching.down)) {
+                const dy = Math.min(sprite.y - pointer.y, 500);
+                sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
+            }
+        });
+
+        this.physics.add.overlap(sprite, doorZone, () => {
+            if (this.transitioning) return;
+            this.transitioning = true;
+            this.cameras.main.fade(500, 0, 0, 0);
+            this.time.delayedCall(500, () => this.scene.start('Game_ChaseScene'));
+        });
+
+        const jumpscareRect = this.add.rectangle(960, 540, 800, 900, 0x22cc44)
+            .setStrokeStyle(8, 0x00ff00).setDepth(100).setAlpha(0);
+        const flashOverlay = this.add.rectangle(960, 540, 1920, 1080, 0xff0000, 0.6)
+            .setDepth(101).setAlpha(0);
+
+        const alien = this.add.rectangle(-30, groundY - 50, 60, 100, 0x22cc44)
+            .setStrokeStyle(2, 0x00ff00);
+        this.physics.add.existing(alien);
+        alien.body.setAllowGravity(false);
+        alien.body.enable = false;
+
+        this.time.delayedCall(300, () => {
+            jumpscareRect.setAlpha(1);
+            flashOverlay.setAlpha(1);
+            this.cameras.main.shake(200, 0.02);
+            this.time.delayedCall(3000, () => {
+                this.tweens.add({
+                    targets: [jumpscareRect, flashOverlay],
+                    alpha: 0,
+                    duration: 400,
+                    onComplete: () => {
+                        sprite.setVelocityX(200);
+                        sprite.anims.play('right', true);
+                        alien.body.enable = true;
+                        alien.body.velocity.x = 150;
+                    }
+                });
+            });
+        });
+    }
+}
+
+class Game_FailScene extends Phaser.Scene {
+    constructor() {
+        super("Game_FailScene");
+    }
+
+    create() {
+        this.cameras.main.setBackgroundColor("#000000");
+
+        this.add.text(960, 430, "你fail了", {
+            fontFamily: "Arial",
+            fontSize: "72px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
+
+        const button = this.add.rectangle(960, 600, 300, 80, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+        this.add.text(960, 600, "继续", {
+            fontFamily: "Arial",
+            fontSize: "36px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
+
+        button.on("pointerdown", () => {
+            this.cameras.main.fade(500, 0, 0, 0);
+            this.time.delayedCall(500, () => this.scene.start("Game_PowerBox"));
         });
     }
 }
