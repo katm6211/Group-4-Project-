@@ -351,9 +351,10 @@ class Game_ChaseScene extends Phaser.Scene {
             color: "#b8c4d4"
         }).setOrigin(0.5);
 
-        this.add.rectangle(960, 1065, 1920, 30, 0x223344);
+        const groundY = 810;
+        this.add.rectangle(960, groundY + 10, 1920, 20, 0x223344);
 
-        const statusText = this.add.text(960, 830, "Find the handle and use it on the lever!", {
+        const statusText = this.add.text(960, 900, "Find the handle and use it on the lever!", {
             fontFamily: "Arial",
             fontSize: "26px",
             color: "#b8c4d4",
@@ -363,14 +364,19 @@ class Game_ChaseScene extends Phaser.Scene {
         GameSpritemovement.call(this);
         const sprite = this.sprite;
 
-        if (!this.game.sound.get("bgm")) {
-            const bgm = this.game.sound.add("bgm", { loop: true });
-            bgm.play();
-        }
+        this.input.removeAllListeners('pointerdown');
+        this.input.on('pointerdown', (pointer) => {
+            if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
+                const dy = Math.min(sprite.y - pointer.y, 600);
+                sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
+                this.sound.play('jump');
+            }
+        });
 
-        const handleObj = this.add.rectangle(500, 1030, 40, 40, 0xc8a200)
+
+        const handleObj = this.add.rectangle(500, groundY - 20, 40, 40, 0xc8a200)
             .setStrokeStyle(2, 0xffd700);
-        this.add.text(500, 998, "Handle", {
+        this.add.text(500, groundY - 52, "Handle", {
             fontFamily: "Arial", fontSize: "18px", color: "#ffd700"
         }).setOrigin(0.5);
         this.physics.add.existing(handleObj, true);
@@ -383,20 +389,22 @@ class Game_ChaseScene extends Phaser.Scene {
             statusText.setText("Handle picked up! Find the lever.");
         });
 
-        const leverObj = this.add.rectangle(1300, 1010, 40, 80, 0x556677)
+        const leverObj = this.add.rectangle(1300, groundY - 40, 40, 80, 0x556677)
             .setStrokeStyle(2, 0x8899aa)
             .setInteractive({ useHandCursor: true });
-        const leverLabel = this.add.text(1300, 968, "Lever", {
+        const leverLabel = this.add.text(1300, groundY - 92, "Lever", {
             fontFamily: "Arial", fontSize: "18px", color: "#8899aa"
         }).setOrigin(0.5);
 
-        const door = this.add.rectangle(1820, 920, 80, 250, 0x3a1a1a)
+        const doorHeight = 250;
+        const doorY = groundY - doorHeight / 2;
+        const door = this.add.rectangle(1820, doorY, 80, doorHeight, 0x3a1a1a)
             .setStrokeStyle(3, 0x6f7c91);
-        this.add.text(1820, 1010, "LOCKED", {
+        this.add.text(1820, groundY - 20, "LOCKED", {
             fontFamily: "Arial", fontSize: "22px", color: "#b8c4d4"
         }).setOrigin(0.5);
 
-        const doorZone = this.add.zone(1820, 920, 80, 250);
+        const doorZone = this.add.zone(1820, doorY, 80, doorHeight);
         this.physics.add.existing(doorZone, false);
         doorZone.body.setAllowGravity(false);
         doorZone.body.enable = false;
