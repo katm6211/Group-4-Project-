@@ -30,7 +30,8 @@ class Launcher extends Phaser.Scene {
         const options = [
             { label: "1  Cinematic Prototype", scene: "CinematicPrototype" },
             { label: "2  Core Gameplay Prototype", scene: "CoreGameplayPrototype" },
-            { label: "3  Scene Flow Prototype", scene: "SceneFlowPrototype" }
+            { label: "3  Scene Flow Prototype", scene: "SceneFlowPrototype" },
+            { label: "4  Game", scene: "Game_StartCinematic" }
         ];
 
         options.forEach((option, index) => {
@@ -100,6 +101,17 @@ const config = {
         AlienRevealScene,
         EndingScene,
         Inventory,
+        Game_StartCinematic,
+        Game_CinematicMainMenu,
+        Game_ChaseScene,
+        Game_PowerBox,
+        Game_DemoWirePuzzle,
+        Game_ClockRoom,
+        Game_DemoClock,
+        Game_RadioRoom,
+        Game_DemoRadio,
+        Game_CreditsScene,
+        Game_SettingsOverlay,
         DemoHandleLever,
         DemoWirePuzzle,
         DemoClock,
