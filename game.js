@@ -361,6 +361,7 @@ class Game_ChaseScene extends Phaser.Scene {
             align: "center"
         }).setOrigin(0.5);
 
+        this.physics.world.setBounds(0, 0, 1920, 1274);
         GameSpritemovement.call(this);
         const sprite = this.sprite;
 
