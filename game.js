@@ -14,6 +14,63 @@ const GAME_SCENE_KEYS = {
     settings: "Game_SettingsOverlay"
 };
 
+function GameSpritemovement() {
+    const sprite = this.sprite = this.physics.add.sprite(0, 0, 'sprite').setScale(4);
+
+    if (!this.anims.exists('left'))
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('sprite', { start: 3, end: 5 }),
+            frameRate: 10,
+            repeat: -1
+        });
+    if (!this.anims.exists('right'))
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('sprite', { start: 0, end: 2 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+    sprite.setPosition(sprite.displayWidth / 2, this.scale.height / 2);
+    const spriteNewWidth = sprite.displayWidth * 0.5;
+    const spriteOffsetX = (sprite.width - spriteNewWidth) / 2;
+    sprite.setBodySize(spriteNewWidth, sprite.displayHeight);
+    sprite.setOffset(spriteOffsetX, 0);
+
+    this.physics.world.gravity.y = 600;
+    sprite.setCollideWorldBounds(true);
+    sprite.body.onWorldBounds = true;
+
+    const JUMP_THRESHOLD = 80;
+    const SPEED = 200;
+
+    this.input.on('pointerdown', (pointer) => {
+        if (pointer.y < sprite.y - JUMP_THRESHOLD) {
+            if (sprite.body.blocked.down || sprite.body.touching.down) {
+                sprite.setVelocityY(-900);
+                this.sound.play('jump');
+            }
+        }
+    });
+
+    this.events.on('update', () => {
+        const pointer = this.input.activePointer;
+        if (pointer.isDown) {
+            if (pointer.x > sprite.x) {
+                sprite.setVelocityX(SPEED);
+                sprite.anims.play('right', true);
+            } else if (pointer.x < sprite.x) {
+                sprite.setVelocityX(-SPEED);
+                sprite.anims.play('left', true);
+            }
+        } else {
+            sprite.setVelocityX(0);
+            sprite.anims.stop();
+        }
+    });
+}
+
 function startWithFade(scene, nextScene) {
     scene.cameras.main.fadeOut(300, 0, 0, 0);
     scene.cameras.main.once("camerafadeoutcomplete", () => {
@@ -303,7 +360,7 @@ class Game_ChaseScene extends Phaser.Scene {
             align: "center"
         }).setOrigin(0.5);
 
-        Spritemovement.call(this);
+        GameSpritemovement.call(this);
         const sprite = this.sprite;
 
         if (!this.game.sound.get("bgm")) {
@@ -397,7 +454,7 @@ class Game_PowerBox extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
-        Spritemovement.call(this);
+        GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
 
@@ -531,7 +588,7 @@ class Game_ClockRoom extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
-        Spritemovement.call(this);
+        GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
         this.add.text(860, 200, "Clock").setFontSize(48)
@@ -661,7 +718,7 @@ class Game_RadioRoom extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
-        Spritemovement.call(this);
+        GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
         this.add.text(860, 200, "Radio").setFontSize(48);
