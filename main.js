@@ -9,6 +9,10 @@ class Launcher extends Phaser.Scene {
         this.load.spritesheet('sprite', 'assets/spritesheet.png', { frameWidth: 29, frameHeight: 38 });
         this.load.audio('bgm', 'assets/backgroundmusic.mp3');
         this.load.audio('jump', 'assets/jumpsoundeffect.mp3');
+        this.load.image('grandfatherClock', 'assets/grandfather clock.png');
+        this.load.image('clockFace', 'assets/clock.png');
+        this.load.image('grayBackground', 'assets/grayBackground.png');
+        this.load.image('border', 'assets/border.png');
 
     }
 
@@ -76,12 +80,16 @@ const config = {
         width: 1920,
         height: 1080
     },
+    render: {
+        pixelArt: true,
+        antialias: true
+    },
     parent: "root",
     physics: {
         default: 'arcade',
         arcade: {
             gravity: { y: 0 },
-            debug: false
+            debug: true
         }
     }, 
     scene: [
