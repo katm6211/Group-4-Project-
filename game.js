@@ -353,7 +353,7 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         });
     }
 }
-
+// Shiyi responsible for 
 class Game_ChaseScene extends Phaser.Scene {
     constructor() {
         super("Game_ChaseScene");
@@ -382,7 +382,7 @@ class Game_ChaseScene extends Phaser.Scene {
         const groundY = 810;
         this.add.rectangle(960, groundY + 10, 1920, 20, 0x223344);
 
-        const statusText = this.add.text(960, 900, "Find the handle and the lever, then escape!", {
+        const statusText = this.add.text(960, 900, "Pick the handle and the lever, then escape!", {
             fontFamily: "Arial",
             fontSize: "26px",
             color: "#b8c4d4",
@@ -460,7 +460,7 @@ class Game_ChaseScene extends Phaser.Scene {
             handleObj.setActive(false).setVisible(false);
             handleObj.body.enable = false;
             addInventoryItem("handle");
-            statusText.setText("Handle picked up! Now find the lever.");
+            statusText.setText("Handle picked up! Now pick the lever.");
         });
 
         const leverObj = this.add.image(1300, groundY - 40, 'lever').setDisplaySize(40, 80);
@@ -475,7 +475,7 @@ class Game_ChaseScene extends Phaser.Scene {
             leverObj.body.enable = false;
             leverLabel.setVisible(false);
             addInventoryItem("lever");
-            statusText.setText("Lever picked up! Find the door and use it.");
+            statusText.setText("Lever picked up! Use it on the door.");
         });
 
         const doorHeight = 250;
