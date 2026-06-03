@@ -26,6 +26,7 @@ class Launcher extends Phaser.Scene {
         this.load.image('grayBackground', 'assets/art/grayBackground.png');
         this.load.image('border', 'assets/art/border.png');
         this.load.image('radio', 'assets/art/radio.png');
+        this.load.image('door', 'assets/art/door.png')
 
     }
 

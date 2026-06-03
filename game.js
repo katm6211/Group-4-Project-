@@ -14,6 +14,10 @@ const GAME_SCENE_KEYS = {
     settings: "Game_SettingsOverlay"
 };
 
+// create global flag to check if clock puzzle is solved, allowing this to be tracked between scenes
+// rewrite as phaser data contained to two scenes?
+window.clockPuzzleSolved = Boolean(window.clockPuzzleSolved);
+
 function GameSpritemovement() {
     const sprite = this.sprite = this.physics.add.sprite(0, 0, 'sprite').setScale(4).setDepth(1000);
 
@@ -217,6 +221,7 @@ function showCompletionPanel(scene) {
 
     replayButton.on("pointerdown", () => {
         window.playerInventory = [];
+        window.clockPuzzleSolved = false;
         startWithFade(scene, GAME_SCENE_KEYS.intro);
     });
 }
@@ -319,6 +324,7 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         startGame.on("pointerout", () => startGame.setFillStyle(0x242a35));
         startGame.on("pointerdown", () => {
             window.playerInventory = [];
+            window.clockPuzzleSolved = false;
             this.scene.start("Game_ChasingScene");
         });
 
@@ -649,6 +655,7 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
     }
 }
 
+// have some visual effects in the room when you return after solving the clock puzzle
 class Game_ClockRoom extends Phaser.Scene {
     constructor() {
         super(GAME_SCENE_KEYS.clockRoom);
@@ -665,23 +672,30 @@ class Game_ClockRoom extends Phaser.Scene {
         this.add.image(960, 540, "border").setScale(2.1);
         this.add.image(965, 544, "grandfatherClock").setScale(11).setSize(260, 520)
 
-        const hasClockKey = () => window.playerInventory.includes("clock_key");
-        const door = this.add.rectangle(1810, 640, 140, 360, hasClockKey() ? 0xffffff : 0x000000)
-            .setStrokeStyle(3, hasClockKey() ? 0x000000 : 0xffffff)
-            .setInteractive({ useHandCursor: true });
-        this.physics.add.existing(door, true);
+        const isClockPuzzleSolved = () => window.clockPuzzleSolved === true;
+        const doorGlowColor = isClockPuzzleSolved() ? 0x44ff44 : 0xff3333;
+        const door = this.add.image(1665, 590, "door").setScale(11);
+        door.enableFilters().filters.external.addGlow(doorGlowColor, 2, 1, 1, false, 10, 12);
 
-        door.on("pointerdown", () => {
-            if (!hasClockKey() || !this.physics.overlap(this.sprite, door))
+        // move when new background added
+        const doorArea = this.add.zone(1665, 590, 190, 330).setInteractive({ useHandCursor: true });
+
+        // add visual debug for clickable areas
+        // this.add.rectangle(1665, 590, 190, 330).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
+        this.physics.add.existing(doorArea, true);
+
+        doorArea.on("pointerdown", () => {
+            if (!isClockPuzzleSolved() || !this.physics.overlap(this.sprite, doorArea))
                 return;
 
-            removeInventoryItem("clock_key");
             startWithFade(this, GAME_SCENE_KEYS.radioRoom);
         });
 
         // create clickable hitbox around the clock
         const clockArea = this.add.zone(965, 540, 260, 520).setInteractive({ useHandCursor: true });
-        this.add.rectangle(965, 540, 260, 520).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
+
+        // add visual debug for clickable areas
+        // this.add.rectangle(965, 540, 260, 520).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
         this.physics.add.existing(clockArea, true);
 
         // add zoom as if walking in toward clock?
@@ -689,8 +703,8 @@ class Game_ClockRoom extends Phaser.Scene {
             if (!this.physics.overlap(this.sprite, clockArea))
                 return;
 
-                startWithFade(this, GAME_SCENE_KEYS.clock);
-                });
+            startWithFade(this, GAME_SCENE_KEYS.clock);
+        });
     }
 }
 
@@ -776,13 +790,17 @@ class Game_DemoClock extends Phaser.Scene {
 
         hitArea.on("dragend", () => {
             if (totalRotation > Math.PI) {
+                // clockwise = "unsolve" the puzzle
+                window.clockPuzzleSolved = false;
                 statusText.setText("Clockwise → Going back to previous room.");
                 statusText.setColor("#ffaa44");
             } else if (totalRotation < -Math.PI) {
-                addInventoryItem("clock_key");
+                // counterclockwise = solved the puzzle
+                window.clockPuzzleSolved = true;
                 statusText.setText("Counterclockwise → Moving forward in time!");
                 statusText.setColor("#44ff44");
             } else {
+                // if not enough rotation, nothing happens
                 statusText.setText("Turn more to make a choice.");
                 statusText.setColor("#b8c4d4");
             }
