@@ -35,7 +35,7 @@ class Launcher extends Phaser.Scene {
             { label: "1  Cinematic Prototype", scene: "CinematicPrototype" },
             { label: "2  Core Gameplay Prototype", scene: "CoreGameplayPrototype" },
             { label: "3  Scene Flow Prototype", scene: "SceneFlowPrototype" },
-            { label: "4  Game", scene: "Game_DemoClock" }
+            { label: "4  Game", scene: "Game_StartCinematic" }
         ];
 
         options.forEach((option, index) => {
