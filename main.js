@@ -7,10 +7,16 @@ class Launcher extends Phaser.Scene {
         this.load.image('logoDraft', 'assets/logodraft4.png');
         this.load.image('placeholder', 'assets/placeholder.png');
         this.load.spritesheet('sprite', 'assets/spritesheet.png', { frameWidth: 29, frameHeight: 42 });
+        this.load.spritesheet('mob', 'assets/mobspritesheet.png', { frameWidth: 29, frameHeight: 42 });
         this.load.audio('bgm', 'assets/backgroundmusic.mp3');
         this.load.audio('jump', 'assets/jumpsoundeffect.mp3');
         this.load.image('grandfatherClock', 'assets/grandfather clock.png');
         this.load.image('clockFace', 'assets/clock.png');
+        this.load.image('powerbox', 'assets/powerbox.png');
+        this.load.image('radio', 'assets/radio.png');
+        this.load.image('lever', 'assets/lever2.png');
+        this.load.image('emptylever', 'assets/emptylever.png');
+        this.load.image('handle', 'assets/handle.png');
         this.load.image('grayBackground', 'assets/grayBackground.png');
         this.load.image('border', 'assets/border.png');
 
