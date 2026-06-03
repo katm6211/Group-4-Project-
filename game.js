@@ -15,7 +15,7 @@ const GAME_SCENE_KEYS = {
 };
 
 function GameSpritemovement() {
-    const sprite = this.sprite = this.physics.add.sprite(0, 0, 'sprite').setScale(4);
+    const sprite = this.sprite = this.physics.add.sprite(0, 0, 'sprite').setScale(4).setDepth(1000);
 
     if (!this.anims.exists('left'))
         this.anims.create({
@@ -39,6 +39,7 @@ function GameSpritemovement() {
     sprite.setOffset(spriteOffsetX, 0);
 
     this.physics.world.gravity.y = 600;
+    this.physics.world.setBounds(0, 0, 1920, 1234);
     sprite.setCollideWorldBounds(true);
     sprite.body.onWorldBounds = true;
 
@@ -600,17 +601,21 @@ class Game_ClockRoom extends Phaser.Scene {
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
-        this.add.text(860, 200, "Clock").setFontSize(48)
-        const clock = this.add.container(960, 540, [
-            this.add.rectangle(0, 0, 260, 520, 0x8b5a2b),
-            this.add.circle(0, -110, 90, 0xffffff)
-        ]);
-        clock.setSize(260, 520).setInteractive({ useHandCursor: true });
+        this.add.image(960, 540, "grayBackground").setScale(2.1);
+        this.add.image(960, 540, "border").setScale(2.1);
+        this.add.image(965, 544, "grandfatherClock").setScale(11).setSize(260, 520)
 
-        const openClock = () => {
-            startWithFade(this, GAME_SCENE_KEYS.clock);
-        };
-        clock.on("pointerdown", openClock);
+        // create clickable hitbox around the clock
+        const clockArea = this.add.zone(965, 540, 260, 520).setInteractive({ useHandCursor: true });
+        this.add.rectangle(965, 540, 260, 520).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
+        this.physics.add.existing(clockArea, true);
+
+        clockArea.on("pointerdown", () => {
+            if (!this.physics.overlap(this.sprite, clockArea))
+                return;
+
+                startWithFade(this, GAME_SCENE_KEYS.clock);
+            });
     }
 }
 
@@ -623,22 +628,19 @@ class Game_DemoClock extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#101716");
         this.clockSolved = false;
         playGameBgm(this);
-
         addGameSettingsButton(this);
 
-        this.add.text(960, 100, "Demo 3: Clock", {
-            fontFamily: "Arial", fontSize: "44px", color: "#f5f1e8"
-        }).setOrigin(0.5);
 
         const statusText = this.add.text(960, 880, "Drag the clock hand. Counterclockwise = move forward.\nClockwise = go back.", {
             fontFamily: "Arial", fontSize: "26px", color: "#b8c4d4", align: "center"
         }).setOrigin(0.5);
 
-        const cx = 960;
-        const cy = 520;
+        const clockFace = this.add.image(960, 520, "clockFace").setScale(12);
+        const clockCenter = clockFace.getCenter();
+        const cx = clockCenter.x;
+        const cy = clockCenter.y;
         const radius = 220;
 
-        this.add.circle(cx, cy, radius, 0x1a1a2e).setStrokeStyle(6, 0x8899aa);
 
         const graphics = this.add.graphics();
         graphics.lineStyle(3, 0x8899aa, 0.6);
