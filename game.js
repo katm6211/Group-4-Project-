@@ -670,7 +670,15 @@ class Game_ClockRoom extends Phaser.Scene {
 
         this.add.image(960, 540, "grayBackground").setScale(2.1);
         this.add.image(960, 540, "border").setScale(2.1);
-        this.add.image(965, 544, "grandfatherClock").setScale(11).setSize(260, 520)
+        this.add.image(965, 544, "grandfatherClock").setScale(11).setSize(260, 520);
+
+        // make global so this can be called / used by other scenes
+        const clockPulse = this.add.image(965, 544, "grandfatherClock")
+            .setScale(11)
+            .setTint(0xffffff)
+            .setTintMode(Phaser.TintModes.FILL)
+            .setAlpha(0)
+            .setDepth(5);
 
         const isClockPuzzleSolved = () => window.clockPuzzleSolved === true;
         const doorGlowColor = isClockPuzzleSolved() ? 0x44ff44 : 0xff3333;
@@ -698,12 +706,23 @@ class Game_ClockRoom extends Phaser.Scene {
         // this.add.rectangle(965, 540, 260, 520).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
         this.physics.add.existing(clockArea, true);
 
-        // add zoom as if walking in toward clock?
         clockArea.on("pointerdown", () => {
-            if (!this.physics.overlap(this.sprite, clockArea))
+            if (!this.physics.overlap(this.sprite, clockArea) || this.isChangingScenes)
                 return;
 
-            startWithFade(this, GAME_SCENE_KEYS.clock);
+            this.input.enabled = false;
+            this.tweens.add({
+                targets: clockPulse,
+                alpha: 0.85,
+                scale: 11.35,
+                duration: 160,
+                yoyo: true,
+                ease: "Sine.easeInOut",
+                onComplete: () => {
+                    clockPulse.setScale(11).setAlpha(0);
+                    startWithFade(this, GAME_SCENE_KEYS.clock);
+                }
+            });
         });
     }
 }
@@ -846,16 +865,11 @@ class Game_RadioRoom extends Phaser.Scene {
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
-        this.input.removeAllListeners('pointerdown');
-        this.input.on('pointerdown', (pointer) => {
-            const sprite = this.sprite;
-            if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
-                const dy = Math.min(sprite.y - pointer.y, 600);
-                sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
-                this.sound.play('jump');
-            }
-        });
-
+        /*
+        add radio sprite
+        add some sound effect as you approach -- radiobeeping.mp3?
+        radio sitting on table?
+        */
         this.add.text(860, 200, "Radio").setFontSize(48);
         const radio = this.add.rectangle(960, 540, 240, 240, 0x808080)
             .setInteractive({ useHandCursor: true });
@@ -870,7 +884,14 @@ class Game_DemoRadio extends Phaser.Scene {
     constructor() {
         super(GAME_SCENE_KEYS.radio);
     }
-
+    /**
+     * Update closeup visual asset / create
+     * randomize the frequency you need to find
+     * use radiotalkshow.mp3? 
+     * becomes louder / quieter based on how close you are
+     * Once you get it right do something
+     * 
+     */
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
@@ -1135,6 +1156,8 @@ class Game_CreditsScene extends Phaser.Scene {
     }
 }
 
+// update Settings Helper.js to use GAME_SCENE_KEYS and play bgm
+// Remove Game_SettingsOverlay
 class Game_SettingsOverlay extends Phaser.Scene {
     constructor() {
         super(GAME_SCENE_KEYS.settings);
