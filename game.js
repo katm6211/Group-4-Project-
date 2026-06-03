@@ -389,10 +389,12 @@ class Game_ChaseScene extends Phaser.Scene {
             align: "center"
         }).setOrigin(0.5);
 
+        // already defined in GameSpritemovement do not redifine unless necessary
         this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         const sprite = this.sprite;
 
+        // already defined in GameSpritemovement do not redifine unless necessary
         this.input.removeAllListeners('pointerdown');
         this.input.on('pointerdown', (pointer) => {
             if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
@@ -522,15 +524,7 @@ class Game_PowerBox extends Phaser.Scene {
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
-        this.input.removeAllListeners('pointerdown');
-        this.input.on('pointerdown', (pointer) => {
-            const sprite = this.sprite;
-            if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
-                const dy = Math.min(sprite.y - pointer.y, 600);
-                sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
-                this.sound.play('jump');
-            }
-        });
+
 
         this.add.text(860, 340, "Power box").setFontSize(48)
         const powerBox = this.add.image(960, 540, 'powerbox').setDisplaySize(240, 240)
@@ -663,31 +657,40 @@ class Game_ClockRoom extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
-        this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
+        addInventoryButton(this);
 
-        this.input.removeAllListeners('pointerdown');
-        this.input.on('pointerdown', (pointer) => {
-            const sprite = this.sprite;
-            if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
-                const dy = Math.min(sprite.y - pointer.y, 600);
-                sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
-                this.sound.play('jump');
-            }
+        this.add.image(960, 540, "grayBackground").setScale(2.1);
+        this.add.image(960, 540, "border").setScale(2.1);
+        this.add.image(965, 544, "grandfatherClock").setScale(11).setSize(260, 520)
+
+        const hasClockKey = () => window.playerInventory.includes("clock_key");
+        const door = this.add.rectangle(1810, 640, 140, 360, hasClockKey() ? 0xffffff : 0x000000)
+            .setStrokeStyle(3, hasClockKey() ? 0x000000 : 0xffffff)
+            .setInteractive({ useHandCursor: true });
+        this.physics.add.existing(door, true);
+
+        door.on("pointerdown", () => {
+            if (!hasClockKey() || !this.physics.overlap(this.sprite, door))
+                return;
+
+            removeInventoryItem("clock_key");
+            startWithFade(this, GAME_SCENE_KEYS.radioRoom);
         });
 
-        this.add.text(860, 200, "Clock").setFontSize(48)
-        const clock = this.add.container(960, 540, [
-            this.add.rectangle(0, 0, 260, 520, 0x8b5a2b),
-            this.add.circle(0, -110, 90, 0xffffff)
-        ]);
-        clock.setSize(260, 520).setInteractive({ useHandCursor: true });
+        // create clickable hitbox around the clock
+        const clockArea = this.add.zone(965, 540, 260, 520).setInteractive({ useHandCursor: true });
+        this.add.rectangle(965, 540, 260, 520).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
+        this.physics.add.existing(clockArea, true);
 
-        const openClock = () => {
-            startWithFade(this, GAME_SCENE_KEYS.clock);
-        };
-        clock.on("pointerdown", openClock);
+        // add zoom as if walking in toward clock?
+        clockArea.on("pointerdown", () => {
+            if (!this.physics.overlap(this.sprite, clockArea))
+                return;
+
+                startWithFade(this, GAME_SCENE_KEYS.clock);
+                });
     }
 }
 
