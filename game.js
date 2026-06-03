@@ -232,6 +232,12 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.spritesheet('sprite', 'assets/spritesheet.png', { frameWidth: 29, frameHeight: 38 });
         this.load.audio('bgm', 'assets/backgroundmusic.mp3');
         this.load.audio('jump', 'assets/jumpsoundeffect.mp3');
+        this.load.image('grayBackground', 'assets/grayBackground.png');
+        this.load.image('handle', 'assets/handle (1).png');
+        this.load.image('lever', 'assets/lever2.png');
+        this.load.image('door', 'assets/door.png');
+        this.load.image('powerbox', 'assets/powerbox.png');
+        this.load.image('border', 'assets/border.png');
     }
 
     create() {
@@ -357,6 +363,7 @@ class Game_ChaseScene extends Phaser.Scene {
         this.escaping = false;
         this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#0d1117");
+        this.add.image(960, 652, 'grayBackground').setDisplaySize(1920, 1304).setDepth(0);
         addGameSettingsButton(this);
         playGameBgm(this);
 
@@ -375,7 +382,7 @@ class Game_ChaseScene extends Phaser.Scene {
         const groundY = 810;
         this.add.rectangle(960, groundY + 10, 1920, 20, 0x223344);
 
-        const statusText = this.add.text(960, 900, "Find the handle and use it on the lever!", {
+        const statusText = this.add.text(960, 900, "Find the handle and the lever, then escape!", {
             fontFamily: "Arial",
             fontSize: "26px",
             color: "#b8c4d4",
@@ -442,8 +449,7 @@ class Game_ChaseScene extends Phaser.Scene {
             }
         });
 
-        const handleObj = this.add.rectangle(500, groundY - 20, 40, 40, 0xc8a200)
-            .setStrokeStyle(2, 0xffd700);
+        const handleObj = this.add.image(500, groundY - 20, 'handle').setDisplaySize(40, 40);
         this.add.text(500, groundY - 52, "Handle", {
             fontFamily: "Arial", fontSize: "18px", color: "#ffd700"
         }).setOrigin(0.5);
@@ -454,57 +460,49 @@ class Game_ChaseScene extends Phaser.Scene {
             handleObj.setActive(false).setVisible(false);
             handleObj.body.enable = false;
             addInventoryItem("handle");
-            statusText.setText("Handle picked up! Find the lever.");
+            statusText.setText("Handle picked up! Now find the lever.");
         });
 
-        const leverObj = this.add.rectangle(1300, groundY - 40, 40, 80, 0x556677)
-            .setStrokeStyle(2, 0x8899aa)
-            .setInteractive({ useHandCursor: true });
+        const leverObj = this.add.image(1300, groundY - 40, 'lever').setDisplaySize(40, 80);
         const leverLabel = this.add.text(1300, groundY - 92, "Lever", {
             fontFamily: "Arial", fontSize: "18px", color: "#8899aa"
         }).setOrigin(0.5);
+        this.physics.add.existing(leverObj, true);
+
+        this.physics.add.overlap(sprite, leverObj, () => {
+            if (!leverObj.active) return;
+            leverObj.setActive(false).setVisible(false);
+            leverObj.body.enable = false;
+            leverLabel.setVisible(false);
+            addInventoryItem("lever");
+            statusText.setText("Lever picked up! Find the door and use it.");
+        });
 
         const doorHeight = 250;
         const doorY = groundY - doorHeight / 2;
-        const door = this.add.rectangle(1820, doorY, 80, doorHeight, 0x3a1a1a)
-            .setStrokeStyle(3, 0x6f7c91);
-        this.add.text(1820, groundY - 20, "LOCKED", {
+        const door = this.add.image(1820, doorY, 'door').setDisplaySize(80, doorHeight);
+        const doorLockedText = this.add.text(1820, groundY - 20, "LOCKED", {
             fontFamily: "Arial", fontSize: "22px", color: "#b8c4d4"
         }).setOrigin(0.5);
 
         const doorZone = this.add.zone(1820, doorY, 80, doorHeight);
         this.physics.add.existing(doorZone, false);
         doorZone.body.setAllowGravity(false);
-        doorZone.body.enable = false;
 
         this.physics.add.overlap(sprite, doorZone, () => {
             if (this.escaping) return;
+            if (!window.playerInventory.includes("lever")) {
+                statusText.setText("The door is locked. Find a lever!");
+                return;
+            }
+            removeInventoryItem("lever");
             this.escaping = true;
+            doorLockedText.setText("OPEN");
+            door.setAlpha(0.5);
             sprite.setVelocity(0, 0);
             window.playerInventory = [];
             this.cameras.main.fade(1000, 0, 0, 0);
             this.time.delayedCall(1000, () => this.scene.start("Game_PowerBox"));
-        });
-
-        leverObj.on("pointerdown", () => {
-            if (!window.playerInventory.includes("handle")) {
-                statusText.setText("The lever needs a handle first.");
-                return;
-            }
-            removeInventoryItem("handle");
-            leverObj.disableInteractive();
-            this.tweens.add({
-                targets: leverObj,
-                angle: 45,
-                duration: 500,
-                ease: "Power2",
-                onComplete: () => {
-                    leverLabel.setText("Lever (used)");
-                    door.setFillStyle(0x1a3a2a);
-                    statusText.setText("The door is open! Run to it!");
-                    doorZone.body.enable = true;
-                }
-            });
         });
 
         addInventoryButton(this);
@@ -518,6 +516,7 @@ class Game_PowerBox extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#101716");
+        this.add.image(960, 652, 'grayBackground').setDisplaySize(1920, 1304).setDepth(0);
         playGameBgm(this);
         this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
@@ -534,7 +533,7 @@ class Game_PowerBox extends Phaser.Scene {
         });
 
         this.add.text(860, 340, "Power box").setFontSize(48)
-        const powerBox = this.add.rectangle(960, 540, 240, 240, 0xffd700)
+        const powerBox = this.add.image(960, 540, 'powerbox').setDisplaySize(240, 240)
             .setInteractive({ useHandCursor: true });
 
         powerBox.on("pointerdown", () => {
