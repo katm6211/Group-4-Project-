@@ -39,7 +39,7 @@ function GameSpritemovement() {
     sprite.setOffset(spriteOffsetX, 0);
 
     this.physics.world.gravity.y = 600;
-    this.physics.world.setBounds(0, 0, 1920, 1274);
+    this.physics.world.setBounds(0, 0, 1920, 1304);
     sprite.setCollideWorldBounds(true);
     sprite.body.onWorldBounds = true;
 
@@ -382,7 +382,7 @@ class Game_ChaseScene extends Phaser.Scene {
             align: "center"
         }).setOrigin(0.5);
 
-        this.physics.world.setBounds(0, 0, 1920, 1274);
+        this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         const sprite = this.sprite;
 
@@ -519,7 +519,7 @@ class Game_PowerBox extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
-        this.physics.world.setBounds(0, 0, 1920, 1274);
+        this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
@@ -664,7 +664,7 @@ class Game_ClockRoom extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
-        this.physics.world.setBounds(0, 0, 1920, 1274);
+        this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
@@ -822,7 +822,7 @@ class Game_RadioRoom extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         playGameBgm(this);
-        this.physics.world.setBounds(0, 0, 1920, 1274);
+        this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
@@ -968,7 +968,7 @@ class Game_ChasingScene extends Phaser.Scene {
         const groundY = 810;
         this.add.rectangle(960, groundY + 10, 1920, 20, 0x223344);
         this.physics.world.gravity.y = 600;
-        this.physics.world.setBounds(0, 0, 1920, 1274);
+        this.physics.world.setBounds(0, 0, 1920, 1304);
 
         this.add.rectangle(1870, groundY - 100, 60, 200, 0x1a3a2a).setStrokeStyle(3, 0x44ff44);
         const doorZone = this.add.zone(1870, groundY - 100, 60, 200);
