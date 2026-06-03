@@ -44,6 +44,35 @@ class Inventory extends Phaser.Scene {
     }
 }
 
+function addInventoryButton(scene) {
+    const buttonDepth = 1100;
+    const inventoryButton = scene.add.rectangle(110, 1010, 170, 58, 0x242a35)
+        .setStrokeStyle(3, 0x6f7c91)
+        .setInteractive({ useHandCursor: true })
+        .setDepth(buttonDepth);
+
+    const inventoryLabel = scene.add.text(110, 1010, "Inventory", {
+        fontFamily: "Arial",
+        fontSize: "24px",
+        color: "#f5f1e8"
+    }).setOrigin(0.5).setDepth(buttonDepth + 1);
+
+    inventoryButton.on("pointerover", () => {
+        inventoryButton.setFillStyle(0x334155);
+        inventoryLabel.setColor("#ffffff");
+    });
+
+    inventoryButton.on("pointerout", () => {
+        inventoryButton.setFillStyle(0x242a35);
+        inventoryLabel.setColor("#f5f1e8");
+    });
+
+    inventoryButton.on("pointerdown", () => {
+        scene.scene.launch("Inventory");
+        scene.scene.bringToTop("Inventory");
+    });
+}
+
 // adds item to inventory if player does not have it already
 function addInventoryItem(item) {
     if (!window.playerInventory.includes(item)) {

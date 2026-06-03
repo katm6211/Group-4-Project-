@@ -46,16 +46,20 @@ function GameSpritemovement() {
     const JUMP_THRESHOLD = 80;
     const SPEED = 200;
 
-    this.input.on('pointerdown', (pointer) => {
+    const handlePointerDown = (pointer) => {
+        if (!sprite.active || !sprite.body) return;
+
         if (pointer.y < sprite.y - JUMP_THRESHOLD) {
             if (sprite.body.blocked.down || sprite.body.touching.down) {
                 sprite.setVelocityY(-900);
                 this.sound.play('jump');
             }
         }
-    });
+    };
 
-    this.events.on('update', () => {
+    const handleUpdate = () => {
+        if (!sprite.active || !sprite.body) return;
+
         const pointer = this.input.activePointer;
         if (pointer.isDown) {
             if (pointer.x > sprite.x) {
@@ -69,16 +73,32 @@ function GameSpritemovement() {
             sprite.setVelocityX(0);
             sprite.anims.stop();
         }
+    };
+
+    this.input.on('pointerdown', handlePointerDown);
+    this.events.on('update', handleUpdate);
+    this.events.once('shutdown', () => {
+        this.input.off('pointerdown', handlePointerDown);
+        this.events.off('update', handleUpdate);
     });
 }
 
 function startWithFade(scene, nextScene) {
+    if (scene.isChangingScenes) return;
+
+    scene.isChangingScenes = true;
+    scene.input.enabled = false;
+    scene.events.once("shutdown", () => {
+        scene.isChangingScenes = false;
+        scene.input.enabled = true;
+    });
     scene.cameras.main.fadeOut(300, 0, 0, 0);
     scene.cameras.main.once("camerafadeoutcomplete", () => {
         scene.scene.start(nextScene);
     });
 }
 
+// unnecessary delete later
 function addRoomLabel(scene, roomNumber, title) {
     scene.add.text(960, 155, `Room ${roomNumber} of 4: ${title}`, {
         fontFamily: "Arial",
@@ -441,18 +461,7 @@ class Game_ChaseScene extends Phaser.Scene {
             });
         });
 
-        const inventoryButton = this.add.rectangle(110, 1010, 170, 58, 0x242a35)
-            .setStrokeStyle(3, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-        this.add.text(110, 1010, "Inventory", {
-            fontFamily: "Arial",
-            fontSize: "24px",
-            color: "#f5f1e8"
-        }).setOrigin(0.5);
-        inventoryButton.on("pointerdown", () => {
-            this.scene.launch("Inventory");
-            this.scene.bringToTop("Inventory");
-        });
+        addInventoryButton(this);
     }
 }
 
@@ -466,6 +475,7 @@ class Game_PowerBox extends Phaser.Scene {
         playGameBgm(this);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
+        addInventoryButton(this);
 
 
         this.add.text(860, 340, "Power box").setFontSize(48)
@@ -489,6 +499,7 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
         playGameBgm(this);
 
         addGameSettingsButton(this);
+        addInventoryButton(this);
 
         this.add.text(960, 100, "Demo 2: Wire Puzzle", {
             fontFamily: "Arial", fontSize: "44px", color: "#f5f1e8"
@@ -600,16 +611,32 @@ class Game_ClockRoom extends Phaser.Scene {
         playGameBgm(this);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
+        addInventoryButton(this);
 
         this.add.image(960, 540, "grayBackground").setScale(2.1);
         this.add.image(960, 540, "border").setScale(2.1);
         this.add.image(965, 544, "grandfatherClock").setScale(11).setSize(260, 520)
+
+        const hasClockKey = () => window.playerInventory.includes("clock_key");
+        const door = this.add.rectangle(1810, 640, 140, 360, hasClockKey() ? 0xffffff : 0x000000)
+            .setStrokeStyle(3, hasClockKey() ? 0x000000 : 0xffffff)
+            .setInteractive({ useHandCursor: true });
+        this.physics.add.existing(door, true);
+
+        door.on("pointerdown", () => {
+            if (!hasClockKey() || !this.physics.overlap(this.sprite, door))
+                return;
+
+            removeInventoryItem("clock_key");
+            startWithFade(this, GAME_SCENE_KEYS.radioRoom);
+        });
 
         // create clickable hitbox around the clock
         const clockArea = this.add.zone(965, 540, 260, 520).setInteractive({ useHandCursor: true });
         this.add.rectangle(965, 540, 260, 520).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
         this.physics.add.existing(clockArea, true);
 
+        // add zoom as if walking in toward clock?
         clockArea.on("pointerdown", () => {
             if (!this.physics.overlap(this.sprite, clockArea))
                 return;
@@ -626,28 +653,28 @@ class Game_DemoClock extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#101716");
-        this.clockSolved = false;
         playGameBgm(this);
         addGameSettingsButton(this);
+        addInventoryButton(this);
 
 
-        const statusText = this.add.text(960, 880, "Drag the clock hand. Counterclockwise = move forward.\nClockwise = go back.", {
+        const statusText = this.add.text(960, 980, "Drag the clock hand. Counterclockwise = move forward.\nClockwise = go back.", {
             fontFamily: "Arial", fontSize: "26px", color: "#b8c4d4", align: "center"
         }).setOrigin(0.5);
 
         const clockFace = this.add.image(960, 520, "clockFace").setScale(12);
         const clockCenter = clockFace.getCenter();
-        const cx = clockCenter.x;
-        const cy = clockCenter.y;
-        const radius = 220;
+        const cx = clockCenter.x + 13;
+        const cy = clockCenter.y - 10;
+        const radius = 160;
 
 
         const graphics = this.add.graphics();
-        graphics.lineStyle(3, 0x8899aa, 0.6);
+        graphics.lineStyle(3, 0x3d3a36, 0.6);
         for (let i = 0; i < 12; i++) {
             const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
-            const x1 = cx + Math.cos(angle) * (radius - 20);
-            const y1 = cy + Math.sin(angle) * (radius - 20);
+            const x1 = cx + Math.cos(angle) * (radius - 50);
+            const y1 = cy + Math.sin(angle) * (radius - 50);
             const x2 = cx + Math.cos(angle) * radius;
             const y2 = cy + Math.sin(angle) * radius;
             graphics.beginPath();
@@ -660,7 +687,7 @@ class Game_DemoClock extends Phaser.Scene {
         const handGraphics = this.add.graphics();
         const drawHand = () => {
             handGraphics.clear();
-            handGraphics.lineStyle(8, 0xffd700, 1);
+            handGraphics.lineStyle(8, 0x99643f, 1);
             handGraphics.beginPath();
             handGraphics.moveTo(cx, cy);
             handGraphics.lineTo(
@@ -668,7 +695,7 @@ class Game_DemoClock extends Phaser.Scene {
                 cy + Math.sin(this.handAngle) * (radius - 30)
             );
             handGraphics.strokePath();
-            handGraphics.fillStyle(0xffd700);
+            handGraphics.fillStyle(0x99643f);
             handGraphics.fillCircle(cx, cy, 12);
         };
         drawHand();
@@ -704,7 +731,7 @@ class Game_DemoClock extends Phaser.Scene {
                 statusText.setText("Clockwise → Going back to previous room.");
                 statusText.setColor("#ffaa44");
             } else if (totalRotation < -Math.PI) {
-                this.clockSolved = true;
+                addInventoryItem("clock_key");
                 statusText.setText("Counterclockwise → Moving forward in time!");
                 statusText.setColor("#44ff44");
             } else {
@@ -714,9 +741,29 @@ class Game_DemoClock extends Phaser.Scene {
         });
 
         addRoomLabel(this, 3, "Clock");
-        addProgressButton(this, {
-            isUnlocked: () => this.clockSolved,
-            onContinue: () => startWithFade(this, GAME_SCENE_KEYS.radioRoom)
+
+        const backButton = this.add.rectangle(220, 920, 300, 64, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+
+        const backLabel = this.add.text(220, 920, "Back to Clock Room", {
+            fontFamily: "Arial",
+            fontSize: "22px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
+
+        backButton.on("pointerover", () => {
+            backButton.setFillStyle(0x334155);
+            backLabel.setColor("#ffffff");
+        });
+
+        backButton.on("pointerout", () => {
+            backButton.setFillStyle(0x242a35);
+            backLabel.setColor("#f5f1e8");
+        });
+
+        backButton.once("pointerdown", () => {
+            startWithFade(this, GAME_SCENE_KEYS.clockRoom);
         });
     }
 }
@@ -731,6 +778,7 @@ class Game_RadioRoom extends Phaser.Scene {
         playGameBgm(this);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
+        addInventoryButton(this);
 
         this.add.text(860, 200, "Radio").setFontSize(48);
         const radio = this.add.rectangle(960, 540, 240, 240, 0x808080)
@@ -752,6 +800,7 @@ class Game_DemoRadio extends Phaser.Scene {
         playGameBgm(this);
 
         addGameSettingsButton(this);
+        addInventoryButton(this);
 
         this.add.text(960, 100, "Demo 4: Radio", {
             fontFamily: "Arial", fontSize: "44px", color: "#f5f1e8"
