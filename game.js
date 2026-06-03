@@ -39,7 +39,7 @@ function GameSpritemovement() {
     sprite.setOffset(spriteOffsetX, 0);
 
     this.physics.world.gravity.y = 600;
-    this.physics.world.setBounds(0, 0, 1920, 1234);
+    this.physics.world.setBounds(0, 0, 1920, 1274);
     sprite.setCollideWorldBounds(true);
     sprite.body.onWorldBounds = true;
 
@@ -1043,7 +1043,7 @@ class Game_FailScene extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#000000");
 
-        this.add.text(960, 430, "你fail了", {
+        this.add.text(960, 430, "you failed", {
             fontFamily: "Arial",
             fontSize: "72px",
             color: "#f5f1e8"
@@ -1052,7 +1052,7 @@ class Game_FailScene extends Phaser.Scene {
         const button = this.add.rectangle(960, 600, 300, 80, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
-        this.add.text(960, 600, "继续", {
+        this.add.text(960, 600, "Continue", {
             fontFamily: "Arial",
             fontSize: "36px",
             color: "#f5f1e8"
