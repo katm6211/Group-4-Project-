@@ -6,7 +6,7 @@ class Launcher extends Phaser.Scene {
     preload() {
         this.load.image('logoDraft', 'assets/logodraft4.png');
         this.load.image('placeholder', 'assets/placeholder.png');
-        this.load.spritesheet('sprite', 'assets/spritesheet.png', { frameWidth: 29, frameHeight: 38 });
+        this.load.spritesheet('sprite', 'assets/spritesheet.png', { frameWidth: 29, frameHeight: 42 });
         this.load.audio('bgm', 'assets/backgroundmusic.mp3');
         this.load.audio('jump', 'assets/jumpsoundeffect.mp3');
         this.load.image('grandfatherClock', 'assets/grandfather clock.png');
