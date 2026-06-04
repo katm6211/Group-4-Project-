@@ -234,12 +234,12 @@ class Game_StartCinematic extends Phaser.Scene {
     preload() {
         this.load.spritesheet('sprite', 'assets/art/spritesheet.png', { frameWidth: 29, frameHeight: 42 });
         this.load.spritesheet('mob', 'assets/art/mobspritesheet.png', { frameWidth: 29, frameHeight: 42 });
-        this.load.spritesheet('titlescrren', 'assets/art/titlescreenbg.png', { frameWidth: 249, frameHeight: 135});
+        this.load.spritesheet('titlescreen', 'assets/art/titlescreenbg.gif', { frameWidth: 249, frameHeight: 135});
 
         this.load.audio('bgm', 'assets/music/backgroundmusic.mp3');
         this.load.audio('jump', 'assets/music/jumpsoundeffect.mp3');
         this.load.audio('clockticking', 'assets/music/clockbackgroundmusic.mp3');
-        this.load.audio('radiobeeping', 'assetsmusic/radiobeeping.mp3');
+        this.load.audio('radiobeeping', 'assets/music/radiobeeping.mp3');
         this.load.audio('talkshow', 'assets/music/radiotalkshow.mp3');
         this.load.audio('mobsound', 'assets/music/mobsound.mp3');
     
@@ -247,7 +247,7 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.image('placeholder', 'assets/art/placeholder.png');
         this.load.image('grandfatherClock', 'assets/art/grandfather clock.png');
         this.load.image('clockFace', 'assets/art/clock.png');
-        this.load.image('powerbox', 'assetsart/powerbox.png');
+        this.load.image('powerbox', 'assets/art/powerbox.png');
         this.load.image('radio', 'assets/art/radio.png');
         this.load.image('lever', 'assets/art/lever2.png');
         this.load.image('emptylever', 'assets/art/emptylever.png');
