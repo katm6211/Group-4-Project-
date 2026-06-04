@@ -234,7 +234,7 @@ class Game_StartCinematic extends Phaser.Scene {
     preload() {
         this.load.spritesheet('sprite', 'assets/art/spritesheet.png', { frameWidth: 29, frameHeight: 42 });
         this.load.spritesheet('mob', 'assets/art/mobspritesheet.png', { frameWidth: 29, frameHeight: 42 });
-        this.load.spritesheet('titlescreen', 'assets/art/titlesceneanim.png', { frameWidth: 249, frameHeight: 135 });
+        this.load.spritesheet('titlescreen', 'assets/art/titlescreenanim.png', { frameWidth: 249, frameHeight: 135 });
 
         this.load.audio('bgm', 'assets/music/backgroundmusic.mp3');
         this.load.audio('jump', 'assets/music/jumpsoundeffect.mp3');
@@ -302,15 +302,15 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         if (!this.anims.exists('bg_loop')) {
             this.anims.create({
                 key: 'bg_loop',
-                frames: this.anims.generateFrameNumbers('titlescreen', { start: 0, end: 44 }),
+                frames: this.anims.generateFrameNumbers('titlescreen', { start: 0, end: 26 }),
                 frameRate: 10,
                 repeat: -1
             });
         }
-
-        const background = this.add.sprite(screen.width / 2, screen.height / 2, 'titlescreen');
-        const scaleX = screen.width / background.width;
-        const scaleY = screen.height / background.height;
+        const { width, height } = this.scale;
+        const background = this.add.sprite(width / 2, height / 2, 'titlescreen');
+        const scaleX = width / background.width;
+        const scaleY = height / background.height;
         const bestScale = Math.min(scaleX, scaleY); 
         background.setScale(bestScale);
         background.play('bg_loop');
@@ -328,8 +328,8 @@ class Game_CinematicMainMenu extends Phaser.Scene {
             color: "#fefefe"
         }).setOrigin(0.5);
 
-        const h = screen.height;
-        const buttonX = screen.width / 2;
+        const h = height;
+        const buttonX = width / 2;
         const buttonWidth = 340;
         const buttonHeight = 86;
         const buttonGap = 175;
