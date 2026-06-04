@@ -234,7 +234,7 @@ class Game_StartCinematic extends Phaser.Scene {
     preload() {
         this.load.spritesheet('sprite', 'assets/art/spritesheet.png', { frameWidth: 29, frameHeight: 42 });
         this.load.spritesheet('mob', 'assets/art/mobspritesheet.png', { frameWidth: 29, frameHeight: 42 });
-        this.load.spritesheet('titlescreen', 'assets/art/newtitlesceneanim.png', { frameWidth: 249, frameHeight: 135});
+        this.load.spritesheet('titlescreen', 'assets/art/titlesceneanim.png', { frameWidth: 249, frameHeight: 135 });
 
         this.load.audio('bgm', 'assets/music/backgroundmusic.mp3');
         this.load.audio('jump', 'assets/music/jumpsoundeffect.mp3');
@@ -242,9 +242,8 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.audio('radiobeeping', 'assets/music/radiobeeping.mp3');
         this.load.audio('talkshow', 'assets/music/radiotalkshow.mp3');
         this.load.audio('mobsound', 'assets/music/mobsound.mp3');
-    
+
         this.load.image('logoDraft', 'assets/art/logodraft4.png');
-        this.load.image('placeholder', 'assets/art/placeholder.png');
         this.load.image('grandfatherClock', 'assets/art/grandfather clock.png');
         this.load.image('clockFace', 'assets/art/clock.png');
         this.load.image('powerbox', 'assets/art/powerbox.png');
@@ -299,9 +298,18 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#151923");
         playGameBgm(this);
 
-        const placeholder = this.placeholder = this.add.image(0, 0, "placeholder")
-            .setOrigin(0, 0)
-            .setDisplaySize(1920, 1080);
+        // Check if the unique key 'bg_loop' already exists in the global manager
+        if (!this.anims.exists('bg_loop')) {
+            this.anims.create({
+                key: 'bg_loop',
+                frames: this.anims.generateFrameNumbers('titlescreen', { start: 0, end: 44 }),
+                frameRate: 10,
+                repeat: -1
+            });
+        }
+
+        const background = this.add.sprite(screen.width / 2, screen.height / 2, 'titlescreen');
+        background.play('bg_loop');
 
         this.fadeRect = this.add.rectangle(960, 540, 1920, 1080, 0x000000, 1)
             .setAlpha(0)
@@ -317,7 +325,7 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         }).setOrigin(0.5);
 
         const h = screen.height;
-        const buttonX = placeholder.width / 2;
+        const buttonX = screen.width / 2;
         const buttonWidth = 340;
         const buttonHeight = 86;
         const buttonGap = 175;
