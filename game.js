@@ -309,6 +309,10 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         }
 
         const background = this.add.sprite(screen.width / 2, screen.height / 2, 'titlescreen');
+        const scaleX = screen.width / background.width;
+        const scaleY = screen.height / background.height;
+        const bestScale = Math.min(scaleX, scaleY); 
+        background.setScale(bestScale);
         background.play('bg_loop');
 
         this.fadeRect = this.add.rectangle(960, 540, 1920, 1080, 0x000000, 1)
