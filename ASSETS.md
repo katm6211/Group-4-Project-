@@ -1,0 +1,25 @@
+* ./assets/music/powerboxsound.mp3
+* ./assets/music/clockbackgroundmusic.mp3
+* ./assets/music/mobsound.mp3
+* ./assets/music/jumpsoundeffect.mp3
+* ./assets/music/radiobeeping.mp3
+* ./assets/music/radiotalkshow.mp3
+* ./assets/music/backgroundmusic.mp3
+* ./assets/.DS_Store
+* ./assets/art/border.png
+* ./assets/art/emptylever.png
+* ./assets/art/radio.png
+* ./assets/art/handle.png
+* ./assets/art/grandfather clock.png
+* ./assets/art/grayBackground.png
+* ./assets/art/lever2.png
+* ./assets/art/placeholder.png
+* ./assets/art/logodraft4.png
+* ./assets/art/spritesheetproto.png
+* ./assets/art/jumpscarescene.png
+* ./assets/art/door.png
+* ./assets/art/clock.png
+* ./assets/art/titlescreenbg.gif
+* ./assets/art/powerbox.png
+* ./assets/art/mobspritesheet.png
+* ./assets/art/spritesheet.png
