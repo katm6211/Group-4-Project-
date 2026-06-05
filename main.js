@@ -15,7 +15,7 @@ class Launcher extends Phaser.Scene {
         this.load.audio('talkshow', 'assets/music/radiotalkshow.mp3');
         this.load.audio('mobsound', 'assets/music/mobsound.mp3');
     
-        this.load.image('logoDraft', 'assets/art/logodraft4.png');
+        this.load.image('logoDraft', 'assets/art/logo.png');
         this.load.image('grandfatherClock', 'assets/art/grandfather clock.png');
         this.load.image('clockFace', 'assets/art/clock.png');
         this.load.image('powerbox', 'assets/art/powerbox.png');

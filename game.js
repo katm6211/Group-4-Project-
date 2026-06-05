@@ -244,7 +244,7 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.audio('talkshow', 'assets/music/radiotalkshow.mp3');
         this.load.audio('mobsound', 'assets/music/mobsound.mp3');
 
-        this.load.image('logoDraft', 'assets/art/logodraft4.png');
+        this.load.image('logoDraft', 'assets/art/logo.png');
         this.load.image('grandfatherClock', 'assets/art/grandfather clock.png');
         this.load.image('clockFace', 'assets/art/clock.png');
         this.load.image('powerbox', 'assets/art/powerbox.png');
@@ -903,10 +903,10 @@ class Game_RadioRoom extends Phaser.Scene {
 
         this.talkshow = this.sound.get('talkshow');
         if (!this.talkshow) {
-            this.talkshow = this.sound.add('talkshow', { loop: true, volume: 0.2 });
+            this.talkshow = this.sound.add('talkshow', { loop: true, volume: 0.1 });
             this.talkshow.play();
         };
-        this.talkshow.volume = 0.2;
+        this.talkshow.volume = 0.1;
 
         /*
         add radio sprite
@@ -947,10 +947,10 @@ class Game_DemoRadio extends Phaser.Scene {
         addInventoryButton(this);
         this.talkshow = this.sound.get('talkshow');
         if (!this.talkshow) {
-            this.talkshow = this.sound.add('talkshow', { loop: true, volume: 0.5 });
+            this.talkshow = this.sound.add('talkshow', { loop: true, volume: 0.6 });
             this.talkshow.play();
         };
-        this.talkshow.volume = 0.5;
+        this.talkshow.volume = 0.6;
 
 
         this.add.text(960, 100, "Demo 4: Radio", {
