@@ -257,13 +257,15 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.image('radio', 'assets/art/radio.png');
         this.load.image('door', 'assets/art/door.png')
 
+        
+
     }
 
     create() {
-        this.cameras.main.setBackgroundColor("#151923");
+        this.cameras.main.setBackgroundColor("#000000");
         playGameBgm(this);
 
-        this.fadeRect = this.add.image(300, 200, "logoDraft").setScale(2.1);
+        this.fadeRect = this.add.image(300, 250, "logoDraft").setScale(3);
         this.fadeRect.setOrigin(0, 0);
         this.fadeRect.setDepth(500);
         this.fadeRect.setAlpha(0);
@@ -304,7 +306,7 @@ class Game_CinematicMainMenu extends Phaser.Scene {
             this.anims.create({
                 key: 'bg_loop',
                 frames: this.anims.generateFrameNumbers('titlescreen', { start: 0, end: 26 }),
-                frameRate: 10,
+                frameRate: 7,
                 repeat: -1
             });
         }
