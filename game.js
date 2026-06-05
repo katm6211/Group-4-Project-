@@ -152,6 +152,7 @@ function addProgressButton(scene, options) {
     scene.events.on("update", refresh);
     scene.events.once("shutdown", () => scene.events.off("update", refresh));
     refresh();
+    return button;
 }
 
 function openGameSettingsOverlay(scene) {
@@ -234,7 +235,11 @@ class Game_StartCinematic extends Phaser.Scene {
     preload() {
         this.load.spritesheet('sprite', 'assets/art/spritesheet.png', { frameWidth: 29, frameHeight: 42 });
         this.load.spritesheet('mob', 'assets/art/mobspritesheet.png', { frameWidth: 29, frameHeight: 42 });
+<<<<<<< HEAD
         this.load.spritesheet('titlescreen', 'assets/art/titlescreenbg.gif', { frameWidth: 249, frameHeight: 135 });
+=======
+        this.load.spritesheet('titlescreen', 'assets/art/titlescreenanim.png', { frameWidth: 249, frameHeight: 135 });
+>>>>>>> 0268d1b78b39cf36d14892fc932440bf8e55c602
 
         this.load.audio('bgm', 'assets/music/backgroundmusic.mp3');
         this.load.audio('jump', 'assets/music/jumpsoundeffect.mp3');
@@ -242,10 +247,15 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.audio('radiobeeping', 'assets/music/radiobeeping.mp3');
         this.load.audio('talkshow', 'assets/music/radiotalkshow.mp3');
         this.load.audio('mobsound', 'assets/music/mobsound.mp3');
+<<<<<<< HEAD
         this.load.audio('powerboxsound', 'assets/music/powerboxsound.mp3');
 
         this.load.image('logoDraft', 'assets/art/logodraft4.png');
         this.load.image('placeholder', 'assets/art/placeholder.png');
+=======
+
+        this.load.image('logoDraft', 'assets/art/logo.png');
+>>>>>>> 0268d1b78b39cf36d14892fc932440bf8e55c602
         this.load.image('grandfatherClock', 'assets/art/grandfather clock.png');
         this.load.image('clockFace', 'assets/art/clock.png');
         this.load.image('powerbox', 'assets/art/powerbox.png');
@@ -258,13 +268,15 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.image('door', 'assets/art/door.png');
         this.load.image('jumpscare', 'assets/art/jumpscarescene.png');
 
+        
+
     }
 
     create() {
-        this.cameras.main.setBackgroundColor("#151923");
+        this.cameras.main.setBackgroundColor("#000000");
         playGameBgm(this);
 
-        this.fadeRect = this.add.image(300, 200, "logoDraft").setScale(2.1);
+        this.fadeRect = this.add.image(300, 250, "logoDraft").setScale(3);
         this.fadeRect.setOrigin(0, 0);
         this.fadeRect.setDepth(500);
         this.fadeRect.setAlpha(0);
@@ -300,9 +312,22 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#151923");
         playGameBgm(this);
 
-        const placeholder = this.placeholder = this.add.image(0, 0, "placeholder")
-            .setOrigin(0, 0)
-            .setDisplaySize(1920, 1080);
+        // Check if the unique key 'bg_loop' already exists in the global manager
+        if (!this.anims.exists('bg_loop')) {
+            this.anims.create({
+                key: 'bg_loop',
+                frames: this.anims.generateFrameNumbers('titlescreen', { start: 0, end: 26 }),
+                frameRate: 7,
+                repeat: -1
+            });
+        }
+        const { width, height } = this.scale;
+        const background = this.add.sprite(width / 2, height / 2, 'titlescreen');
+        const scaleX = width / background.width;
+        const scaleY = height / background.height;
+        const bestScale = Math.min(scaleX, scaleY);
+        background.setScale(bestScale);
+        background.play('bg_loop');
 
         this.fadeRect = this.add.rectangle(960, 540, 1920, 1080, 0x000000, 1)
             .setAlpha(0)
@@ -317,8 +342,8 @@ class Game_CinematicMainMenu extends Phaser.Scene {
             color: "#fefefe"
         }).setOrigin(0.5);
 
-        const h = screen.height;
-        const buttonX = placeholder.width / 2;
+        const h = height;
+        const buttonX = width / 2;
         const buttonWidth = 340;
         const buttonHeight = 86;
         const buttonGap = 175;
@@ -941,10 +966,26 @@ class Game_RadioRoom extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#101716");
-        playGameBgm(this);
         this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
+
+        const bgm = this.sound.get('bgm');
+        if (bgm) {
+            bgm.stop();
+        }
+        this.radiobeeping = this.sound.get('radiobeeping');
+        if (!this.radiobeeping) {
+            this.radiobeeping = this.sound.add('radiobeeping', { loop: true, volume: 0.5 });
+            this.radiobeeping.play();
+        };
+
+        this.talkshow = this.sound.get('talkshow');
+        if (!this.talkshow) {
+            this.talkshow = this.sound.add('talkshow', { loop: true, volume: 0.1 });
+            this.talkshow.play();
+        };
+        this.talkshow.volume = 0.1;
 
         /*
         add radio sprite
@@ -975,10 +1016,21 @@ class Game_DemoRadio extends Phaser.Scene {
      */
     create() {
         this.cameras.main.setBackgroundColor("#101716");
-        playGameBgm(this);
+
+        const bgm = this.sound.get('bgm');
+        if (bgm) {
+            bgm.stop();
+        }
 
         addGameSettingsButton(this);
         addInventoryButton(this);
+        this.talkshow = this.sound.get('talkshow');
+        if (!this.talkshow) {
+            this.talkshow = this.sound.add('talkshow', { loop: true, volume: 0.6 });
+            this.talkshow.play();
+        };
+        this.talkshow.volume = 0.6;
+
 
         this.add.text(960, 100, "Demo 4: Radio", {
             fontFamily: "Arial", fontSize: "44px", color: "#f5f1e8"
@@ -1069,11 +1121,21 @@ class Game_DemoRadio extends Phaser.Scene {
         update();
 
         addRoomLabel(this, 4, "Radio");
-        addProgressButton(this, {
+        const button = addProgressButton(this, {
             lockedLabel: "Find the signal",
             unlockedLabel: "Finish Game",
             isUnlocked: () => this.frequency === correctFrequency,
             onContinue: () => showCompletionPanel(this)
+        });
+        button.on('pointerdown', () => {
+            const talkshow = this.sound.get('talkshow');
+            if (talkshow) {
+                talkshow.stop();
+            }
+            const radiobeeping = this.sound.get('radiobeeping');
+            if (radiobeeping) {
+                radiobeeping.stop();
+            }
         });
     }
 }
