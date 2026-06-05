@@ -152,6 +152,7 @@ function addProgressButton(scene, options) {
     scene.events.on("update", refresh);
     scene.events.once("shutdown", () => scene.events.off("update", refresh));
     refresh();
+    return button;
 }
 
 function openGameSettingsOverlay(scene) {
@@ -311,7 +312,7 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         const background = this.add.sprite(width / 2, height / 2, 'titlescreen');
         const scaleX = width / background.width;
         const scaleY = height / background.height;
-        const bestScale = Math.min(scaleX, scaleY); 
+        const bestScale = Math.min(scaleX, scaleY);
         background.setScale(bestScale);
         background.play('bg_loop');
 
@@ -886,10 +887,26 @@ class Game_RadioRoom extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#101716");
-        playGameBgm(this);
         this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
+
+        const bgm = this.sound.get('bgm');
+        if (bgm) {
+            bgm.stop();
+        }
+        this.radiobeeping = this.sound.get('radiobeeping');
+        if (!this.radiobeeping) {
+            this.radiobeeping = this.sound.add('radiobeeping', { loop: true, volume: 0.5 });
+            this.radiobeeping.play();
+        };
+
+        this.talkshow = this.sound.get('talkshow');
+        if (!this.talkshow) {
+            this.talkshow = this.sound.add('talkshow', { loop: true, volume: 0.2 });
+            this.talkshow.play();
+        };
+        this.talkshow.volume = 0.2;
 
         /*
         add radio sprite
@@ -920,10 +937,21 @@ class Game_DemoRadio extends Phaser.Scene {
      */
     create() {
         this.cameras.main.setBackgroundColor("#101716");
-        playGameBgm(this);
+
+        const bgm = this.sound.get('bgm');
+        if (bgm) {
+            bgm.stop();
+        }
 
         addGameSettingsButton(this);
         addInventoryButton(this);
+        this.talkshow = this.sound.get('talkshow');
+        if (!this.talkshow) {
+            this.talkshow = this.sound.add('talkshow', { loop: true, volume: 0.5 });
+            this.talkshow.play();
+        };
+        this.talkshow.volume = 0.5;
+
 
         this.add.text(960, 100, "Demo 4: Radio", {
             fontFamily: "Arial", fontSize: "44px", color: "#f5f1e8"
@@ -1014,11 +1042,21 @@ class Game_DemoRadio extends Phaser.Scene {
         update();
 
         addRoomLabel(this, 4, "Radio");
-        addProgressButton(this, {
+        const button = addProgressButton(this, {
             lockedLabel: "Find the signal",
             unlockedLabel: "Finish Game",
             isUnlocked: () => this.frequency === correctFrequency,
             onContinue: () => showCompletionPanel(this)
+        });
+        button.on('pointerdown', () => {
+            const talkshow = this.sound.get('talkshow');
+            if (talkshow) {
+                talkshow.stop();
+            }
+            const radiobeeping = this.sound.get('radiobeeping');
+            if (radiobeeping) {
+                radiobeeping.stop();
+            }
         });
     }
 }
