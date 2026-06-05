@@ -234,28 +234,29 @@ class Game_StartCinematic extends Phaser.Scene {
     preload() {
         this.load.spritesheet('sprite', 'assets/art/spritesheet.png', { frameWidth: 29, frameHeight: 42 });
         this.load.spritesheet('mob', 'assets/art/mobspritesheet.png', { frameWidth: 29, frameHeight: 42 });
-        this.load.spritesheet('titlescrren', 'assets/art/titlescreenbg.png', { frameWidth: 249, frameHeight: 135});
+        this.load.spritesheet('titlescreen', 'assets/art/titlescreenbg.gif', { frameWidth: 249, frameHeight: 135 });
 
         this.load.audio('bgm', 'assets/music/backgroundmusic.mp3');
         this.load.audio('jump', 'assets/music/jumpsoundeffect.mp3');
         this.load.audio('clockticking', 'assets/music/clockbackgroundmusic.mp3');
-        this.load.audio('radiobeeping', 'assetsmusic/radiobeeping.mp3');
+        this.load.audio('radiobeeping', 'assets/music/radiobeeping.mp3');
         this.load.audio('talkshow', 'assets/music/radiotalkshow.mp3');
         this.load.audio('mobsound', 'assets/music/mobsound.mp3');
-    
+        this.load.audio('powerboxsound', 'assets/music/powerboxsound.mp3');
+
         this.load.image('logoDraft', 'assets/art/logodraft4.png');
         this.load.image('placeholder', 'assets/art/placeholder.png');
         this.load.image('grandfatherClock', 'assets/art/grandfather clock.png');
         this.load.image('clockFace', 'assets/art/clock.png');
-        this.load.image('powerbox', 'assetsart/powerbox.png');
+        this.load.image('powerbox', 'assets/art/powerbox.png');
         this.load.image('radio', 'assets/art/radio.png');
         this.load.image('lever', 'assets/art/lever2.png');
         this.load.image('emptylever', 'assets/art/emptylever.png');
         this.load.image('handle', 'assets/art/handle.png');
         this.load.image('grayBackground', 'assets/art/grayBackground.png');
         this.load.image('border', 'assets/art/border.png');
-        this.load.image('radio', 'assets/art/radio.png');
-        this.load.image('door', 'assets/art/door.png')
+        this.load.image('door', 'assets/art/door.png');
+        this.load.image('jumpscare', 'assets/art/jumpscarescene.png');
 
     }
 
@@ -546,13 +547,32 @@ class Game_PowerBox extends Phaser.Scene {
 
 
 
-        this.add.text(860, 340, "Power box").setFontSize(48)
+        const notePickedUp = window.playerInventory.includes("decoder");
+        const noteObj = this.add.text(300, 750, "📄 Note", {
+            fontFamily: "Arial", fontSize: "24px", color: "#ffd700"
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(!notePickedUp);
+
+        noteObj.on("pointerdown", () => {
+            addInventoryItem("decoder");
+            noteObj.setVisible(false);
+        });
+
+        this.add.text(960, 340, "Power Box").setFontSize(48).setOrigin(0.5);
         const powerBox = this.add.image(960, 540, 'powerbox').setDisplaySize(240, 240)
             .setInteractive({ useHandCursor: true });
 
         powerBox.on("pointerdown", () => {
             startWithFade(this, GAME_SCENE_KEYS.wires);
         });
+
+        const backBtn = this.add.rectangle(165, 72, 230, 64, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91).setInteractive({ useHandCursor: true }).setDepth(10);
+        this.add.text(165, 72, "Back", {
+            fontFamily: "Arial", fontSize: "28px", color: "#f5f1e8"
+        }).setOrigin(0.5).setDepth(11);
+        backBtn.on("pointerdown", () => startWithFade(this, GAME_SCENE_KEYS.handle));
+
+        addInventoryButton(this);
     }
 }
 
@@ -569,97 +589,144 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
         addGameSettingsButton(this);
         addInventoryButton(this);
 
-        this.add.text(960, 100, "Demo 2: Wire Puzzle", {
+        this.add.text(960, 80, "Wire Puzzle", {
             fontFamily: "Arial", fontSize: "44px", color: "#f5f1e8"
         }).setOrigin(0.5);
 
-        const statusText = this.add.text(960, 900, "Connect all wires to the correct ports.", {
-            fontFamily: "Arial", fontSize: "26px", color: "#b8c4d4", align: "center"
+        const statusText = this.add.text(960, 900, "Connect each symbol to its correct terminal. Check your inventory for the decoder.", {
+            fontFamily: "Arial", fontSize: "24px", color: "#b8c4d4", align: "center", wordWrap: { width: 1200 }
         }).setOrigin(0.5);
 
-        const wireColors = [0xff4444, 0x44ff44, 0x4488ff];
-        const colorNames = ["red", "green", "blue"];
-        const leftNodes = wireColors.map((color, i) => {
-            const y = 380 + i * 160;
-            const node = this.add.circle(500, y, 28, color)
-                .setStrokeStyle(3, 0xffffff)
-                .setInteractive({ useHandCursor: true });
-            this.add.text(420, y, colorNames[i], {
-                fontFamily: "Arial", fontSize: "22px", color: "#f5f1e8"
+        const symbols    = ["△", "○", "□", "✕"];
+        const rightCodes = ["XR-1", "QM-2", "AL-0", "TZ-3"];
+        const rightSymOrder = [2, 3, 1, 0];
+        const correctPairs  = [1, 0, 3, 2];
+        const leftX = 460, rightX = 1460, yStart = 280, yGap = 150;
+
+        const leftNodes = symbols.map((sym, i) => {
+            const y = yStart + i * yGap;
+            const node = this.add.circle(leftX, y, 28, 0x4a90d9)
+                .setStrokeStyle(3, 0xffffff).setInteractive({ useHandCursor: true });
+            this.add.text(leftX - 55, y, sym, {
+                fontFamily: "Arial", fontSize: "38px", color: "#f5f1e8"
             }).setOrigin(0.5);
-            node.colorIndex = i;
             return node;
         });
 
-        const rightOrder = [1, 2, 0];
-        const rightNodes = rightOrder.map((colorIndex, i) => {
-            const y = 380 + i * 160;
-            const node = this.add.circle(1420, y, 28, wireColors[colorIndex])
-                .setStrokeStyle(3, 0xffffff);
-            node.colorIndex = colorIndex;
+        const rightNodes = rightSymOrder.map((si, i) => {
+            const y = yStart + i * yGap;
+            const node = this.add.circle(rightX, y, 28, 0x334455)
+                .setStrokeStyle(3, 0xaabbcc).setInteractive({ useHandCursor: true });
+            this.add.text(rightX + 50, y, rightCodes[si], {
+                fontFamily: "Arial", fontSize: "26px", color: "#f5f1e8"
+            }).setOrigin(0, 0.5);
             return node;
         });
 
         const lines = this.add.graphics();
         this.connected = {};
         this.selectedLeft = null;
+        this.wirePuzzleSolved = false;
 
         const redraw = () => {
             lines.clear();
-            Object.entries(this.connected).forEach(([leftIndex, rightIndex]) => {
-                const leftNode = leftNodes[leftIndex];
-                const rightNode = rightNodes[rightIndex];
-                lines.lineStyle(6, wireColors[leftNode.colorIndex], 1);
+            Object.entries(this.connected).forEach(([li, ri]) => {
+                lines.lineStyle(5, 0x4a90d9, 1);
                 lines.beginPath();
-                lines.moveTo(leftNode.x + 28, leftNode.y);
-                lines.lineTo(rightNode.x - 28, rightNode.y);
+                lines.moveTo(leftX + 28, yStart + li * yGap);
+                lines.lineTo(rightX - 28, yStart + ri * yGap);
                 lines.strokePath();
             });
         };
 
         const checkSolved = () => {
-            this.wirePuzzleSolved = leftNodes.every((leftNode, leftIndex) => {
-                const rightIndex = this.connected[leftIndex];
-                if (rightIndex === undefined) return false;
-                return rightNodes[rightIndex].colorIndex === leftNode.colorIndex;
-            });
-
-            if (this.wirePuzzleSolved) {
-                statusText.setText("✓ All wires connected correctly! Puzzle solved.");
-                statusText.setColor("#44ff44");
+            const done = symbols.every((_, i) => this.connected[i] !== undefined);
+            if (!done) return;
+            const correct = symbols.every((_, i) => this.connected[i] === correctPairs[i]);
+            if (correct) {
+                this.wirePuzzleSolved = true;
+                statusText.setText("✓ All circuits connected! Puzzle solved.").setColor("#44ff44");
             } else {
-                statusText.setText("Keep connecting — match the colors.");
-                statusText.setColor("#b8c4d4");
+                statusText.setText("Incorrect — resetting...").setColor("#ff6644");
+                this.time.delayedCall(1500, () => {
+                    this.connected = {};
+                    redraw();
+                    leftNodes.forEach(n => n.setStrokeStyle(3, 0xffffff));
+                    statusText.setText("Try again. Check your inventory for the decoder.").setColor("#b8c4d4");
+                });
             }
         };
 
         leftNodes.forEach((node, i) => {
             node.on("pointerdown", () => {
                 this.selectedLeft = i;
-                leftNodes.forEach((leftNode) => leftNode.setStrokeStyle(3, 0xffffff));
+                leftNodes.forEach(n => n.setStrokeStyle(3, 0xffffff));
                 node.setStrokeStyle(4, 0xffff00);
-                statusText.setText(`Selected ${colorNames[i]} wire. Now click a port on the right.`);
+                statusText.setText(`"${symbols[i]}" selected — click or drag to a terminal on the right.`).setColor("#ffff00");
             });
+            this.input.setDraggable(node);
         });
 
-        rightNodes.forEach((node, rightIndex) => {
-            node.setInteractive({ useHandCursor: true });
-            node.on("pointerdown", () => {
-                if (this.selectedLeft === null) {
-                    statusText.setText("Select a wire on the left first.");
-                    return;
-                }
+        const dragLine = this.add.graphics().setDepth(5);
+        this.input.on("drag", (pointer, obj) => {
+            const i = leftNodes.indexOf(obj);
+            if (i === -1) return;
+            dragLine.clear();
+            dragLine.lineStyle(4, 0xffffff, 0.5);
+            dragLine.beginPath();
+            dragLine.moveTo(leftX + 28, yStart + i * yGap);
+            dragLine.lineTo(pointer.x, pointer.y);
+            dragLine.strokePath();
+        });
 
-                Object.keys(this.connected).forEach((leftIndex) => {
-                    if (this.connected[leftIndex] === rightIndex) delete this.connected[leftIndex];
-                });
-                this.connected[this.selectedLeft] = rightIndex;
+        this.input.on("dragend", (pointer, obj) => {
+            dragLine.clear();
+            const i = leftNodes.indexOf(obj);
+            if (i === -1) return;
+            const hit = rightNodes.findIndex(n => Phaser.Math.Distance.Between(pointer.x, pointer.y, n.x, n.y) < 50);
+            if (hit !== -1) {
+                Object.keys(this.connected).forEach(li => { if (this.connected[li] === hit) delete this.connected[li]; });
+                this.connected[i] = hit;
                 this.selectedLeft = null;
-                leftNodes.forEach((leftNode) => leftNode.setStrokeStyle(3, 0xffffff));
+                leftNodes.forEach(n => n.setStrokeStyle(3, 0xffffff));
+                redraw();
+                checkSolved();
+            }
+        });
+
+        rightNodes.forEach((node, ri) => {
+            node.on("pointerdown", () => {
+                if (this.selectedLeft === null) return;
+                Object.keys(this.connected).forEach(li => { if (this.connected[li] === ri) delete this.connected[li]; });
+                this.connected[this.selectedLeft] = ri;
+                this.selectedLeft = null;
+                leftNodes.forEach(n => n.setStrokeStyle(3, 0xffffff));
                 redraw();
                 checkSolved();
             });
         });
+
+        const decoderOverlay = this.add.container(960, 540).setDepth(20).setVisible(false);
+        const bg = this.add.rectangle(0, 0, 480, 360, 0x101010).setStrokeStyle(3, 0xffd700);
+        const title = this.add.text(0, -140, "— Decoder Note —", { fontFamily: "Arial", fontSize: "26px", color: "#ffd700" }).setOrigin(0.5);
+        const body = this.add.text(0, -30, "△  =  TZ-3\n○  =  AL-0\n□  =  XR-1\n✕  =  QM-2", {
+            fontFamily: "Arial", fontSize: "30px", color: "#f5f1e8", lineSpacing: 14, align: "center"
+        }).setOrigin(0.5);
+        const close = this.add.text(0, 145, "[ Close ]", { fontFamily: "Arial", fontSize: "22px", color: "#aaaaaa" })
+            .setOrigin(0.5).setInteractive({ useHandCursor: true });
+        close.on("pointerdown", () => decoderOverlay.setVisible(false));
+        decoderOverlay.add([bg, title, body, close]);
+
+        window.inventoryItemActions = window.inventoryItemActions || {};
+        window.inventoryItemActions["decoder"] = () => decoderOverlay.setVisible(true);
+        this.events.once("shutdown", () => { delete window.inventoryItemActions["decoder"]; });
+
+        const backBtn = this.add.rectangle(165, 72, 230, 64, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91).setInteractive({ useHandCursor: true }).setDepth(10);
+        this.add.text(165, 72, "Back", {
+            fontFamily: "Arial", fontSize: "28px", color: "#f5f1e8"
+        }).setOrigin(0.5).setDepth(11);
+        backBtn.on("pointerdown", () => startWithFade(this, GAME_SCENE_KEYS.powerBox));
 
         addRoomLabel(this, 2, "Wire Puzzle");
         addProgressButton(this, {
@@ -1058,9 +1125,9 @@ class Game_ChasingScene extends Phaser.Scene {
             this.time.delayedCall(500, () => this.scene.start('Game_ChaseScene'));
         });
 
-        const jumpscareRect = this.add.rectangle(960, 540, 800, 900, 0x22cc44)
-            .setStrokeStyle(8, 0x00ff00).setDepth(100).setAlpha(0);
-        const flashOverlay = this.add.rectangle(960, 540, 1920, 1080, 0xff0000, 0.6)
+        const jumpscareRect = this.add.image(960, 540, 'jumpscare')
+            .setDisplaySize(1920, 1080).setDepth(100).setAlpha(0);
+        const flashOverlay = this.add.rectangle(960, 540, 1920, 1080, 0xff0000, 0.4)
             .setDepth(101).setAlpha(0);
 
         const alien = this.add.rectangle(-30, groundY - 50, 60, 100, 0x22cc44)

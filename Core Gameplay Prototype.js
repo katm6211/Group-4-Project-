@@ -189,12 +189,9 @@ class DemoWirePuzzle extends Phaser.Scene {
             fontFamily: "Arial", fontSize: "26px", color: "#b8c4d4", align: "center"
         }).setOrigin(0.5);
 
-        // 左边的线头（输出端），右边的接口（输入端）
-        // 颜色对应：红→红，绿→绿，蓝→蓝
         const wireColors = [0xff4444, 0x44ff44, 0x4488ff];
         const colorNames = ["red", "green", "blue"];
 
-        // 左边节点
         const leftNodes = wireColors.map((color, i) => {
             const y = 380 + i * 160;
             const node = this.add.circle(500, y, 28, color)
@@ -207,7 +204,6 @@ class DemoWirePuzzle extends Phaser.Scene {
             return node;
         });
 
-        // 右边节点（顺序打乱：绿、蓝、红）
         const rightOrder = [1, 2, 0];
         const rightNodes = rightOrder.map((colorIdx, i) => {
             const y = 380 + i * 160;
@@ -217,9 +213,8 @@ class DemoWirePuzzle extends Phaser.Scene {
             return node;
         });
 
-        // 连线图形
         const lines = this.add.graphics();
-        this.connected = {}; // { leftIndex: rightIndex }
+        this.connected = {};
         this.selectedLeft = null;
         this.selectedLeftGraphic = null;
 
@@ -237,7 +232,6 @@ class DemoWirePuzzle extends Phaser.Scene {
             });
         };
 
-        // 点左边节点 → 选中
         leftNodes.forEach((node, i) => {
             node.on("pointerdown", () => {
                 this.selectedLeft = i;
@@ -247,7 +241,6 @@ class DemoWirePuzzle extends Phaser.Scene {
             });
         });
 
-        // 点右边节点 → 连线
         rightNodes.forEach((node, ri) => {
             node.setInteractive({ useHandCursor: true });
             node.on("pointerdown", () => {
@@ -255,7 +248,6 @@ class DemoWirePuzzle extends Phaser.Scene {
                     statusText.setText("Select a wire on the left first.");
                     return;
                 }
-                // 移除已有的连到这个右侧节点的线
                 Object.keys(this.connected).forEach(li => {
                     if (this.connected[li] === ri) delete this.connected[li];
                 });
@@ -268,7 +260,6 @@ class DemoWirePuzzle extends Phaser.Scene {
         });
 
         const checkSolved = () => {
-            // 正确答案：左i连到右边colorIndex相同的节点
             const correct = leftNodes.every((lNode, li) => {
                 const ri = this.connected[li];
                 if (ri === undefined) return false;

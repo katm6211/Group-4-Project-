@@ -17,16 +17,27 @@ class Inventory extends Phaser.Scene {
             color: "#f5f1e8"
         }).setOrigin(0.5);
 
-        const items = window.playerInventory.length
-            ? window.playerInventory.map((item) => item)
-            : "No items yet.";
-
-        this.add.text(660, 400, items, {
-            fontFamily: "Arial",
-            fontSize: "30px",
-            color: "#b8c4d4",
-            lineSpacing: 18
-        });
+        if (!window.playerInventory.length) {
+            this.add.text(960, 540, "No items yet.", {
+                fontFamily: "Arial", fontSize: "30px", color: "#b8c4d4"
+            }).setOrigin(0.5);
+        } else {
+            window.playerInventory.forEach((item, i) => {
+                const y = 420 + i * 60;
+                const btn = this.add.text(960, y, item, {
+                    fontFamily: "Arial", fontSize: "28px", color: "#b8c4d4"
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+                btn.on("pointerover", () => btn.setColor("#ffffff"));
+                btn.on("pointerout", () => btn.setColor("#b8c4d4"));
+                btn.on("pointerdown", () => {
+                    const action = window.inventoryItemActions?.[item];
+                    if (action) {
+                        this.scene.stop("Inventory");
+                        setTimeout(action, 50);
+                    }
+                });
+            });
+        }
 
         const closeButton = this.add.rectangle(960, 760, 220, 62, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
