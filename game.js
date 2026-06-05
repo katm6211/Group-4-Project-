@@ -235,11 +235,8 @@ class Game_StartCinematic extends Phaser.Scene {
     preload() {
         this.load.spritesheet('sprite', 'assets/art/spritesheet.png', { frameWidth: 29, frameHeight: 42 });
         this.load.spritesheet('mob', 'assets/art/mobspritesheet.png', { frameWidth: 29, frameHeight: 42 });
-<<<<<<< HEAD
-        this.load.spritesheet('titlescreen', 'assets/art/titlescreenbg.gif', { frameWidth: 249, frameHeight: 135 });
-=======
+
         this.load.spritesheet('titlescreen', 'assets/art/titlescreenanim.png', { frameWidth: 249, frameHeight: 135 });
->>>>>>> 0268d1b78b39cf36d14892fc932440bf8e55c602
 
         this.load.audio('bgm', 'assets/music/backgroundmusic.mp3');
         this.load.audio('jump', 'assets/music/jumpsoundeffect.mp3');
@@ -247,15 +244,11 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.audio('radiobeeping', 'assets/music/radiobeeping.mp3');
         this.load.audio('talkshow', 'assets/music/radiotalkshow.mp3');
         this.load.audio('mobsound', 'assets/music/mobsound.mp3');
-<<<<<<< HEAD
         this.load.audio('powerboxsound', 'assets/music/powerboxsound.mp3');
 
-        this.load.image('logoDraft', 'assets/art/logodraft4.png');
-        this.load.image('placeholder', 'assets/art/placeholder.png');
-=======
+
 
         this.load.image('logoDraft', 'assets/art/logo.png');
->>>>>>> 0268d1b78b39cf36d14892fc932440bf8e55c602
         this.load.image('grandfatherClock', 'assets/art/grandfather clock.png');
         this.load.image('clockFace', 'assets/art/clock.png');
         this.load.image('powerbox', 'assets/art/powerbox.png');
@@ -435,12 +428,10 @@ class Game_ChaseScene extends Phaser.Scene {
             align: "center"
         }).setOrigin(0.5);
 
-        // already defined in GameSpritemovement do not redifine unless necessary
         this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         const sprite = this.sprite;
 
-        // already defined in GameSpritemovement do not redifine unless necessary
         this.input.removeAllListeners('pointerdown');
         this.input.on('pointerdown', (pointer) => {
             if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
@@ -472,9 +463,13 @@ class Game_ChaseScene extends Phaser.Scene {
             color: '#ff4444'
         }).setOrigin(0.5).setDepth(10);
 
+        if (!this.anims.exists('mob-walk')) {
+            this.anims.create({ key: 'mob-walk', frames: this.anims.generateFrameNumbers('mob', { start: 0, end: 2 }), frameRate: 10, repeat: -1 });
+        }
+
         const alienEnter = () => {
-            const alien = this.add.rectangle(0, groundY - 50, 60, 100, 0x22cc44)
-                .setStrokeStyle(2, 0x00ff00).setDepth(5);
+            const alien = this.add.sprite(0, groundY - 50, 'mob').setScale(4).setDepth(5);
+            alien.anims.play('mob-walk');
             this.events.on('update', (time, delta) => {
                 if (this.failing || this.escaping) return;
                 alien.x += 500 * (delta / 1000);
@@ -498,7 +493,7 @@ class Game_ChaseScene extends Phaser.Scene {
         });
 
         const handleObj = this.add.image(500, groundY - 20, 'handle').setDisplaySize(40, 40);
-        this.add.text(500, groundY - 52, "Handle", {
+        const handleLabel = this.add.text(500, groundY - 52, "Handle", {
             fontFamily: "Arial", fontSize: "18px", color: "#ffd700"
         }).setOrigin(0.5);
         this.physics.add.existing(handleObj, true);
@@ -507,8 +502,9 @@ class Game_ChaseScene extends Phaser.Scene {
             if (!handleObj.active) return;
             handleObj.setActive(false).setVisible(false);
             handleObj.body.enable = false;
+            handleLabel.setVisible(false);
             addInventoryItem("handle");
-            statusText.setText("Handle picked up! Now pick the lever.");
+            statusText.setText("Handle picked up! Now find the lever.");
         });
 
         const leverObj = this.add.image(1300, groundY - 40, 'lever').setDisplaySize(40, 80);
@@ -1192,9 +1188,11 @@ class Game_ChasingScene extends Phaser.Scene {
         const flashOverlay = this.add.rectangle(960, 540, 1920, 1080, 0xff0000, 0.4)
             .setDepth(101).setAlpha(0);
 
-        const alien = this.add.rectangle(-30, groundY - 50, 60, 100, 0x22cc44)
-            .setStrokeStyle(2, 0x00ff00);
-        this.physics.add.existing(alien);
+        if (!this.anims.exists('mob-walk')) {
+            this.anims.create({ key: 'mob-walk', frames: this.anims.generateFrameNumbers('mob', { start: 0, end: 2 }), frameRate: 10, repeat: -1 });
+        }
+        const alien = this.physics.add.sprite(-30, groundY - 80, 'mob').setScale(4);
+        alien.anims.play('mob-walk');
         alien.body.setAllowGravity(false);
         alien.body.enable = false;
 
@@ -1211,7 +1209,7 @@ class Game_ChasingScene extends Phaser.Scene {
                         sprite.setVelocityX(200);
                         sprite.anims.play('right', true);
                         alien.body.enable = true;
-                        alien.body.velocity.x = 150;
+                        alien.body.velocity.x = 195;
                     }
                 });
             });
