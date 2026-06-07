@@ -163,7 +163,8 @@ class SettingsOverlay extends Phaser.Scene {
         }
 
         this.settingsValues = this.registry.get("settingsValues") || {
-            musicVolume: 0.5
+            musicVolume: 0.5,
+            soundVolume: 1.0
         };
         this.registry.set("settingsValues", this.settingsValues);
 

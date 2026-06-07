@@ -1181,6 +1181,7 @@ class Game_ChasingScene extends Phaser.Scene {
             if (pointer.y < sprite.y - 80 && (sprite.body.blocked.down || sprite.body.touching.down)) {
                 const dy = Math.min(sprite.y - pointer.y, 500);
                 sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
+                playSoundEffect(this, "jump");
             }
         });
 
