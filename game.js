@@ -1,25 +1,12 @@
 // The game scenes in this file are copied from the prototypes.
 
-const GAME_SCENE_KEYS = {
-    intro: "Game_StartCinematic",
-    menu: "Game_CinematicMainMenu",
-    handle: "Game_ChaseScene",
-    powerBox: "Game_PowerBox",
-    wires: "Game_DemoWirePuzzle",
-    clockRoom: "Game_ClockRoom",
-    clock: "Game_DemoClock",
-    radioRoom: "Game_RadioRoom",
-    radio: "Game_DemoRadio",
-    credits: "Game_CreditsScene",
-    settings: "Game_SettingsOverlay"
-};
-
 // create global flag to check if clock puzzle is solved, allowing this to be tracked between scenes
 // rewrite as phaser data contained to two scenes?
 window.clockPuzzleSolved = Boolean(window.clockPuzzleSolved);
 
-function GameSpritemovement() {
-    const sprite = this.sprite = this.physics.add.sprite(0, 0, 'sprite').setScale(4).setDepth(1000);
+function GameSpritemovement(options = {}) {
+    const sprite = this.sprite = this.physics.add.sprite(0, 0, 'sprite').setScale(4);
+    sprite.setDepth(options.depth ?? 1000);
 
     if (!this.anims.exists('left'))
         this.anims.create({
@@ -36,7 +23,7 @@ function GameSpritemovement() {
             repeat: -1
         });
 
-    sprite.setPosition(sprite.displayWidth / 2, this.scale.height / 2);
+    sprite.setPosition(options.x ?? sprite.displayWidth / 2, options.y ?? this.scale.height / 2);
     const spriteNewWidth = sprite.displayWidth * 0.5;
     const spriteOffsetX = (sprite.width - spriteNewWidth) / 2;
     sprite.setBodySize(spriteNewWidth, sprite.displayHeight);
@@ -47,17 +34,15 @@ function GameSpritemovement() {
     sprite.setCollideWorldBounds(true);
     sprite.body.onWorldBounds = true;
 
-    const JUMP_THRESHOLD = 80;
     const SPEED = 200;
 
     const handlePointerDown = (pointer) => {
         if (!sprite.active || !sprite.body) return;
 
-        if (pointer.y < sprite.y - JUMP_THRESHOLD) {
-            if (sprite.body.blocked.down || sprite.body.touching.down) {
-                sprite.setVelocityY(-900);
-                this.sound.play('jump');
-            }
+        if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
+            const dy = Math.min(sprite.y - pointer.y, 600);
+            sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
+            playSoundEffect(this, 'jump');
         }
     };
 
@@ -80,7 +65,9 @@ function GameSpritemovement() {
     };
 
     this.input.on('pointerdown', handlePointerDown);
-    this.events.on('update', handleUpdate);
+    if (options.enablePointerMovement !== false) {
+        this.events.on('update', handleUpdate);
+    }
     this.events.once('shutdown', () => {
         this.input.off('pointerdown', handlePointerDown);
         this.events.off('update', handleUpdate);
@@ -155,26 +142,11 @@ function addProgressButton(scene, options) {
     return button;
 }
 
-function openGameSettingsOverlay(scene) {
-    const previousScene = scene.scene.key;
-
-    scene.scene.launch(GAME_SCENE_KEYS.settings, {
-        previousScene: previousScene
-    });
-    scene.scene.bringToTop(GAME_SCENE_KEYS.settings);
-    scene.scene.pause(previousScene);
-}
-
-function addGameSettingsButton(scene) {
-    new MenuButton(scene, 1775, 72, "Settings", () => {
-        openGameSettingsOverlay(scene);
-    }, 210, 64);
-}
-
 function playGameBgm(scene) {
-    const settingsValues = scene.registry.get("settingsValues") || {
+    const settingsValues = {
         soundVolume: 1.0,
-        musicVolume: 0.2
+        musicVolume: 0.2,
+        ...(scene.registry.get("settingsValues") || {})
     };
     scene.registry.set("settingsValues", settingsValues);
 
@@ -223,13 +195,13 @@ function showCompletionPanel(scene) {
     replayButton.on("pointerdown", () => {
         window.playerInventory = [];
         window.clockPuzzleSolved = false;
-        startWithFade(scene, GAME_SCENE_KEYS.intro);
+        startWithFade(scene, "Game_StartCinematic");
     });
 }
 
 class Game_StartCinematic extends Phaser.Scene {
     constructor() {
-        super(GAME_SCENE_KEYS.intro);
+        super("Game_StartCinematic");
     }
 
     preload() {
@@ -288,7 +260,7 @@ class Game_StartCinematic extends Phaser.Scene {
                 duration: 1000,
                 ease: "Linear",
                 onComplete: () => {
-                    this.scene.start(GAME_SCENE_KEYS.menu);
+                    this.scene.start("Game_CinematicMainMenu");
                 }
             });
         });
@@ -298,7 +270,7 @@ class Game_StartCinematic extends Phaser.Scene {
 
 class Game_CinematicMainMenu extends Phaser.Scene {
     constructor() {
-        super(GAME_SCENE_KEYS.menu);
+        super("Game_CinematicMainMenu");
     }
 
     create() {
@@ -381,7 +353,7 @@ class Game_CinematicMainMenu extends Phaser.Scene {
 
         credits.on("pointerover", () => credits.setFillStyle(0x334155));
         credits.on("pointerout", () => credits.setFillStyle(0x242a35));
-        credits.on("pointerdown", () => this.scene.start(GAME_SCENE_KEYS.credits));
+        credits.on("pointerdown", () => this.scene.start("Game_CreditsScene"));
 
         this.tweens.chain({
             tweens: [
@@ -428,18 +400,8 @@ class Game_ChaseScene extends Phaser.Scene {
             align: "center"
         }).setOrigin(0.5);
 
-        this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         const sprite = this.sprite;
-
-        this.input.removeAllListeners('pointerdown');
-        this.input.on('pointerdown', (pointer) => {
-            if (pointer.y < sprite.y && (sprite.body.blocked.down || sprite.body.touching.down)) {
-                const dy = Math.min(sprite.y - pointer.y, 600);
-                sprite.setVelocityY(-Math.sqrt(2 * 600 * dy));
-                this.sound.play('jump');
-            }
-        });
 
         this.failing = false;
 
@@ -555,14 +517,13 @@ class Game_ChaseScene extends Phaser.Scene {
 
 class Game_PowerBox extends Phaser.Scene {
     constructor() {
-        super(GAME_SCENE_KEYS.powerBox);
+        super("Game_PowerBox");
     }
 
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         this.add.image(960, 652, 'grayBackground').setDisplaySize(1920, 1304).setDepth(0);
         playGameBgm(this);
-        this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
@@ -583,7 +544,7 @@ class Game_PowerBox extends Phaser.Scene {
             .setInteractive({ useHandCursor: true });
 
         powerBox.on("pointerdown", () => {
-            startWithFade(this, GAME_SCENE_KEYS.wires);
+            startWithFade(this, "Game_DemoWirePuzzle");
         });
 
         const backBtn = this.add.rectangle(165, 72, 230, 64, 0x242a35)
@@ -591,7 +552,7 @@ class Game_PowerBox extends Phaser.Scene {
         this.add.text(165, 72, "Back", {
             fontFamily: "Arial", fontSize: "28px", color: "#f5f1e8"
         }).setOrigin(0.5).setDepth(11);
-        backBtn.on("pointerdown", () => startWithFade(this, GAME_SCENE_KEYS.handle));
+        backBtn.on("pointerdown", () => startWithFade(this, "Game_ChaseScene"));
 
         addInventoryButton(this);
     }
@@ -599,7 +560,7 @@ class Game_PowerBox extends Phaser.Scene {
 
 class Game_DemoWirePuzzle extends Phaser.Scene {
     constructor() {
-        super(GAME_SCENE_KEYS.wires);
+        super("Game_DemoWirePuzzle");
     }
 
     create() {
@@ -747,12 +708,12 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
         this.add.text(165, 72, "Back", {
             fontFamily: "Arial", fontSize: "28px", color: "#f5f1e8"
         }).setOrigin(0.5).setDepth(11);
-        backBtn.on("pointerdown", () => startWithFade(this, GAME_SCENE_KEYS.powerBox));
+        backBtn.on("pointerdown", () => startWithFade(this, "Game_PowerBox"));
 
         addRoomLabel(this, 2, "Wire Puzzle");
         addProgressButton(this, {
             isUnlocked: () => this.wirePuzzleSolved,
-            onContinue: () => startWithFade(this, GAME_SCENE_KEYS.clockRoom)
+            onContinue: () => startWithFade(this, "Game_ClockRoom")
         });
     }
 }
@@ -760,7 +721,7 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
 // have some visual effects in the room when you return after solving the clock puzzle
 class Game_ClockRoom extends Phaser.Scene {
     constructor() {
-        super(GAME_SCENE_KEYS.clockRoom);
+        super("Game_ClockRoom");
     }
 
     create() {
@@ -798,7 +759,7 @@ class Game_ClockRoom extends Phaser.Scene {
             if (!isClockPuzzleSolved() || !this.physics.overlap(this.sprite, doorArea))
                 return;
 
-            startWithFade(this, GAME_SCENE_KEYS.radioRoom);
+            startWithFade(this, "Game_RadioRoom");
         });
 
         // create clickable hitbox around the clock
@@ -822,7 +783,7 @@ class Game_ClockRoom extends Phaser.Scene {
                 ease: "Sine.easeInOut",
                 onComplete: () => {
                     clockPulse.setScale(11).setAlpha(0);
-                    startWithFade(this, GAME_SCENE_KEYS.clock);
+                    startWithFade(this, "Game_DemoClock");
                 }
             });
         });
@@ -831,7 +792,7 @@ class Game_ClockRoom extends Phaser.Scene {
 
 class Game_DemoClock extends Phaser.Scene {
     constructor() {
-        super(GAME_SCENE_KEYS.clock);
+        super("Game_DemoClock");
     }
 
     create() {
@@ -950,19 +911,18 @@ class Game_DemoClock extends Phaser.Scene {
         });
 
         backButton.once("pointerdown", () => {
-            startWithFade(this, GAME_SCENE_KEYS.clockRoom);
+            startWithFade(this, "Game_ClockRoom");
         });
     }
 }
 
 class Game_RadioRoom extends Phaser.Scene {
     constructor() {
-        super(GAME_SCENE_KEYS.radioRoom);
+        super("Game_RadioRoom");
     }
 
     create() {
         this.cameras.main.setBackgroundColor("#101716");
-        this.physics.world.setBounds(0, 0, 1920, 1304);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
@@ -972,35 +932,82 @@ class Game_RadioRoom extends Phaser.Scene {
         }
         this.radiobeeping = this.sound.get('radiobeeping');
         if (!this.radiobeeping) {
-            this.radiobeeping = this.sound.add('radiobeeping', { loop: true, volume: 0.5 });
+            this.radiobeeping = this.sound.add('radiobeeping', { loop: true });
             this.radiobeeping.play();
         };
+        this.radiobeeping.setVolume(getSoundVolume(this));
 
         this.talkshow = this.sound.get('talkshow');
         if (!this.talkshow) {
-            this.talkshow = this.sound.add('talkshow', { loop: true, volume: 0.1 });
+            this.talkshow = this.sound.add('talkshow', { loop: true });
             this.talkshow.play();
         };
-        this.talkshow.volume = 0.1;
+        this.talkshow.setVolume(getSoundVolume(this));
 
         /*
         add radio sprite
         add some sound effect as you approach -- radiobeeping.mp3?
         radio sitting on table?
         */
-        this.add.text(860, 200, "Radio").setFontSize(48);
-        const radio = this.add.rectangle(960, 540, 240, 240, 0x808080)
-            .setInteractive({ useHandCursor: true });
 
-        radio.on("pointerdown", () => {
-            startWithFade(this, GAME_SCENE_KEYS.radio);
+        this.add.image(960, 540, "grayBackground").setScale(2.1);
+        this.add.image(960, 540, "border").setScale(2.1);
+        this.radio = this.add.image(1160, 450, "radio").setScale(5);
+        this.add.image(1172, 462, "radio").setScale(5).setTint(0x000000).setAlpha(0.28); // radio shadow
+
+        // draw table
+        const tableGraphics = this.add.graphics();
+        tableGraphics.fillStyle(0x000000, 0.28);
+
+        // table top, legs
+        tableGraphics.fillRoundedRect(942, 536, 660, 34, 8);
+        tableGraphics.fillRoundedRect(1024, 568, 36, 220, 6);
+        tableGraphics.fillRoundedRect(1484, 568, 36, 220, 6);
+
+        // table top border
+        tableGraphics.fillStyle(0x6b4226);
+        tableGraphics.lineStyle(4, 0x3f2718);
+        tableGraphics.fillRoundedRect(930, 523, 660, 34, 8);
+        tableGraphics.strokeRoundedRect(930, 523, 660, 34, 8);
+
+        // table legs border
+        tableGraphics.fillStyle(0x4f2f1b);
+        tableGraphics.lineStyle(3, 0x2a170d);
+        tableGraphics.fillRoundedRect(1012, 555, 36, 220, 6);
+        tableGraphics.strokeRoundedRect(1012, 555, 36, 220, 6);
+        tableGraphics.fillRoundedRect(1472, 555, 36, 220, 6);
+        tableGraphics.strokeRoundedRect(1472, 555, 36, 220, 6);
+
+
+        // small nails / bolts
+        tableGraphics.fillStyle(0x2b160b, 0.7);
+        tableGraphics.fillCircle(965, 540, 3);
+        tableGraphics.fillCircle(1555, 540, 3);
+        tableGraphics.fillCircle(1030, 585, 3);
+        tableGraphics.fillCircle(1030, 745, 3);
+        tableGraphics.fillCircle(1490, 585, 3);
+        tableGraphics.fillCircle(1490, 745, 3);
+
+
+        // radio hitbox
+        const radioArea = this.add.zone(1160, 450, 200, 150).setInteractive({ useHandCursor: true });
+        this.physics.add.existing(radioArea, true);
+
+        // debug visual for zone
+        this.add.rectangle(1160, 450, 200, 150).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
+
+        radioArea.on("pointerdown", () => {
+            if (!this.physics.overlap(this.sprite, radioArea) || this.isChangingScenes)
+                return;
+
+            startWithFade(this, "Game_DemoRadio");
         });
     }
 }
 
 class Game_DemoRadio extends Phaser.Scene {
     constructor() {
-        super(GAME_SCENE_KEYS.radio);
+        super("Game_DemoRadio");
     }
     /**
      * Update closeup visual asset / create
@@ -1022,10 +1029,10 @@ class Game_DemoRadio extends Phaser.Scene {
         addInventoryButton(this);
         this.talkshow = this.sound.get('talkshow');
         if (!this.talkshow) {
-            this.talkshow = this.sound.add('talkshow', { loop: true, volume: 0.6 });
+            this.talkshow = this.sound.add('talkshow', { loop: true });
             this.talkshow.play();
         };
-        this.talkshow.volume = 0.6;
+        this.talkshow.setVolume(getSoundVolume(this));
 
 
         this.add.text(960, 100, "Demo 4: Radio", {
@@ -1144,6 +1151,7 @@ class Game_ChasingScene extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#0d1117");
         this.transitioning = false;
+        addGameSettingsButton(this);
 
         const groundY = 810;
         this.add.rectangle(960, groundY + 10, 1920, 20, 0x223344);
@@ -1249,7 +1257,7 @@ class Game_FailScene extends Phaser.Scene {
 
 class Game_CreditsScene extends Phaser.Scene {
     constructor() {
-        super(GAME_SCENE_KEYS.credits);
+        super("Game_CreditsScene");
     }
 
     create() {
@@ -1294,99 +1302,6 @@ class Game_CreditsScene extends Phaser.Scene {
             color: "#f5f1e8"
         }).setOrigin(0.5);
 
-    }
-}
-
-// update Settings Helper.js to use GAME_SCENE_KEYS and play bgm
-// Remove Game_SettingsOverlay
-class Game_SettingsOverlay extends Phaser.Scene {
-    constructor() {
-        super(GAME_SCENE_KEYS.settings);
-    }
-
-    init(data = {}) {
-        this.previousScene = data.previousScene;
-    }
-
-    create() {
-        this.cameras.main.setBackgroundColor("rgba(0,0,0,0.5)");
-        playGameBgm(this);
-
-        this.settingsValues = this.registry.get("settingsValues") || {
-            soundVolume: 0.7,
-            musicVolume: 0.5
-        };
-        this.registry.set("settingsValues", this.settingsValues);
-
-        this.add.rectangle(960, 540, 700, 560, 0x242a35)
-            .setStrokeStyle(3, 0x6f7c91);
-        this.add.text(960, 300, "Settings", Settings_Title).setOrigin(0.5);
-
-        this.createVolumeSlider(960, 430, "Sound Volume", "soundVolume");
-        this.createVolumeSlider(960, 530, "Music Volume", "musicVolume");
-
-        new MenuButton(this, 820, 700, "Close", () => {
-            if (this.previousScene) {
-                this.scene.resume(this.previousScene);
-            }
-            this.scene.stop();
-        }, 240, 70);
-
-        new MenuButton(this, 1100, 700, "Main Menu", () => {
-            if (this.previousScene) {
-                this.scene.stop(this.previousScene);
-            }
-            this.scene.start(GAME_SCENE_KEYS.menu);
-        }, 240, 70);
-    }
-
-    createVolumeSlider(x, y, label, settingsKey) {
-        const sliderWidth = 360;
-        const trackX = x - sliderWidth / 2;
-        const valueText = this.add.text(x + 265, y, "", Settings_Value).setOrigin(0.5);
-
-        this.add.text(x - 265, y, label, Settings_Label).setOrigin(0.5);
-
-        const track = this.add.rectangle(x, y, sliderWidth, 10, 0x111318)
-            .setStrokeStyle(2, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-        const fill = this.add.rectangle(trackX, y, sliderWidth, 10, 0x7dd3fc)
-            .setOrigin(0, 0.5);
-        const knob = this.add.circle(trackX, y, 16, 0xf5f1e8)
-            .setStrokeStyle(3, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-
-        const setValue = (value) => {
-            const clampedValue = Phaser.Math.Clamp(value, 0, 1);
-            this.settingsValues[settingsKey] = clampedValue;
-            this.registry.set("settingsValues", this.settingsValues);
-
-            fill.scaleX = clampedValue;
-            knob.x = trackX + sliderWidth * clampedValue;
-            valueText.setText(Math.round(clampedValue * 100) + "%");
-
-            if (settingsKey === "musicVolume") {
-                setMusicVolume(this, clampedValue);
-            }
-        };
-
-        const setValueFromPointer = (pointer) => {
-            setValue((pointer.x - trackX) / sliderWidth);
-        };
-
-        setValue(this.settingsValues[settingsKey]);
-
-        track.on("pointerdown", setValueFromPointer);
-        knob.on("pointerdown", setValueFromPointer);
-        knob.on("pointerover", () => knob.setFillStyle(0xffffff));
-        knob.on("pointerout", () => knob.setFillStyle(0xf5f1e8));
-
-        this.input.setDraggable(knob);
-        this.input.on("drag", (pointer, gameObject, dragX) => {
-            if (gameObject === knob) {
-                setValue((dragX - trackX) / sliderWidth);
-            }
-        });
     }
 }
 

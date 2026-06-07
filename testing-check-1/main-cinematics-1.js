@@ -110,7 +110,6 @@ const config = {
         Game_RadioRoom,
         Game_DemoRadio,
         Game_CreditsScene,
-        Game_SettingsOverlay,
         DemoHandleLever,
         DemoWirePuzzle,
         DemoClock,

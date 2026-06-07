@@ -72,7 +72,7 @@ function Spritemovement() {
     jumpBtn.on('pointerdown', () => { 
         if (sprite.body.blocked.down || sprite.body.touching.down) { 
             sprite.setVelocityY(-400); 
-            this.sound.play('jump'); 
+            playSoundEffect(this, 'jump');
         } 
     }); 
 

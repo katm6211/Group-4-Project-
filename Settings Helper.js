@@ -22,6 +22,15 @@ const Settings_Value = {
     color: "#b8c4d4"
 };
 
+const Sound_Volume_Keys = [
+    "jump",
+    "clockticking",
+    "radiobeeping",
+    "talkshow",
+    "mobsound",
+    "powerboxsound"
+];
+
 class MenuButton extends Phaser.GameObjects.Container {
     constructor(scene, x, y, label, callback, width = 230, height = 64) {
         const button = scene.add.rectangle(0, 0, width, height, 0x242a35)
@@ -41,20 +50,22 @@ class MenuButton extends Phaser.GameObjects.Container {
 }
 
 class SettingsButton extends MenuButton {
-    constructor(scene) {
+    constructor(scene, options = {}) {
         super(scene, 1775, 72, "Settings", () => {
-            openSettingsOverlay(scene);
+            openSettingsOverlay(scene, options);
         }, 210, 64);
     }
 }
 
 // helper to call instead of launching scene
 // it gets the scene key of previous scene to pause and launches the overlay on top
-function openSettingsOverlay(scene) {
+function openSettingsOverlay(scene, options = {}) {
     const previousScene = scene.scene.key;
 
     scene.scene.launch("SettingsOverlay", {
-        previousScene: previousScene
+        previousScene: previousScene,
+        mainMenuScene: options.mainMenuScene || "Launcher",
+        onOpen: options.onOpen
     });
     scene.scene.bringToTop("SettingsOverlay");
     scene.scene.pause(previousScene);
@@ -62,8 +73,35 @@ function openSettingsOverlay(scene) {
 
 
 // function to automatically add settings button to a scene
-function addSettingsButton(scene) {
-    new SettingsButton(scene);
+function addSettingsButton(scene, options = {}) {
+    const settingsButton = new SettingsButton(scene, options);
+
+    if (options.depth !== undefined) {
+        settingsButton.setDepth(options.depth);
+    }
+
+    return settingsButton;
+}
+
+function openGameSettingsOverlay(scene) {
+    openSettingsOverlay(scene, {
+        mainMenuScene: "Game_CinematicMainMenu",
+        onOpen: playGameSettingsBgm
+    });
+}
+
+function addGameSettingsButton(scene) {
+    return addSettingsButton(scene, {
+        mainMenuScene: "Game_CinematicMainMenu",
+        onOpen: playGameSettingsBgm,
+        depth: 1100
+    });
+}
+
+function playGameSettingsBgm(settingsScene) {
+    if (typeof playGameBgm === "function") {
+        playGameBgm(settingsScene);
+    }
 }
 
 function setMusicVolume(scene, volume) {
@@ -74,6 +112,38 @@ function setMusicVolume(scene, volume) {
     }
 }
 
+function getSoundVolume(scene) {
+    const settingsValues = scene.registry.get("settingsValues");
+    return Phaser.Math.Clamp(settingsValues?.soundVolume ?? scene.sound.volume ?? 1, 0, 1);
+}
+
+function playSoundEffect(scene, key, config = {}) {
+    scene.sound.play(key, {
+        ...config,
+        volume: getSoundVolume(scene)
+    });
+}
+
+function setSoundVolume(scene, volume) {
+    const clampedVolume = Phaser.Math.Clamp(volume, 0, 1);
+
+    Sound_Volume_Keys.forEach((key) => {
+        const sounds = typeof scene.sound.getAll === "function"
+            ? scene.sound.getAll(key)
+            : [scene.sound.get(key)].filter(Boolean);
+
+        sounds.forEach((sound) => {
+            if (!sound) return;
+
+            if (typeof sound.setVolume === "function") {
+                sound.setVolume(clampedVolume);
+            } else {
+                sound.volume = clampedVolume;
+            }
+        });
+    });
+}
+
 class SettingsOverlay extends Phaser.Scene {
     constructor() {
         super("SettingsOverlay");
@@ -81,13 +151,18 @@ class SettingsOverlay extends Phaser.Scene {
 
     init(data = {}) {
         this.previousScene = data.previousScene;
+        this.mainMenuScene = data.mainMenuScene || "Launcher";
+        this.onOpen = data.onOpen;
     }
 
     create() {
         this.cameras.main.setBackgroundColor("rgba(0,0,0,0.5)");
 
+        if (typeof this.onOpen === "function") {
+            this.onOpen(this);
+        }
+
         this.settingsValues = this.registry.get("settingsValues") || {
-            soundVolume: 0.7,
             musicVolume: 0.5
         };
         this.registry.set("settingsValues", this.settingsValues);
@@ -113,7 +188,7 @@ class SettingsOverlay extends Phaser.Scene {
                 this.scene.stop(this.previousScene);
             }
 
-            this.scene.start("Launcher");
+            this.scene.start(this.mainMenuScene);
         }, 240, 70);
     }
 
@@ -144,6 +219,8 @@ class SettingsOverlay extends Phaser.Scene {
 
             if (settingsKey === "musicVolume") {
                 setMusicVolume(this, clampedValue);
+            } else if (settingsKey === "soundVolume") {
+                setSoundVolume(this, clampedValue);
             }
         };
 
@@ -151,7 +228,10 @@ class SettingsOverlay extends Phaser.Scene {
             setValue((pointer.x - trackX) / sliderWidth);
         };
 
-        setValue(this.settingsValues[settingsKey]);
+        const initialValue = settingsKey === "soundVolume"
+            ? getSoundVolume(this)
+            : this.settingsValues[settingsKey];
+        setValue(initialValue);
 
         track.on("pointerdown", setValueFromPointer);
         knob.on("pointerdown", setValueFromPointer);
