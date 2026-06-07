@@ -4,6 +4,43 @@
 // rewrite as phaser data contained to two scenes?
 window.clockPuzzleSolved = Boolean(window.clockPuzzleSolved);
 
+const Game_Default_Settings_Values = {
+    soundVolume: 0.60,
+    musicVolume: 0.20
+};
+
+// add new audio assets to list here and define as music or sound
+const Game_Audio_Assets = [
+    { key: "bgm", path: "assets/music/backgroundmusic.mp3", category: "music" },
+    { key: "jump", path: "assets/music/jumpsoundeffect.mp3", category: "sound" },
+    { key: "clockticking", path: "assets/music/clockbackgroundmusic.mp3", category: "sound" },
+    { key: "radiobeeping", path: "assets/music/radiobeeping.mp3", category: "sound" },
+    { key: "talkshow", path: "assets/music/radiotalkshow.mp3", category: "sound" },
+    { key: "mobsound", path: "assets/music/mobsound.mp3", category: "sound" },
+    { key: "powerboxsound", path: "assets/music/powerboxsound.mp3", category: "sound" }
+];
+
+function getGameSettingsValues(scene) {
+    const settingsValues = {
+        ...Game_Default_Settings_Values,
+        ...(scene.registry.get("settingsValues") || {})
+    };
+
+    scene.registry.set("settingsValues", settingsValues);
+    return settingsValues;
+}
+
+function getGameAudioCategory(key) {
+    const asset = Game_Audio_Assets.find((audioAsset) => audioAsset.key === key);
+    return asset?.category || "sound";
+}
+
+function getGameAudioKeys(category) {
+    return Game_Audio_Assets
+        .filter((audioAsset) => getGameAudioCategory(audioAsset.key) === category)
+        .map((audioAsset) => audioAsset.key);
+}
+
 function GameSpritemovement(options = {}) {
     const sprite = this.sprite = this.physics.add.sprite(0, 0, 'sprite').setScale(4);
     sprite.setDepth(options.depth ?? 1000);
@@ -143,12 +180,7 @@ function addProgressButton(scene, options) {
 }
 
 function playGameBgm(scene) {
-    const settingsValues = {
-        soundVolume: 1.0,
-        musicVolume: 0.2,
-        ...(scene.registry.get("settingsValues") || {})
-    };
-    scene.registry.set("settingsValues", settingsValues);
+    const settingsValues = getGameSettingsValues(scene);
 
     const bgm = scene.sound.get("bgm") || scene.sound.add("bgm", {
         loop: true,
@@ -210,13 +242,9 @@ class Game_StartCinematic extends Phaser.Scene {
 
         this.load.spritesheet('titlescreen', 'assets/art/titlescreenanim.png', { frameWidth: 249, frameHeight: 135 });
 
-        this.load.audio('bgm', 'assets/music/backgroundmusic.mp3');
-        this.load.audio('jump', 'assets/music/jumpsoundeffect.mp3');
-        this.load.audio('clockticking', 'assets/music/clockbackgroundmusic.mp3');
-        this.load.audio('radiobeeping', 'assets/music/radiobeeping.mp3');
-        this.load.audio('talkshow', 'assets/music/radiotalkshow.mp3');
-        this.load.audio('mobsound', 'assets/music/mobsound.mp3');
-        this.load.audio('powerboxsound', 'assets/music/powerboxsound.mp3');
+        Game_Audio_Assets.forEach((audioAsset) => {
+            this.load.audio(audioAsset.key, audioAsset.path);
+        });
 
 
 
@@ -924,25 +952,14 @@ class Game_RadioRoom extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#101716");
         GameSpritemovement.call(this);
-        addGameSettingsButton(this);
+        addGameSettingsButton(this, { playBgmOnOpen: false });
 
         const bgm = this.sound.get('bgm');
         if (bgm) {
             bgm.stop();
         }
-        this.radiobeeping = this.sound.get('radiobeeping');
-        if (!this.radiobeeping) {
-            this.radiobeeping = this.sound.add('radiobeeping', { loop: true });
-            this.radiobeeping.play();
-        };
-        this.radiobeeping.setVolume(getSoundVolume(this));
-
-        this.talkshow = this.sound.get('talkshow');
-        if (!this.talkshow) {
-            this.talkshow = this.sound.add('talkshow', { loop: true });
-            this.talkshow.play();
-        };
-        this.talkshow.setVolume(getSoundVolume(this));
+        this.radiobeeping = playLoopingSound(this, 'radiobeeping');
+        this.talkshow = playLoopingSound(this, 'talkshow');
 
         /*
         add radio sprite
@@ -1025,25 +1042,17 @@ class Game_DemoRadio extends Phaser.Scene {
             bgm.stop();
         }
 
-        addGameSettingsButton(this);
+        addGameSettingsButton(this, { playBgmOnOpen: false });
         addInventoryButton(this);
-        this.talkshow = this.sound.get('talkshow');
-        if (!this.talkshow) {
-            this.talkshow = this.sound.add('talkshow', { loop: true });
-            this.talkshow.play();
-        };
-        this.talkshow.setVolume(getSoundVolume(this));
+        this.talkshow = playLoopingSound(this, 'radiobeeping');
 
 
-        this.add.text(960, 100, "Demo 4: Radio", {
-            fontFamily: "Arial", fontSize: "44px", color: "#f5f1e8"
-        }).setOrigin(0.5);
 
         const statusText = this.add.text(960, 880, "Tune the radio to the correct frequency.", {
             fontFamily: "Arial", fontSize: "26px", color: "#b8c4d4", align: "center"
         }).setOrigin(0.5);
 
-        const correctFrequency = 47;
+        const correctFrequency = Phaser.Math.Between(20, 110);
         this.frequency = 30;
 
         this.add.rectangle(960, 530, 700, 400, 0x222233)
@@ -1061,19 +1070,16 @@ class Game_DemoRadio extends Phaser.Scene {
             if (this.frequency === correctFrequency) {
                 signalText.setText("◆ SIGNAL FOUND ◆");
                 signalText.setColor("#44ff44");
-                statusText.setText(`Frequency locked: ${correctFrequency} MHz\nCode: 7-3-9`);
-                statusText.setColor("#44ff44");
             } else {
                 const difference = Math.abs(this.frequency - correctFrequency);
-                if (difference <= 3) {
+                if (difference <= 5) {
                     signalText.setText("~ almost... ~");
                     signalText.setColor("#ffaa44");
                 } else {
                     signalText.setText("~ static ~");
                     signalText.setColor("#556677");
                 }
-                statusText.setText("Tune the radio to the correct frequency.");
-                statusText.setColor("#b8c4d4");
+
             }
         };
 
@@ -1095,7 +1101,7 @@ class Game_DemoRadio extends Phaser.Scene {
             fontFamily: "Arial", fontSize: "36px", color: "#f5f1e8"
         }).setOrigin(0.5);
         buttonRight.on("pointerdown", () => {
-            this.frequency = Math.min(80, this.frequency + 1);
+            this.frequency = Math.min(110, this.frequency + 1);
             update();
         });
 
@@ -1117,7 +1123,7 @@ class Game_DemoRadio extends Phaser.Scene {
             fontFamily: "Arial", fontSize: "24px", color: "#b8c4d4"
         }).setOrigin(0.5);
         buttonRightFive.on("pointerdown", () => {
-            this.frequency = Math.min(80, this.frequency + 5);
+            this.frequency = Math.min(110, this.frequency + 5);
             update();
         });
 
@@ -1305,4 +1311,3 @@ class Game_CreditsScene extends Phaser.Scene {
 
     }
 }
-

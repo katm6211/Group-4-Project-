@@ -22,15 +22,7 @@ const Settings_Value = {
     color: "#b8c4d4"
 };
 
-const Sound_Volume_Keys = [
-    "jump",
-    "clockticking",
-    "radiobeeping",
-    "talkshow",
-    "mobsound",
-    "powerboxsound"
-];
-
+// Reusable text-and-rectangle menu button used by settings and overlay actions.
 class MenuButton extends Phaser.GameObjects.Container {
     constructor(scene, x, y, label, callback, width = 230, height = 64) {
         const button = scene.add.rectangle(0, 0, width, height, 0x242a35)
@@ -49,6 +41,7 @@ class MenuButton extends Phaser.GameObjects.Container {
     }
 }
 
+// Fixed-position Settings button that opens the settings overlay for the current scene.
 class SettingsButton extends MenuButton {
     constructor(scene, options = {}) {
         super(scene, 1775, 72, "Settings", () => {
@@ -57,8 +50,7 @@ class SettingsButton extends MenuButton {
     }
 }
 
-// helper to call instead of launching scene
-// it gets the scene key of previous scene to pause and launches the overlay on top
+// Launches SettingsOverlay above the current scene, then pauses that scene underneath it.
 function openSettingsOverlay(scene, options = {}) {
     const previousScene = scene.scene.key;
 
@@ -72,7 +64,7 @@ function openSettingsOverlay(scene, options = {}) {
 }
 
 
-// function to automatically add settings button to a scene
+// Adds the standard Settings button to a scene and applies an optional draw depth.
 function addSettingsButton(scene, options = {}) {
     const settingsButton = new SettingsButton(scene, options);
 
@@ -83,67 +75,105 @@ function addSettingsButton(scene, options = {}) {
     return settingsButton;
 }
 
-function openGameSettingsOverlay(scene) {
-    openSettingsOverlay(scene, {
+// Builds the shared settings options for game scenes and the game main menu.
+function getGameSettingsOptions(options = {}) {
+    return {
         mainMenuScene: "Game_CinematicMainMenu",
-        onOpen: playGameSettingsBgm
-    });
+        onOpen: options.playBgmOnOpen === false ? undefined : playGameBgm,
+        depth: options.depth ?? 1100
+    };
 }
 
-function addGameSettingsButton(scene) {
-    return addSettingsButton(scene, {
-        mainMenuScene: "Game_CinematicMainMenu",
-        onOpen: playGameSettingsBgm,
-        depth: 1100
-    });
+// Opens the game version of the settings overlay, returning Main Menu to the game menu scene.
+function openGameSettingsOverlay(scene, options = {}) {
+    openSettingsOverlay(scene, getGameSettingsOptions(options));
 }
 
-function playGameSettingsBgm(settingsScene) {
-    if (typeof playGameBgm === "function") {
-        playGameBgm(settingsScene);
-    }
+// Adds the game version of the Settings button, with game-menu routing and default high depth.
+function addGameSettingsButton(scene, options = {}) {
+    return addSettingsButton(scene, getGameSettingsOptions(options));
 }
 
+// Applies a new volume to all active audio categorized as music.
 function setMusicVolume(scene, volume) {
-    const bgm = scene.sound.get("bgm");
-
-    if (bgm) {
-        bgm.setVolume(volume);
-    }
+    setAudioCategoryVolume(scene, "music", volume);
 }
 
+// Returns the saved music volume, falling back to Phaser's global sound volume.
+function getMusicVolume(scene) {
+    const settingsValues = getGameSettingsValues(scene);
+    return Phaser.Math.Clamp(settingsValues.musicVolume ?? scene.sound.volume ?? 1, 0, 1);
+}
+
+// Returns the saved sound-effect volume, falling back to Phaser's global sound volume.
 function getSoundVolume(scene) {
-    const settingsValues = scene.registry.get("settingsValues");
+    const settingsValues = getGameSettingsValues(scene);
     return Phaser.Math.Clamp(settingsValues?.soundVolume ?? scene.sound.volume ?? 1, 0, 1);
 }
 
+// Picks the correct current volume value for a specific audio key.
+function getAudioVolume(scene, key) {
+    return getGameAudioCategory(key) === "music"
+        ? getMusicVolume(scene)
+        : getSoundVolume(scene);
+}
+
+// Sets volume on a Phaser sound instance across sound-manager implementations.
+function setSoundInstanceVolume(sound, volume) {
+    if (!sound) return;
+
+    if (typeof sound.setVolume === "function") {
+        sound.setVolume(volume);
+    } else {
+        sound.volume = volume;
+    }
+}
+
+// Plays a one-shot sound using the volume for its audio category.
 function playSoundEffect(scene, key, config = {}) {
     scene.sound.play(key, {
         ...config,
-        volume: getSoundVolume(scene)
+        volume: getAudioVolume(scene, key)
     });
 }
 
-function setSoundVolume(scene, volume) {
+// Gets or creates a looping sound, applies category volume, and starts it if needed.
+function playLoopingSound(scene, key, config = {}) {
+    const sound = scene.sound.get(key) || scene.sound.add(key, {
+        ...config,
+        loop: true
+    });
+
+    setSoundInstanceVolume(sound, getAudioVolume(scene, key));
+
+    if (!sound.isPlaying) {
+        sound.play();
+    }
+
+    return sound;
+}
+
+// Updates every currently active sound instance in the requested category.
+function setAudioCategoryVolume(scene, category, volume) {
     const clampedVolume = Phaser.Math.Clamp(volume, 0, 1);
 
-    Sound_Volume_Keys.forEach((key) => {
+    getGameAudioKeys(category).forEach((key) => {
         const sounds = typeof scene.sound.getAll === "function"
             ? scene.sound.getAll(key)
             : [scene.sound.get(key)].filter(Boolean);
 
         sounds.forEach((sound) => {
-            if (!sound) return;
-
-            if (typeof sound.setVolume === "function") {
-                sound.setVolume(clampedVolume);
-            } else {
-                sound.volume = clampedVolume;
-            }
+            setSoundInstanceVolume(sound, clampedVolume);
         });
     });
 }
 
+// Applies a new volume to all active audio categorized as sound effects.
+function setSoundVolume(scene, volume) {
+    setAudioCategoryVolume(scene, "sound", volume);
+}
+
+// Pause-menu style overlay scene that owns the settings UI and slider interactions.
 class SettingsOverlay extends Phaser.Scene {
     constructor() {
         super("SettingsOverlay");
@@ -162,11 +192,7 @@ class SettingsOverlay extends Phaser.Scene {
             this.onOpen(this);
         }
 
-        this.settingsValues = this.registry.get("settingsValues") || {
-            musicVolume: 0.5,
-            soundVolume: 1.0
-        };
-        this.registry.set("settingsValues", this.settingsValues);
+        this.settingsValues = getGameSettingsValues(this);
 
         this.add.rectangle(960, 540, 700, 560, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91);
@@ -193,6 +219,7 @@ class SettingsOverlay extends Phaser.Scene {
         }, 240, 70);
     }
 
+    // Creates one draggable volume slider and syncs changes to the settings registry.
     createVolumeSlider(x, y, label, settingsKey) {
         const sliderWidth = 360;
         const trackX = x - sliderWidth / 2;
@@ -229,9 +256,9 @@ class SettingsOverlay extends Phaser.Scene {
             setValue((pointer.x - trackX) / sliderWidth);
         };
 
-        const initialValue = settingsKey === "soundVolume"
-            ? getSoundVolume(this)
-            : this.settingsValues[settingsKey];
+        const initialValue = settingsKey === "musicVolume"
+            ? getMusicVolume(this)
+            : getSoundVolume(this);
         setValue(initialValue);
 
         track.on("pointerdown", setValueFromPointer);
