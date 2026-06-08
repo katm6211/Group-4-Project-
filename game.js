@@ -563,7 +563,7 @@ class Game_PowerBox extends Phaser.Scene {
 
 
         const notePickedUp = window.playerInventory.includes("decoder");
-        this.add.image(300, 762, "noteDesk").setDisplaySize(80, 100);
+        //this.add.image(300, 762, "noteDesk").setDisplaySize(80, 100);
         const noteObj = this.add.image(300, 742, "note").setDisplaySize(40, 40)
             .setInteractive({ useHandCursor: true }).setVisible(!notePickedUp);
 
