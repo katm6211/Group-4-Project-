@@ -262,6 +262,8 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.image('border', 'assets/art/border.png');
         this.load.image('door', 'assets/art/door.png');
         this.load.image('jumpscare', 'assets/art/jumpscarescene.png');
+        this.load.image('note', 'assets/art/note.png');
+        this.load.image('noteDesk', 'assets/art/desk2.png');
 
         
 
@@ -405,7 +407,7 @@ class Game_ChaseScene extends Phaser.Scene {
         this.escaping = false;
         this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#0d1117");
-        this.add.image(960, 652, 'grayBackground').setDisplaySize(1920, 1304).setDepth(0);
+        this.add.image(960, 540, "grayBackground").setScale(4);
         addGameSettingsButton(this);
         playGameBgm(this);
 
@@ -553,7 +555,7 @@ class Game_PowerBox extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#101716");
-        this.add.image(960, 652, 'grayBackground').setDisplaySize(1920, 1304).setDepth(0);
+        this.add.image(960, 540, "grayBackground").setScale(4);
         playGameBgm(this);
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
@@ -561,9 +563,9 @@ class Game_PowerBox extends Phaser.Scene {
 
 
         const notePickedUp = window.playerInventory.includes("decoder");
-        const noteObj = this.add.text(300, 750, "📄 Note", {
-            fontFamily: "Arial", fontSize: "24px", color: "#ffd700"
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(!notePickedUp);
+        this.add.image(300, 762, "noteDesk").setDisplaySize(80, 100);
+        const noteObj = this.add.image(300, 742, "note").setDisplaySize(40, 40)
+            .setInteractive({ useHandCursor: true }).setVisible(!notePickedUp);
 
         noteObj.on("pointerdown", () => {
             addInventoryItem("decoder");
@@ -762,7 +764,7 @@ class Game_ClockRoom extends Phaser.Scene {
         addGameSettingsButton(this);
         addInventoryButton(this);
 
-        this.add.image(960, 540, "grayBackground").setScale(2.1);
+        this.add.image(960, 540, "grayBackground").setScale(4);
         this.add.image(960, 540, "border").setScale(2.1);
         this.add.image(965, 544, "grandfatherClock").setScale(11).setSize(260, 520);
 
@@ -970,7 +972,7 @@ class Game_RadioRoom extends Phaser.Scene {
         radio sitting on table?
         */
 
-        this.add.image(960, 540, "grayBackground").setScale(2.1);
+        this.add.image(960, 540, "grayBackground").setScale(4);
         this.add.image(960, 540, "border").setScale(2.1);
 
         const isRadioPuzzleSolved = () => window.radioPuzzleSolved === true;
@@ -1199,6 +1201,7 @@ class Game_ChasingScene extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#0d1117");
+        this.add.image(960, 540, "grayBackground").setScale(4);
         this.transitioning = false;
         addGameSettingsButton(this);
 
