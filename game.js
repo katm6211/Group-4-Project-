@@ -333,7 +333,7 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         this.add.rectangle(960, 150, 900, 120, 0x000000, 0.55)
             .setStrokeStyle(3, 0xffffff, 0.35);
 
-        this.add.text(960, 150, "CMPM 120 Final Game", {
+        this.add.text(960, 150, "The Outer Limit", {
             fontFamily: "Arial",
             fontSize: "72px",
             color: "#fefefe"
