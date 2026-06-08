@@ -3,6 +3,7 @@
 // create global flag to check if clock puzzle is solved, allowing this to be tracked between scenes
 // rewrite as phaser data contained to two scenes?
 window.clockPuzzleSolved = Boolean(window.clockPuzzleSolved);
+window.radioPuzzleSolved = Boolean(window.radioPuzzleSolved);
 
 const Game_Default_Settings_Values = {
     soundVolume: 0.60,
@@ -227,6 +228,7 @@ function showCompletionPanel(scene) {
     replayButton.on("pointerdown", () => {
         window.playerInventory = [];
         window.clockPuzzleSolved = false;
+        window.radioPuzzleSolved = false;
         startWithFade(scene, "Game_StartCinematic");
     });
 }
@@ -358,6 +360,7 @@ class Game_CinematicMainMenu extends Phaser.Scene {
         startGame.on("pointerdown", () => {
             window.playerInventory = [];
             window.clockPuzzleSolved = false;
+            window.radioPuzzleSolved = false;
             this.scene.start("Game_ChasingScene");
         });
 
@@ -969,6 +972,31 @@ class Game_RadioRoom extends Phaser.Scene {
 
         this.add.image(960, 540, "grayBackground").setScale(2.1);
         this.add.image(960, 540, "border").setScale(2.1);
+
+        const isRadioPuzzleSolved = () => window.radioPuzzleSolved === true;
+        const doorGlowColor = isRadioPuzzleSolved() ? 0x44ff44 : 0xff3333;
+        const door = this.add.image(1665, 590, "door").setScale(11);
+        door.enableFilters().filters.external.addGlow(doorGlowColor, 2, 1, 1, false, 10, 12);
+
+        const doorArea = this.add.zone(1665, 590, 190, 330).setInteractive({ useHandCursor: true });
+        this.physics.add.existing(doorArea, true);
+
+        doorArea.on("pointerdown", () => {
+            if (!isRadioPuzzleSolved() || !this.physics.overlap(this.sprite, doorArea) || this.completionShown)
+                return;
+
+            this.completionShown = true;
+            const talkshow = this.sound.get('talkshow');
+            if (talkshow) {
+                talkshow.stop();
+            }
+            const radiobeeping = this.sound.get('radiobeeping');
+            if (radiobeeping) {
+                radiobeeping.stop();
+            }
+            showCompletionPanel(this);
+        });
+
         this.radio = this.add.image(1160, 450, "radio").setScale(5);
         this.add.image(1172, 462, "radio").setScale(5).setTint(0x000000).setAlpha(0.28); // radio shadow
 
@@ -1054,6 +1082,7 @@ class Game_DemoRadio extends Phaser.Scene {
 
         const correctFrequency = Phaser.Math.Between(20, 110);
         this.frequency = 30;
+        window.radioPuzzleSolved = false;
 
         this.add.rectangle(960, 530, 700, 400, 0x222233)
             .setStrokeStyle(5, 0x8899aa);
@@ -1068,9 +1097,13 @@ class Game_DemoRadio extends Phaser.Scene {
         const update = () => {
             frequencyText.setText(`${this.frequency} MHz`);
             if (this.frequency === correctFrequency) {
+                window.radioPuzzleSolved = true;
                 signalText.setText("◆ SIGNAL FOUND ◆");
                 signalText.setColor("#44ff44");
+                statusText.setText(`Frequency locked: ${correctFrequency} MHz\nReturn to the radio room.`);
+                statusText.setColor("#44ff44");
             } else {
+                window.radioPuzzleSolved = false;
                 const difference = Math.abs(this.frequency - correctFrequency);
                 if (difference <= 5) {
                     signalText.setText("~ almost... ~");
@@ -1079,6 +1112,8 @@ class Game_DemoRadio extends Phaser.Scene {
                     signalText.setText("~ static ~");
                     signalText.setColor("#556677");
                 }
+                statusText.setText("Tune the radio to the correct frequency.");
+                statusText.setColor("#b8c4d4");
 
             }
         };
@@ -1130,21 +1165,29 @@ class Game_DemoRadio extends Phaser.Scene {
         update();
 
         addRoomLabel(this, 4, "Radio");
-        const button = addProgressButton(this, {
-            lockedLabel: "Find the signal",
-            unlockedLabel: "Finish Game",
-            isUnlocked: () => this.frequency === correctFrequency,
-            onContinue: () => showCompletionPanel(this)
+
+        const backButton = this.add.rectangle(220, 920, 300, 64, 0x242a35)
+            .setStrokeStyle(3, 0x6f7c91)
+            .setInteractive({ useHandCursor: true });
+
+        const backLabel = this.add.text(220, 920, "Back to Radio Room", {
+            fontFamily: "Arial",
+            fontSize: "22px",
+            color: "#f5f1e8"
+        }).setOrigin(0.5);
+
+        backButton.on("pointerover", () => {
+            backButton.setFillStyle(0x334155);
+            backLabel.setColor("#ffffff");
         });
-        button.on('pointerdown', () => {
-            const talkshow = this.sound.get('talkshow');
-            if (talkshow) {
-                talkshow.stop();
-            }
-            const radiobeeping = this.sound.get('radiobeeping');
-            if (radiobeeping) {
-                radiobeeping.stop();
-            }
+
+        backButton.on("pointerout", () => {
+            backButton.setFillStyle(0x242a35);
+            backLabel.setColor("#f5f1e8");
+        });
+
+        backButton.once("pointerdown", () => {
+            startWithFade(this, "Game_RadioRoom");
         });
     }
 }
