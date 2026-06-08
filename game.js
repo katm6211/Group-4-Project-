@@ -1286,11 +1286,70 @@ class Game_FailScene extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#000000");
 
-        this.add.text(960, 430, "you failed", {
+        const failText = this.add.text(960, 430, "", {
             fontFamily: "Arial",
             fontSize: "72px",
-            color: "#f5f1e8"
+            color: "#b8c4d4"
         }).setOrigin(0.5);
+
+        const fullMessage = "you failed";
+        let revealed = 0;
+
+        this.time.addEvent({
+            delay: 130,
+            repeat: fullMessage.length - 1,
+            callback: () => {
+                revealed++;
+                failText.setText(fullMessage.slice(0, revealed));
+
+                if (revealed === fullMessage.length) {
+                    const colorShift = { progress: 0 };
+
+                    this.tweens.add({
+                        targets: failText,
+                        scale: 1.3,
+                        duration: 600,
+                        ease: "Sine.easeOut"
+                    });
+
+                    this.tweens.add({
+                        targets: colorShift,
+                        progress: 100,
+                        duration: 600,
+                        onUpdate: () => {
+                            const blended = Phaser.Display.Color.Interpolate.ColorWithColor(
+                                Phaser.Display.Color.ValueToColor("#b8c4d4"),
+                                Phaser.Display.Color.ValueToColor("#ff2222"),
+                                100,
+                                colorShift.progress
+                            );
+                            failText.setColor(Phaser.Display.Color.RGBToString(blended.r, blended.g, blended.b));
+                        },
+                        onComplete: () => {
+                            this.tweens.add({
+                                targets: failText,
+                                scale: 1.34,
+                                duration: 220,
+                                hold: 480,
+                                yoyo: true,
+                                repeat: -1,
+                                ease: "Sine.easeInOut"
+                            });
+
+                            this.tweens.add({
+                                targets: failText,
+                                x: failText.x + 3,
+                                y: failText.y + 3,
+                                duration: 90,
+                                yoyo: true,
+                                repeat: -1,
+                                ease: "Sine.easeInOut"
+                            });
+                        }
+                    });
+                }
+            }
+        });
 
         const button = this.add.rectangle(960, 600, 300, 80, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
