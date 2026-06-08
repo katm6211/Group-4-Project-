@@ -1,30 +1,30 @@
 const Menu_Button_Text = {
     fontFamily: "Arial",
-    fontSize: "26px",
+    fontSize: "39px",
     color: "#f5f1e8"
 };
 
 const Settings_Title = {
     fontFamily: "Arial",
-    fontSize: "48px",
+    fontSize: "72px",
     color: "#f5f1e8"
 };
 
 const Settings_Label = {
     fontFamily: "Arial",
-    fontSize: "23px",
+    fontSize: "35px",
     color: "#f5f1e8"
 };
 
 const Settings_Value = {
     fontFamily: "Arial",
-    fontSize: "23px",
+    fontSize: "35px",
     color: "#b8c4d4"
 };
 
 // Reusable text-and-rectangle menu button used by settings and overlay actions.
 class MenuButton extends Phaser.GameObjects.Container {
-    constructor(scene, x, y, label, callback, width = 230, height = 64) {
+    constructor(scene, x, y, label, callback, width = 345, height = 96) {
         const button = scene.add.rectangle(0, 0, width, height, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
@@ -35,7 +35,13 @@ class MenuButton extends Phaser.GameObjects.Container {
 
         button.on("pointerover", () => button.setFillStyle(0x334155));
         button.on("pointerout", () => button.setFillStyle(0x242a35));
-        button.on("pointerdown", callback);
+        button.on("pointerdown", (pointer, localX, localY, event) => {
+            if (event) {
+                event.stopPropagation();
+            }
+
+            callback();
+        });
 
         scene.add.existing(this);
     }
@@ -44,9 +50,9 @@ class MenuButton extends Phaser.GameObjects.Container {
 // Fixed-position Settings button that opens the settings overlay for the current scene.
 class SettingsButton extends MenuButton {
     constructor(scene, options = {}) {
-        super(scene, 1775, 72, "Settings", () => {
+        super(scene, 1710, 96, "Settings", () => {
             openSettingsOverlay(scene, options);
-        }, 210, 64);
+        }, 315, 96);
     }
 }
 
@@ -194,46 +200,46 @@ class SettingsOverlay extends Phaser.Scene {
 
         this.settingsValues = getGameSettingsValues(this);
 
-        this.add.rectangle(960, 540, 700, 560, 0x242a35)
+        this.add.rectangle(960, 540, 1050, 840, 0x242a35)
             .setStrokeStyle(3, 0x6f7c91);
 
-        this.add.text(960, 300, "Settings", Settings_Title).setOrigin(0.5);
+        this.add.text(960, 180, "Settings", Settings_Title).setOrigin(0.5);
 
-        this.createVolumeSlider(960, 430, "Sound Volume", "soundVolume");
-        this.createVolumeSlider(960, 530, "Music Volume", "musicVolume");
+        this.createVolumeSlider(960, 375, "Sound Volume", "soundVolume");
+        this.createVolumeSlider(960, 525, "Music Volume", "musicVolume");
 
-        new MenuButton(this, 820, 700, "Close", () => {
+        new MenuButton(this, 750, 780, "Close", () => {
             if (this.previousScene) {
                 this.scene.resume(this.previousScene);
             }
 
             this.scene.stop();
-        }, 240, 70);
+        }, 360, 105);
 
-        new MenuButton(this, 1100, 700, "Main Menu", () => {
+        new MenuButton(this, 1170, 780, "Main Menu", () => {
             if (this.previousScene) {
                 this.scene.stop(this.previousScene);
             }
 
             this.scene.start(this.mainMenuScene);
-        }, 240, 70);
+        }, 360, 105);
     }
 
     // Creates one draggable volume slider and syncs changes to the settings registry.
     createVolumeSlider(x, y, label, settingsKey) {
-        const sliderWidth = 360;
+        const sliderWidth = 540;
         const trackX = x - sliderWidth / 2;
-        const valueText = this.add.text(x + 265, y, "", Settings_Value).setOrigin(0.5);
+        const valueText = this.add.text(x + 398, y, "", Settings_Value).setOrigin(0.5);
 
-        this.add.text(x - 265, y, label, Settings_Label).setOrigin(0.5);
+        this.add.text(x - 398, y, label, Settings_Label).setOrigin(0.5);
 
-        const track = this.add.rectangle(x, y, sliderWidth, 10, 0x111318)
+        const track = this.add.rectangle(x, y, sliderWidth, 15, 0x111318)
             .setStrokeStyle(2, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
-        const fill = this.add.rectangle(trackX, y, sliderWidth, 10, 0x7dd3fc)
+        const fill = this.add.rectangle(trackX, y, sliderWidth, 15, 0x7dd3fc)
             .setOrigin(0, 0.5);
-        const knob = this.add.circle(trackX, y, 16, 0xf5f1e8)
-            .setStrokeStyle(3, 0x6f7c91)
+        const knob = this.add.circle(trackX, y, 24, 0xf5f1e8)
+            .setStrokeStyle(5, 0x6f7c91)
             .setInteractive({ useHandCursor: true });
 
         const setValue = (value) => {
