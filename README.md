@@ -1,6 +1,6 @@
 # The Outer Limit
 
-Latest [release](../../tree/RC2).
+Latest [release](../../tree/RC2) and downloadable [archive](../../archive/refs/tags/RC2.zip).
 
 # Introduction
 
