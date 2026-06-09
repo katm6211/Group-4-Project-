@@ -14,6 +14,7 @@ function showCaption(scene, text, duration = 2500) {
     let label = scene.data.get('_captionLabel');
     let timer = scene.data.get('_captionTimer');
 
+    //make rectangle smaller and more transparent
     if (!bg) {
         bg = scene.add.rectangle(960, 1030, 1800, 96, 0x000000, 0.75).setDepth(5000).setScrollFactor(0);
         label = scene.add.text(960, 1030, '', { fontFamily: 'Arial', fontSize: '52px', color: '#ffffff' }).setOrigin(0.5).setDepth(5001).setScrollFactor(0);
@@ -247,8 +248,8 @@ class SettingsOverlay extends Phaser.Scene {
         this.createVolumeSlider(960, 375, "Sound Volume", "soundVolume");
         this.createVolumeSlider(960, 525, "Music Volume", "musicVolume");
 
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        if (isIOS) {
+        const canUseFullscreen = this.scale.fullscreen && this.scale.fullscreen.available;
+        if (!canUseFullscreen) {
             this.add.text(960, 655, "Fullscreen on iOS: tap Share → Add to Home Screen", {
                 fontFamily: "Arial", fontSize: "28px", color: "#b8c4d4", align: "center", wordWrap: { width: 900 }
             }).setOrigin(0.5);
