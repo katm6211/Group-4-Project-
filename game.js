@@ -194,6 +194,7 @@ function playGameBgm(scene) {
     }
 }
 
+// win "scene"
 function showCompletionPanel(scene) {
     const depth = 1000;
 
