@@ -1,0 +1,17 @@
+{
+  "wirePuzzle": {
+    "symbols": ["△", "○", "□", "✕"],
+    "rightCodes": ["XR-1", "QM-2", "AL-0", "TZ-3"],
+    "rightSymOrder": [2, 3, 1, 0],
+    "correctPairs": [1, 0, 3, 2]
+  },
+  "radioPuzzle": {
+    "targetFrequency": 88
+  },
+  "rooms": [
+    { "name": "Chase",     "description": "Escape from the aliens before time runs out!" },
+    { "name": "Power Box", "description": "Fix the power to unlock the next room."        },
+    { "name": "Clock",     "description": "Turn the clock hands. Which direction?"        },
+    { "name": "Radio",     "description": "Tune the radio to the right frequency."        }
+  ]
+}

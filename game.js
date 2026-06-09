@@ -269,6 +269,7 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.image('jumpscare', 'assets/art/jumpscarescene.png');
         this.load.image('note', 'assets/art/note.png');
         this.load.image('noteDesk', 'assets/art/desk2.png');
+        this.load.json('gameData', 'data/levels.json');
 
         
 
@@ -625,10 +626,7 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
             fontFamily: "Arial", fontSize: "24px", color: "#b8c4d4", align: "center", wordWrap: { width: 1200 }
         }).setOrigin(0.5);
 
-        const symbols    = ["△", "○", "□", "✕"];
-        const rightCodes = ["XR-1", "QM-2", "AL-0", "TZ-3"];
-        const rightSymOrder = [2, 3, 1, 0];
-        const correctPairs  = [1, 0, 3, 2];
+        const { symbols, rightCodes, rightSymOrder, correctPairs } = this.cache.json.get('gameData').wirePuzzle;
         const leftX = 460, rightX = 1460, yStart = 280, yGap = 150;
 
         const leftNodes = symbols.map((sym, i) => {
