@@ -155,7 +155,7 @@ function addInventoryButton(scene) {
         });
     };
 
-    window.InButtonEffect = playInventoryButtonEffect;
+    window.playInventoryButtonEffect = playInventoryButtonEffect;
     scene.events.once("shutdown", () => {
         if (window.playInventoryButtonEffect === playInventoryButtonEffect) {
             window.playInventoryButtonEffect = null;

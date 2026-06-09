@@ -7,7 +7,8 @@ window.radioPuzzleSolved = Boolean(window.radioPuzzleSolved);
 
 const Game_Default_Settings_Values = {
     soundVolume: 0.60,
-    musicVolume: 0.20
+    musicVolume: 0.20,
+    captionsEnabled: false
 };
 
 // add new audio assets to list here and define as music or sound
@@ -219,16 +220,10 @@ function showCompletionPanel(scene) {
         .setInteractive()
         .setDepth(depth);
 
-    scene.add.text(960, 400, "Signal received. You escaped!", {
+    scene.add.text(960, 400, "You escaped!", {
         fontFamily: "Arial",
         fontSize: "54px",
         color: "#f5f1e8"
-    }).setOrigin(0.5).setDepth(depth + 1);
-
-    scene.add.text(960, 495, "All four rooms are complete.", {
-        fontFamily: "Arial",
-        fontSize: "30px",
-        color: "#b8c4d4"
     }).setOrigin(0.5).setDepth(depth + 1);
 
     const replayButton = scene.add.rectangle(960, 640, 300, 76, 0x1a3a2a)
@@ -630,12 +625,36 @@ class Game_PowerBox extends Phaser.Scene {
             noteObj.setVisible(false);
         });
 
-        this.add.text(960, 340, "Power Box").setFontSize(48).setOrigin(0.5);
+        // this.add.text(960, 340, "Power Box").setFontSize(48).setOrigin(0.5);
         const powerBox = this.add.image(960, 540, 'powerbox').setDisplaySize(240, 240)
             .setInteractive({ useHandCursor: true });
+        const powerBoxPulse = this.add.image(960, 540, 'powerbox')
+            .setDisplaySize(240, 240)
+            .setTint(0xffffff)
+            .setTintMode(Phaser.TintModes.FILL)
+            .setAlpha(0)
+            .setDepth(5);
+        const powerBoxPulseScaleX = powerBoxPulse.scaleX;
+        const powerBoxPulseScaleY = powerBoxPulse.scaleY;
 
         powerBox.on("pointerdown", () => {
-            startWithFade(this, "Game_DemoWirePuzzle");
+            if (this.isChangingScenes)
+                return;
+
+            this.input.enabled = false;
+            this.tweens.add({
+                targets: powerBoxPulse,
+                alpha: 0.85,
+                scaleX: powerBoxPulseScaleX * 1.03,
+                scaleY: powerBoxPulseScaleY * 1.03,
+                duration: 160,
+                yoyo: true,
+                ease: "Sine.easeInOut",
+                onComplete: () => {
+                    powerBoxPulse.setScale(powerBoxPulseScaleX, powerBoxPulseScaleY).setAlpha(0);
+                    startWithFade(this, "Game_DemoWirePuzzle");
+                }
+            });
         });
 
         const backWidth = 230;
@@ -913,6 +932,36 @@ class Game_ClockRoom extends Phaser.Scene {
         this.add.image(960, 540, "border").setScale(2.1);
         this.add.image(965, 544, "grandfatherClock").setScale(11).setSize(260, 520);
 
+        const clockNoteOverlay = this.add.container(960, 540).setDepth(20).setVisible(false);
+        const clockNoteBg = this.add.rectangle(0, 0, 620, 300, 0x101010).setStrokeStyle(3, 0xffd700);
+        const clockNoteTitle = this.add.text(0, -105, "— Clock Note —", {
+            fontFamily: "Arial", fontSize: "28px", color: "#ffd700"
+        }).setOrigin(0.5);
+        const clockNoteBody = this.add.text(0, 0, "Only one hand can unwind time.", {
+            fontFamily: "Arial", fontSize: "34px", color: "#f5f1e8", align: "center", wordWrap: { width: 520 }
+        }).setOrigin(0.5);
+        const clockNoteClose = this.add.text(0, 105, "[ Close ]", {
+            fontFamily: "Arial", fontSize: "22px", color: "#aaaaaa"
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        clockNoteClose.on("pointerdown", () => clockNoteOverlay.setVisible(false));
+        clockNoteOverlay.add([clockNoteBg, clockNoteTitle, clockNoteBody, clockNoteClose]);
+
+        window.inventoryItemActions = window.inventoryItemActions || {};
+        window.inventoryItemActions["Clock Note"] = () => clockNoteOverlay.setVisible(true);
+        this.events.once("shutdown", () => { delete window.inventoryItemActions["Clock Note"]; });
+
+        const clockNotePickedUp = window.playerInventory.includes("Clock Note");
+        const clockNoteObj = this.add.image(1325, 710, "note")
+            .setDisplaySize(40, 40)
+            .setInteractive({ useHandCursor: true })
+            .setVisible(!clockNotePickedUp);
+
+        clockNoteObj.on("pointerdown", () => {
+            addInventoryItem("Clock Note");
+            clockNoteObj.setVisible(false);
+        });
+
         // make global so this can be called / used by other scenes
         const clockPulse = this.add.image(965, 544, "grandfatherClock")
             .setScale(11)
@@ -920,6 +969,35 @@ class Game_ClockRoom extends Phaser.Scene {
             .setTintMode(Phaser.TintModes.FILL)
             .setAlpha(0)
             .setDepth(5);
+
+        if (window.clockTimeRewindEffect) {
+            window.clockTimeRewindEffect = false;
+            const timeFlash = this.add.rectangle(960, 540, 1920, 1080, 0xb7f3ff, 0.55)
+                .setDepth(6)
+                .setScrollFactor(0);
+
+            this.tweens.add({
+                targets: clockPulse,
+                alpha: 0.85,
+                scale: 11.35,
+                duration: 220,
+                yoyo: true,
+                ease: "Sine.easeInOut",
+                onComplete: () => {
+                    clockPulse.setScale(11).setAlpha(0);
+                }
+            });
+
+            this.tweens.add({
+                targets: timeFlash,
+                alpha: 0,
+                duration: 650,
+                ease: "Sine.easeOut",
+                onComplete: () => {
+                    timeFlash.destroy();
+                }
+            });
+        }
 
         const isClockPuzzleSolved = () => window.clockPuzzleSolved === true;
         const doorGlowColor = isClockPuzzleSolved() ? 0x44ff44 : 0xff3333;
@@ -980,7 +1058,7 @@ class Game_DemoClock extends Phaser.Scene {
         addInventoryButton(this);
 
 
-        const statusText = this.add.text(960, 980, "Drag the clock hand. Counterclockwise = move forward.\nClockwise = go back.", {
+        const statusText = this.add.text(960, 980, "Drag the clock hand.", {
             fontFamily: "Arial", fontSize: "26px", color: "#b8c4d4", align: "center"
         }).setOrigin(0.5);
 
@@ -995,10 +1073,10 @@ class Game_DemoClock extends Phaser.Scene {
         graphics.lineStyle(3, 0x3d3a36, 0.6);
         for (let i = 0; i < 12; i++) {
             const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
-            const x1 = cx + Math.cos(angle) * (radius - 50);
-            const y1 = cy + Math.sin(angle) * (radius - 50);
-            const x2 = cx + Math.cos(angle) * radius;
-            const y2 = cy + Math.sin(angle) * radius;
+            const x1 = cx + Math.cos(angle) * (radius - 20);
+            const y1 = cy + Math.sin(angle) * (radius - 20);
+            const x2 = cx + Math.cos(angle) * (radius + 97);
+            const y2 = cy + Math.sin(angle) * (radius + 97);
             graphics.beginPath();
             graphics.moveTo(x1, y1);
             graphics.lineTo(x2, y2);
@@ -1053,12 +1131,12 @@ class Game_DemoClock extends Phaser.Scene {
             if (totalRotation > Math.PI) {
                 // clockwise = "unsolve" the puzzle
                 window.clockPuzzleSolved = false;
-                statusText.setText("Clockwise → Going back to previous room.");
+                statusText.setText("Clockwise rotation");
                 statusText.setColor("#ffaa44");
             } else if (totalRotation < -Math.PI) {
                 // counterclockwise = solved the puzzle
                 window.clockPuzzleSolved = true;
-                statusText.setText("Counterclockwise → Moving forward in time!");
+                statusText.setText("Counterclockwise rotation");
                 statusText.setColor("#44ff44");
             } else {
                 // if not enough rotation, nothing happens
@@ -1067,7 +1145,7 @@ class Game_DemoClock extends Phaser.Scene {
             }
         });
 
-        const backWidth = 300;
+        const backWidth = 255;
         const backHeight = 64;
         const backButton = this.add.graphics();
         const drawBackButton = (fill = 0x17212b, stroke = 0x7dd3fc) => {
@@ -1080,7 +1158,7 @@ class Game_DemoClock extends Phaser.Scene {
         const backLabel = this.add.text(0, 0, "Back to Clock Room", {
             fontFamily: "Arial", fontSize: "22px", color: "#f5f1e8"
         }).setOrigin(0.5);
-        const backContainer = this.add.container(220, 920, [backButton, backLabel]);
+        const backContainer = this.add.container(153, 540, [backButton, backLabel]);
         drawBackButton();
         backButton.setInteractive(
             new Phaser.Geom.Rectangle(-backWidth / 2, -backHeight / 2, backWidth, backHeight),
@@ -1100,6 +1178,9 @@ class Game_DemoClock extends Phaser.Scene {
             backContainer.setScale(0.92);
             drawBackButton(0x0f1821, 0xb7f3ff);
             this.time.delayedCall(90, () => backContainer.setScale(1));
+            if (window.clockPuzzleSolved === true) {
+                window.clockTimeRewindEffect = true;
+            }
             startWithFade(this, "Game_ClockRoom");
         });
         backButton.on("pointerup", () => backContainer.setScale(1));
@@ -1126,6 +1207,12 @@ class Game_RadioRoom extends Phaser.Scene {
         this.add.image(960, 540, "grayBackground").setScale(4);
         this.add.image(960, 540, "border").setScale(2.1);
         this.add.image(1160, 450, "radio").setScale(5).setDepth(2);
+        const radioPulse = this.add.image(1160, 450, "radio")
+            .setScale(5)
+            .setTint(0xffffff)
+            .setTintMode(Phaser.TintModes.FILL)
+            .setAlpha(0)
+            .setDepth(5);
 
         const isRadioPuzzleSolved = () => window.radioPuzzleSolved === true;
         const doorGlowColor = isRadioPuzzleSolved() ? 0x44ff44 : 0xff3333;
@@ -1196,7 +1283,19 @@ class Game_RadioRoom extends Phaser.Scene {
             if (!this.physics.overlap(this.sprite, radioArea) || this.isChangingScenes)
                 return;
 
-            startWithFade(this, "Game_DemoRadio");
+            this.input.enabled = false;
+            this.tweens.add({
+                targets: radioPulse,
+                alpha: 0.85,
+                scale: 5.16,
+                duration: 160,
+                yoyo: true,
+                ease: "Sine.easeInOut",
+                onComplete: () => {
+                    radioPulse.setScale(5).setAlpha(0);
+                    startWithFade(this, "Game_DemoRadio");
+                }
+            });
         });
     }
 }
@@ -1235,15 +1334,14 @@ class Game_DemoRadio extends Phaser.Scene {
         this.frequency = 30;
         window.radioPuzzleSolved = false;
 
-        this.add.rectangle(960, 530, 700, 400, 0x222233)
-            .setStrokeStyle(5, 0x8899aa);
+        this.add.image(960, 430, "radio").setScale(23).setDepth(2);
 
-        const frequencyText = this.add.text(960, 440, `${this.frequency} MHz`, {
+        const frequencyText = this.add.text(960, 310, `${this.frequency} MHz`, {
             fontFamily: "Arial", fontSize: "56px", color: "#7dd3fc"
-        }).setOrigin(0.5);
-        const signalText = this.add.text(960, 530, "~ static ~", {
+        }).setOrigin(0.5).setDepth(3);
+        const signalText = this.add.text(960, 780, "~ static ~", {
             fontFamily: "Arial", fontSize: "30px", color: "#556677"
-        }).setOrigin(0.5);
+        }).setOrigin(0.5).setDepth(3);
 
         const update = () => {
             const difference = Math.abs(this.frequency - correctFrequency);
@@ -1253,12 +1351,12 @@ class Game_DemoRadio extends Phaser.Scene {
                 window.radioPuzzleSolved = true;
                 signalText.setText("◆ SIGNAL FOUND ◆");
                 signalText.setColor("#44ff44");
-                statusText.setText(`Frequency locked: ${correctFrequency} MHz\nReturn to the radio room.`);
+                statusText.setText(`Frequency locked: ${correctFrequency} MHz`);
                 statusText.setColor("#44ff44");
             } else {
                 window.radioPuzzleSolved = false;
                 if (difference <= 5) {
-                    signalText.setText("~ almost... ~");
+                    signalText.setText("~ the signal gets louder ~");
                     signalText.setColor("#ffaa44");
                 } else {
                     signalText.setText("~ static ~");
@@ -1270,53 +1368,78 @@ class Game_DemoRadio extends Phaser.Scene {
             }
         };
 
-        const buttonLeft = this.add.rectangle(700, 640, 100, 80, 0x334155)
-            .setStrokeStyle(3, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-        this.add.text(700, 640, "◀", {
-            fontFamily: "Arial", fontSize: "36px", color: "#f5f1e8"
-        }).setOrigin(0.5);
-        buttonLeft.on("pointerdown", () => {
+        const createTuningButton = (x, y, width, height, drawIcon, onClick) => {
+            const button = this.add.graphics();
+            const icon = this.add.graphics();
+            const container = this.add.container(x, y, [button, icon]).setDepth(3);
+            const drawButton = (fill = 0x17212b, stroke = 0x7dd3fc) => {
+                button.clear();
+                button.fillStyle(fill, 0.94);
+                button.fillRoundedRect(-width / 2, -height / 2, width, height, 12);
+                button.lineStyle(3, stroke, 1);
+                button.strokeRoundedRect(-width / 2, -height / 2, width, height, 12);
+            };
+
+            drawButton();
+            drawIcon(icon);
+            button.setInteractive(
+                new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
+                Phaser.Geom.Rectangle.Contains
+            );
+            button.input.cursor = "pointer";
+            button.on("pointerover", () => drawButton(0x24384a, 0xb7f3ff));
+            button.on("pointerout", () => {
+                container.setScale(1);
+                drawButton();
+            });
+            button.on("pointerdown", () => {
+                container.setScale(0.92);
+                drawButton(0x0f1821, 0xb7f3ff);
+                this.time.delayedCall(90, () => container.setScale(1));
+                onClick();
+            });
+            button.on("pointerup", () => container.setScale(1));
+
+            return button;
+        };
+
+        const buttonLeft = createTuningButton(520, 460, 100, 80, (icon) => {
+            icon.fillStyle(0xf5f1e8);
+            icon.fillTriangle(-25, 0, 20, -25, 20, 25);
+        }, () => {
             this.frequency = Math.max(20, this.frequency - 1);
             update();
         });
 
-        const buttonRight = this.add.rectangle(1220, 640, 100, 80, 0x334155)
-            .setStrokeStyle(3, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-        this.add.text(1220, 640, "▶", {
-            fontFamily: "Arial", fontSize: "36px", color: "#f5f1e8"
-        }).setOrigin(0.5);
-        buttonRight.on("pointerdown", () => {
+        const buttonRight = createTuningButton(1420, 460, 100, 80, (icon) => {
+            icon.fillStyle(0xf5f1e8);
+            icon.fillTriangle(25, 0, -20, -25, -20, 25);
+        }, () => {
             this.frequency = Math.min(160, this.frequency + 1);
             update();
         });
 
-        const buttonLeftFive = this.add.rectangle(580, 640, 80, 60, 0x242a35)
-            .setStrokeStyle(2, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-        this.add.text(580, 640, "◀◀", {
-            fontFamily: "Arial", fontSize: "24px", color: "#b8c4d4"
-        }).setOrigin(0.5);
-        buttonLeftFive.on("pointerdown", () => {
+        const buttonLeftFive = createTuningButton(520, 670, 80, 60, (icon) => {
+            icon.fillStyle(0xb8c4d4);
+            icon.fillTriangle(-28, 0, -5, -18, -5, 18);
+            icon.fillTriangle(2, 0, 25, -18, 25, 18);
+        }, () => {
             this.frequency = Math.max(20, this.frequency - 5);
             update();
         });
 
-        const buttonRightFive = this.add.rectangle(1340, 640, 80, 60, 0x242a35)
-            .setStrokeStyle(2, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-        this.add.text(1340, 640, "▶▶", {
-            fontFamily: "Arial", fontSize: "24px", color: "#b8c4d4"
-        }).setOrigin(0.5);
-        buttonRightFive.on("pointerdown", () => {
+        const buttonRightFive = createTuningButton(1420, 670, 80, 60, (icon) => {
+            icon.fillStyle(0xb8c4d4);
+            icon.fillTriangle(-25, -18, -25, 18, -2, 0);
+            icon.fillTriangle(5, -18, 5, 18, 28, 0);
+        }, () => {
             this.frequency = Math.min(160, this.frequency + 5);
             update();
         });
 
         update();
 
-        const backWidth = 300;
+        const backWidth = 255;
         const backHeight = 64;
         const backButton = this.add.graphics();
         const drawBackButton = (fill = 0x17212b, stroke = 0x7dd3fc) => {
@@ -1329,7 +1452,7 @@ class Game_DemoRadio extends Phaser.Scene {
         const backLabel = this.add.text(0, 0, "Back to Radio Room", {
             fontFamily: "Arial", fontSize: "22px", color: "#f5f1e8"
         }).setOrigin(0.5);
-        const backContainer = this.add.container(220, 920, [backButton, backLabel]);
+        const backContainer = this.add.container(153, 540, [backButton, backLabel]);
         drawBackButton();
         backButton.setInteractive(
             new Phaser.Geom.Rectangle(-backWidth / 2, -backHeight / 2, backWidth, backHeight),

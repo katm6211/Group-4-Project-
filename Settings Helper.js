@@ -10,13 +10,16 @@ const Audio_Captions = {
 function showCaption(scene, text, duration = 2500) {
     if (!scene || !scene.add) return;
 
+    const settingsValues = getGameSettingsValues(scene);
+    if (!settingsValues.captionsEnabled) return;
+
     let bg = scene.data.get('_captionBg');
     let label = scene.data.get('_captionLabel');
     let timer = scene.data.get('_captionTimer');
 
     //make rectangle smaller and more transparent
     if (!bg) {
-        bg = scene.add.rectangle(960, 1030, 1800, 96, 0x000000, 0.75).setDepth(5000).setScrollFactor(0);
+        bg = scene.add.rectangle(960, 1030, 1100, 96, 0x000000, 0.75).setDepth(5000).setScrollFactor(0);
         label = scene.add.text(960, 1030, '', { fontFamily: 'Arial', fontSize: '52px', color: '#ffffff' }).setOrigin(0.5).setDepth(5001).setScrollFactor(0);
         scene.data.set('_captionBg', bg);
         scene.data.set('_captionLabel', label);
@@ -34,6 +37,22 @@ function showCaption(scene, text, duration = 2500) {
             label.setVisible(false);
         }));
     }
+}
+
+function hideCaption(scene) {
+    if (!scene || !scene.data) return;
+
+    const bg = scene.data.get('_captionBg');
+    const label = scene.data.get('_captionLabel');
+    const timer = scene.data.get('_captionTimer');
+
+    if (timer) {
+        timer.remove();
+        scene.data.remove('_captionTimer');
+    }
+
+    if (bg) bg.setVisible(false);
+    if (label) label.setVisible(false);
 }
 
 const Menu_Button_Text = {
@@ -303,14 +322,15 @@ class SettingsOverlay extends Phaser.Scene {
 
         this.createVolumeSlider(960, 375, "Sound Volume", "soundVolume");
         this.createVolumeSlider(960, 525, "Music Volume", "musicVolume");
+        this.createCaptionsToggle(750, 660);
 
         const canUseFullscreen = this.scale.fullscreen && this.scale.fullscreen.available;
         if (!canUseFullscreen) {
-            this.add.text(960, 655, "Fullscreen on iOS: tap Share → Add to Home Screen", {
-                fontFamily: "Arial", fontSize: "28px", color: "#b8c4d4", align: "center", wordWrap: { width: 900 }
+            this.add.text(1190, 660, "Fullscreen on iOS: tap Share → Add to Home Screen", {
+                fontFamily: "Arial", fontSize: "28px", color: "#b8c4d4", align: "center", wordWrap: { width: 420 }
             }).setOrigin(0.5);
         } else {
-            new MenuButton(this, 960, 655, this.scale.isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen", () => {
+            new MenuButton(this, 1190, 660, this.scale.isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen", () => {
                 if (this.scale.isFullscreen) {
                     this.scale.stopFullscreen();
                 } else {
@@ -319,7 +339,7 @@ class SettingsOverlay extends Phaser.Scene {
             }, 420, 90);
         }
 
-        new MenuButton(this, 750, 780, "Close", () => {
+        new MenuButton(this, 750, 830, "Close", () => {
             if (this.previousScene) {
                 this.scene.resume(this.previousScene);
             }
@@ -327,7 +347,7 @@ class SettingsOverlay extends Phaser.Scene {
             this.scene.stop();
         }, 360, 105);
 
-        new MenuButton(this, 1170, 780, "Main Menu", () => {
+        new MenuButton(this, 1170, 830, "Main Menu", () => {
             if (this.previousScene) {
                 this.scene.stop(this.previousScene);
             }
@@ -390,5 +410,76 @@ class SettingsOverlay extends Phaser.Scene {
                 setValue((dragX - trackX) / sliderWidth);
             }
         });
+    }
+
+    //checkbox to toggle captions
+    createCaptionsToggle(x, y) {
+        const checkboxSize = 52;
+        const checkbox = this.add.graphics();
+        const checkmark = this.add.graphics();
+        const label = this.add.text(-95, 0, "Captions", Settings_Label).setOrigin(0.5);
+        const checkboxContainer = this.add.container(30, 0, [checkbox, checkmark]);
+        const container = this.add.container(x, y, [label, checkboxContainer]);
+
+        const drawCheckbox = (fill = Menu_Button_Theme.fill, stroke = Menu_Button_Theme.stroke) => {
+            checkbox.clear();
+            checkbox.fillStyle(fill, 0.94);
+            checkbox.fillRoundedRect(-checkboxSize / 2, -checkboxSize / 2, checkboxSize, checkboxSize, 10);
+            checkbox.lineStyle(3, stroke, 1);
+            checkbox.strokeRoundedRect(-checkboxSize / 2, -checkboxSize / 2, checkboxSize, checkboxSize, 10);
+        };
+
+        const drawCheckmark = () => {
+            checkmark.clear();
+
+            if (!this.settingsValues.captionsEnabled) return;
+
+            checkmark.lineStyle(6, 0xffffff, 1);
+            checkmark.beginPath();
+            checkmark.moveTo(-16, -1);
+            checkmark.lineTo(-5, 13);
+            checkmark.lineTo(18, -16);
+            checkmark.strokePath();
+        };
+
+        const setCaptionsEnabled = (enabled) => {
+            this.settingsValues.captionsEnabled = enabled;
+            this.registry.set("settingsValues", this.settingsValues);
+            try { localStorage.setItem('gameSettings', JSON.stringify(this.settingsValues)); } catch (e) {}
+            if (!enabled) {
+                hideCaption(this);
+
+                if (this.previousScene) {
+                    hideCaption(this.scene.get(this.previousScene));
+                }
+            }
+            drawCheckmark();
+        };
+
+        drawCheckbox();
+        drawCheckmark();
+        checkbox.setInteractive(
+            new Phaser.Geom.Rectangle(-checkboxSize / 2, -checkboxSize / 2, checkboxSize, checkboxSize),
+            Phaser.Geom.Rectangle.Contains
+        );
+        checkbox.input.cursor = "pointer";
+        checkbox.on("pointerover", () => drawCheckbox(Menu_Button_Theme.hoverFill, Menu_Button_Theme.hoverStroke));
+        checkbox.on("pointerout", () => {
+            container.setScale(1);
+            drawCheckbox();
+        });
+        checkbox.on("pointerdown", (pointer, localX, localY, event) => {
+            if (event) {
+                event.stopPropagation();
+            }
+
+            container.setScale(0.92);
+            drawCheckbox(Menu_Button_Theme.downFill, Menu_Button_Theme.hoverStroke);
+            setCaptionsEnabled(!this.settingsValues.captionsEnabled);
+            this.time.delayedCall(90, () => container.setScale(1));
+        });
+        checkbox.on("pointerup", () => container.setScale(1));
+
+        return container;
     }
 }
