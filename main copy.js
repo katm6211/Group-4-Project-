@@ -32,20 +32,23 @@ class Launcher extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor("#111318");
 
-        this.add.text(960, 165, "CMPM120 Final Game", {
+        this.add.text(960, 165, "Prototype Launcher", {
             fontFamily: "Arial",
             fontSize: "76px",
             color: "#f5f1e8"
         }).setOrigin(0.5);
 
-        /*this.add.text(960, 250, "Select a prototype", {
+        this.add.text(960, 250, "Select a prototype", {
             fontFamily: "Arial",
             fontSize: "32px",
             color: "#b8c4d4"
-        }).setOrigin(0.5); */
+        }).setOrigin(0.5);
 
         const options = [
-            { label: "Click to Start", scene: "Game_StartCinematic" }
+            { label: "1  Cinematic Prototype", scene: "CinematicPrototype" },
+            { label: "2  Core Gameplay Prototype", scene: "CoreGameplayPrototype" },
+            { label: "3  Scene Flow Prototype", scene: "SceneFlowPrototype" },
+            { label: "4  Game", scene: "Game_StartCinematic" }
         ];
 
         options.forEach((option, index) => {
@@ -103,7 +106,7 @@ const config = {
         }
     }, 
     scene: [
-        Game_StartCinematic,
+        Launcher,
         StartCinematic,
         CinematicPrototype,
         CoreGameplayPrototype,
@@ -119,6 +122,7 @@ const config = {
         AlienRevealScene,
         EndingScene,
         Inventory,
+        Game_StartCinematic,
         Game_CinematicMainMenu,
         Game_ChasingScene,
         Game_ChaseScene,
