@@ -21,9 +21,12 @@ Selectable Requirements：
 
 Contributors: 
 Denis Gamolya - Production lead
+
 Shiyi Sun - Technology lead
+
 Katarina Malenovic - Testing lead
 
 Asset Credits:
 All third-party assets are credited in ASSETS.md.
+
 Original art assets were created by Katarina Malenovic using Piskel.
