@@ -3,7 +3,7 @@
 # Introduction
 
 ## Play the Game
-[ Main Game ]( https://katm6211.github.io/Group-4-Project-/ ). A touchscreen is recommended. On mobile, open Settings in-game to enter fullscreen. On iOS, tap Share then Add to Home Screen for fullscreen.
+[ Main Game ]( https://katm6211.github.io/Group-4-Project-/) - A touchscreen is recommended. On mobile, open Settings in-game to enter fullscreen. On iOS, tap Share then Add to Home Screen for fullscreen.
 
 ## Prototypes
 * Cinematic Prototype: https://katm6211.github.io/Group-4-Project-/testing-check-1/cinematics-1.html
