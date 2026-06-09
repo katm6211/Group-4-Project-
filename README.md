@@ -1,41 +1,49 @@
-# Group-4-Project-
-## TEAM MEMBERS
-- Denis Gamolya
-- Katarina Malenovic
-- Shiyi Sun
+# [游戏名字 TODO]
 
-Cinematic Prototype: 
-- Non-interactive cinematic: The beginning of our prototype displays the logo of our game studio. 
-- Interactive cinematic: A menu screen screen appears after our non-interactive cinematic plays, with "Start game, Settings, and Credits" buttons. Each button is technically interactable by clicking or tapping, and returns feedback to the player by stating the button's currently a prototype. 
-- Choreography in code: We have a tween chain for the buttons of the menu screen, where each button fades in after the previous one.
+[一句话游戏简介 TODO]
 
-Scene Flow Prototype: 
-- Scene types: Your prototype should demonstrate how at least four kinds of distinct types of scenes are used in your game. Every game needs to have a distinct main title screen and a separate credits screen that is easy to access without finishing the game first. The inclusion of other types of scenes can vary between teams. Kinds:
-  - Main title scene: We have a placeholder for the Main title scene in the beginning, once you press start on the menu screen. There are tweens places in for the text to fade in. 
-  - Credits scene: We've allocated a Credits button on the menu screen, and a credits scene which appears once all of the gameplay scenes are completed. 
-  - Gameplay scene: Our gameplay scene titles: ChaseScene PuzzleScene, ClockScene, YoungerSelfScene, AlienRevealScene, & EndingScene. Each of these titles in captioned with additional text such as: ["Escape from the aliens before time runs out!"], ["Find the clock and interact with it."], ["Turn the clock hands. Which direction?"], ["You have been caught. The alien reveals itself."], ["You and your younger self escaped the UFO!"]. 
-  - Menu scene: We have a settings screen in our menu which allows the player to adjust the volume and the music of the game. This button is below the credits and start game button. 
 
-- Communication between scenes: We've built an inventory scene and added a placeholder button in the bottom left corner of the screen to allow the player to temporarily access the inventory throughout all of the scenes. The inventory appears in the first gameplay scene, the "ChaseScene" class. There's a test to make sure the inventory works, and then in every scene there's a button dedicated to access the inventory. 
+## Play the Game
 
-- Reachability: We encorporated this into our gameplay scenes by displaying two buttons on our interface as placeholders. Each button leads to either a good ending or a bad ending. The scenes that display only one button and go back to the title screen are considered to be part of the bad ending. The good endings allow the player to progress into the next scene and eventually reach the end. Each button is captioned with a description of the different outcomes gameplay-wise.
+Main Game: https://katm6211.github.io/Group-4-Project-/
 
-- Transitions: Each scene contains a transition which fades into black, where the next scene fades out of black. 
+A touchscreen is recommended. On mobile, open Settings in-game to enter fullscreen. On iOS, tap Share then Add to Home Screen for fullscreen.
 
-Core Gameplay Prototype: 
-- Audio: There's a continuously looping background sound in the core mechanic. And there's a jumping sound effect triggered when the player clicks the jump button. 
 
-- Visual: We have a sprite sheet in the core mechanic and the each of the puzzles are graphically mapped out/prototyped. The sprite sheet is in spritemovement.js and the graphic visuals for the puzzles are in the core gameplay prototype.js file. 
+## Prototypes
 
-- Motion: Dynamic motion (physics) is exercised through the sprite. For now, you can control the sprite through buttons on the screen: left, right, and up. There's also modifications of animation frames for the sprite, this is all located in spritemovement.js. 
+Cinematic Prototype: https://katm6211.github.io/Group-4-Project-/testing-check-1/cinematics-1.html
 
-- Prefabs: We have our design presets expressed as a structured block of data inside our core gameplay prototype.js file that drives repeated UI elements : 
-        const demos = [
-            { label: "1. Handle & Lever", scene: "DemoHandleLever" },
-            { label: "2. Wire Puzzle", scene: "DemoWirePuzzle" },
-            { label: "3. Clock", scene: "DemoClock" },
-            { label: "4. Radio", scene: "DemoRadio" },
-            { label: "5. Core Mechanic", scene: "Sprite"}
-        ];
-    Two or more notions of prefab objects must be used in your prototype's software implementation:
-    In Settings Helper.js there is a MenuButton class and SettingsButton extends MenuButton. MenuButton is a custom GameObject and SettingsButton is a subclass of it. At the top of Settings Helper.js there are also styling presets for the pause menu.
+Scene Flow Prototype: https://katm6211.github.io/Group-4-Project-/testing-check-1/scene-flow-1.html
+
+Core Gameplay Prototype: https://katm6211.github.io/Group-4-Project-/testing-check-1/core-gameplay-1.html
+
+
+## Theme
+
+[一段话解释你们怎么诠释 "nearby in space, but distant in time" 这个主题 TODO]
+
+
+## Selectable Requirements
+
+1. Data-driven experience progression: Puzzle configurations including wire puzzle symbol mappings and room descriptions are defined in data/levels.json and loaded at runtime. You can edit puzzle design details in that file without touching the game code.
+
+2. Procedural graphics: The wire puzzle connection lines and the clock puzzle hands and tick marks are drawn with Phaser's Graphics API in code. No image files are used for these visuals.
+
+3. Complete closed captioning: Every sound in the game is described with on-screen text when it plays, including background music, sound effects, and ambient loops.
+
+
+## Contributors
+
+Denis Gamolya - Production lead
+
+Shiyi Sun - Technology lead
+
+Katarina Malenovic - Testing lead
+
+
+## Asset Credits
+
+All third-party assets are credited in ASSETS.md.
+
+Original art assets were created by Katarina Malenovic using Piskel.
