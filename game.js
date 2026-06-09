@@ -22,8 +22,11 @@ const Game_Audio_Assets = [
 ];
 
 function getGameSettingsValues(scene) {
+    let fromStorage = {};
+    try { fromStorage = JSON.parse(localStorage.getItem('gameSettings') || '{}'); } catch (e) {}
     const settingsValues = {
         ...Game_Default_Settings_Values,
+        ...fromStorage,
         ...(scene.registry.get("settingsValues") || {})
     };
 

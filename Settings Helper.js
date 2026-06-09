@@ -208,6 +208,14 @@ class SettingsOverlay extends Phaser.Scene {
         this.createVolumeSlider(960, 375, "Sound Volume", "soundVolume");
         this.createVolumeSlider(960, 525, "Music Volume", "musicVolume");
 
+        const fsBtn = new MenuButton(this, 960, 655, this.scale.isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen", () => {
+            if (this.scale.isFullscreen) {
+                this.scale.stopFullscreen();
+            } else {
+                this.scale.startFullscreen();
+            }
+        }, 420, 90);
+
         new MenuButton(this, 750, 780, "Close", () => {
             if (this.previousScene) {
                 this.scene.resume(this.previousScene);
@@ -246,6 +254,7 @@ class SettingsOverlay extends Phaser.Scene {
             const clampedValue = Phaser.Math.Clamp(value, 0, 1);
             this.settingsValues[settingsKey] = clampedValue;
             this.registry.set("settingsValues", this.settingsValues);
+            try { localStorage.setItem('gameSettings', JSON.stringify(this.settingsValues)); } catch (e) {}
 
             fill.scaleX = clampedValue;
             knob.x = trackX + sliderWidth * clampedValue;
