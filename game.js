@@ -130,57 +130,69 @@ function startWithFade(scene, nextScene) {
     });
 }
 
-// unnecessary delete later
-function addRoomLabel(scene, roomNumber, title) {
-    scene.add.text(960, 155, `Room ${roomNumber} of 4: ${title}`, {
-        fontFamily: "Arial",
-        fontSize: "24px",
-        color: "#7dd3fc"
-    }).setOrigin(0.5);
-}
-
 function addProgressButton(scene, options) {
-    const button = scene.add.rectangle(1700, 1000, 300, 64, 0x242a35)
-        .setStrokeStyle(3, 0x6f7c91)
-        .setInteractive({ useHandCursor: true });
+    const buttonWidth = 300;
+    const buttonHeight = 64;
+    const button = scene.add.graphics();
+    const drawButton = (fill, stroke) => {
+        button.clear();
+        button.fillStyle(fill, 0.94);
+        button.fillRoundedRect(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight, 12);
+        button.lineStyle(3, stroke, 1);
+        button.strokeRoundedRect(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight, 12);
+    };
 
-    const label = scene.add.text(1700, 1000, options.lockedLabel || "Solve puzzle first", {
+    const label = scene.add.text(0, 0, options.lockedLabel || "Solve puzzle first", {
         fontFamily: "Arial",
         fontSize: "22px",
         color: "#8993a4"
     }).setOrigin(0.5);
+    const buttonContainer = scene.add.container(1700, 1000, [button, label]);
 
     let unlocked = false;
     let leaving = false;
+    drawButton(0x151d27, 0x4b6174);
+    button.setInteractive(
+        new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
+        Phaser.Geom.Rectangle.Contains
+    );
+    button.input.cursor = "pointer";
 
     const refresh = () => {
         if (unlocked || !options.isUnlocked()) return;
 
         unlocked = true;
-        button.setFillStyle(0x1a3a2a).setStrokeStyle(3, 0x44ff44);
+        drawButton(0x17212b, 0x7dd3fc);
         label.setText(options.unlockedLabel || "Continue").setColor("#f5f1e8");
     };
 
     button.on("pointerover", () => {
-        if (unlocked) button.setFillStyle(0x24523a);
+        drawButton(unlocked ? 0x24384a : 0x1d2b38, unlocked ? 0xb7f3ff : 0x4b6174);
+        if (unlocked) label.setColor("#ffffff");
     });
 
     button.on("pointerout", () => {
-        button.setFillStyle(unlocked ? 0x1a3a2a : 0x242a35);
+        buttonContainer.setScale(1);
+        drawButton(unlocked ? 0x17212b : 0x151d27, unlocked ? 0x7dd3fc : 0x4b6174);
+        label.setColor(unlocked ? "#f5f1e8" : "#8993a4");
     });
 
     button.on("pointerdown", () => {
         refresh();
         if (!unlocked || leaving) return;
 
+        buttonContainer.setScale(0.92);
+        drawButton(0x0f1821, 0xb7f3ff);
+        scene.time.delayedCall(90, () => buttonContainer.setScale(1));
         leaving = true;
         options.onContinue();
     });
+    button.on("pointerup", () => buttonContainer.setScale(1));
 
     scene.events.on("update", refresh);
     scene.events.once("shutdown", () => scene.events.off("update", refresh));
     refresh();
-    return button;
+    return buttonContainer;
 }
 
 function playGameBgm(scene) {
@@ -626,12 +638,42 @@ class Game_PowerBox extends Phaser.Scene {
             startWithFade(this, "Game_DemoWirePuzzle");
         });
 
-        const backBtn = this.add.rectangle(165, 72, 230, 64, 0x242a35)
-            .setStrokeStyle(3, 0x6f7c91).setInteractive({ useHandCursor: true }).setDepth(10);
-        this.add.text(165, 72, "Back", {
+        const backWidth = 230;
+        const backHeight = 64;
+        const backButton = this.add.graphics();
+        const drawBackButton = (fill = 0x17212b, stroke = 0x7dd3fc) => {
+            backButton.clear();
+            backButton.fillStyle(fill, 0.94);
+            backButton.fillRoundedRect(-backWidth / 2, -backHeight / 2, backWidth, backHeight, 12);
+            backButton.lineStyle(3, stroke, 1);
+            backButton.strokeRoundedRect(-backWidth / 2, -backHeight / 2, backWidth, backHeight, 12);
+        };
+        const backLabel = this.add.text(0, 0, "Back", {
             fontFamily: "Arial", fontSize: "28px", color: "#f5f1e8"
-        }).setOrigin(0.5).setDepth(11);
-        backBtn.on("pointerdown", () => startWithFade(this, "Game_ChaseScene"));
+        }).setOrigin(0.5);
+        const backContainer = this.add.container(165, 72, [backButton, backLabel]).setDepth(10);
+        drawBackButton();
+        backButton.setInteractive(
+            new Phaser.Geom.Rectangle(-backWidth / 2, -backHeight / 2, backWidth, backHeight),
+            Phaser.Geom.Rectangle.Contains
+        );
+        backButton.input.cursor = "pointer";
+        backButton.on("pointerover", () => {
+            drawBackButton(0x24384a, 0xb7f3ff);
+            backLabel.setColor("#ffffff");
+        });
+        backButton.on("pointerout", () => {
+            backContainer.setScale(1);
+            drawBackButton();
+            backLabel.setColor("#f5f1e8");
+        });
+        backButton.on("pointerdown", () => {
+            backContainer.setScale(0.92);
+            drawBackButton(0x0f1821, 0xb7f3ff);
+            this.time.delayedCall(90, () => backContainer.setScale(1));
+            startWithFade(this, "Game_ChaseScene");
+        });
+        backButton.on("pointerup", () => backContainer.setScale(1));
 
         addInventoryButton(this);
     }
@@ -681,9 +723,9 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
         addGameSettingsButton(this);
         addInventoryButton(this);
 
-        this.add.text(960, 80, "Wire Puzzle", {
-            fontFamily: "Arial", fontSize: "44px", color: "#f5f1e8"
-        }).setOrigin(0.5);
+        // this.add.text(960, 80, "Wire Puzzle", {
+        //     fontFamily: "Arial", fontSize: "44px", color: "#f5f1e8"
+        // }).setOrigin(0.5);
 
         const statusText = this.add.text(960, 900, "Connect each symbol to its correct terminal. Check your inventory for the decoder.", {
             fontFamily: "Arial", fontSize: "24px", color: "#b8c4d4", align: "center", wordWrap: { width: 1200 }
@@ -810,14 +852,43 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
         window.inventoryItemActions["decoder"] = () => decoderOverlay.setVisible(true);
         this.events.once("shutdown", () => { delete window.inventoryItemActions["decoder"]; });
 
-        const backBtn = this.add.rectangle(165, 72, 230, 64, 0x242a35)
-            .setStrokeStyle(3, 0x6f7c91).setInteractive({ useHandCursor: true }).setDepth(10);
-        this.add.text(165, 72, "Back", {
+        const backWidth = 230;
+        const backHeight = 64;
+        const backButton = this.add.graphics();
+        const drawBackButton = (fill = 0x17212b, stroke = 0x7dd3fc) => {
+            backButton.clear();
+            backButton.fillStyle(fill, 0.94);
+            backButton.fillRoundedRect(-backWidth / 2, -backHeight / 2, backWidth, backHeight, 12);
+            backButton.lineStyle(3, stroke, 1);
+            backButton.strokeRoundedRect(-backWidth / 2, -backHeight / 2, backWidth, backHeight, 12);
+        };
+        const backLabel = this.add.text(0, 0, "Back", {
             fontFamily: "Arial", fontSize: "28px", color: "#f5f1e8"
-        }).setOrigin(0.5).setDepth(11);
-        backBtn.on("pointerdown", () => startWithFade(this, "Game_PowerBox"));
+        }).setOrigin(0.5);
+        const backContainer = this.add.container(165, 72, [backButton, backLabel]).setDepth(10);
+        drawBackButton();
+        backButton.setInteractive(
+            new Phaser.Geom.Rectangle(-backWidth / 2, -backHeight / 2, backWidth, backHeight),
+            Phaser.Geom.Rectangle.Contains
+        );
+        backButton.input.cursor = "pointer";
+        backButton.on("pointerover", () => {
+            drawBackButton(0x24384a, 0xb7f3ff);
+            backLabel.setColor("#ffffff");
+        });
+        backButton.on("pointerout", () => {
+            backContainer.setScale(1);
+            drawBackButton();
+            backLabel.setColor("#f5f1e8");
+        });
+        backButton.on("pointerdown", () => {
+            backContainer.setScale(0.92);
+            drawBackButton(0x0f1821, 0xb7f3ff);
+            this.time.delayedCall(90, () => backContainer.setScale(1));
+            startWithFade(this, "Game_PowerBox");
+        });
+        backButton.on("pointerup", () => backContainer.setScale(1));
 
-        addRoomLabel(this, 2, "Wire Puzzle");
         addProgressButton(this, {
             isUnlocked: () => this.wirePuzzleSolved,
             onContinue: () => startWithFade(this, "Game_ClockRoom")
@@ -935,6 +1006,7 @@ class Game_DemoClock extends Phaser.Scene {
         }
 
         this.handAngle = -Math.PI / 2;
+        const handLength = 173;
         const handGraphics = this.add.graphics();
         const drawHand = () => {
             handGraphics.clear();
@@ -942,8 +1014,8 @@ class Game_DemoClock extends Phaser.Scene {
             handGraphics.beginPath();
             handGraphics.moveTo(cx, cy);
             handGraphics.lineTo(
-                cx + Math.cos(this.handAngle) * (radius - 30),
-                cy + Math.sin(this.handAngle) * (radius - 30)
+                cx + Math.cos(this.handAngle) * handLength,
+                cy + Math.sin(this.handAngle) * handLength
             );
             handGraphics.strokePath();
             handGraphics.fillStyle(0x99643f);
@@ -995,31 +1067,42 @@ class Game_DemoClock extends Phaser.Scene {
             }
         });
 
-        addRoomLabel(this, 3, "Clock");
-
-        const backButton = this.add.rectangle(220, 920, 300, 64, 0x242a35)
-            .setStrokeStyle(3, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-
-        const backLabel = this.add.text(220, 920, "Back to Clock Room", {
-            fontFamily: "Arial",
-            fontSize: "22px",
-            color: "#f5f1e8"
+        const backWidth = 300;
+        const backHeight = 64;
+        const backButton = this.add.graphics();
+        const drawBackButton = (fill = 0x17212b, stroke = 0x7dd3fc) => {
+            backButton.clear();
+            backButton.fillStyle(fill, 0.94);
+            backButton.fillRoundedRect(-backWidth / 2, -backHeight / 2, backWidth, backHeight, 12);
+            backButton.lineStyle(3, stroke, 1);
+            backButton.strokeRoundedRect(-backWidth / 2, -backHeight / 2, backWidth, backHeight, 12);
+        };
+        const backLabel = this.add.text(0, 0, "Back to Clock Room", {
+            fontFamily: "Arial", fontSize: "22px", color: "#f5f1e8"
         }).setOrigin(0.5);
-
+        const backContainer = this.add.container(220, 920, [backButton, backLabel]);
+        drawBackButton();
+        backButton.setInteractive(
+            new Phaser.Geom.Rectangle(-backWidth / 2, -backHeight / 2, backWidth, backHeight),
+            Phaser.Geom.Rectangle.Contains
+        );
+        backButton.input.cursor = "pointer";
         backButton.on("pointerover", () => {
-            backButton.setFillStyle(0x334155);
+            drawBackButton(0x24384a, 0xb7f3ff);
             backLabel.setColor("#ffffff");
         });
-
         backButton.on("pointerout", () => {
-            backButton.setFillStyle(0x242a35);
+            backContainer.setScale(1);
+            drawBackButton();
             backLabel.setColor("#f5f1e8");
         });
-
-        backButton.once("pointerdown", () => {
+        backButton.on("pointerdown", () => {
+            backContainer.setScale(0.92);
+            drawBackButton(0x0f1821, 0xb7f3ff);
+            this.time.delayedCall(90, () => backContainer.setScale(1));
             startWithFade(this, "Game_ClockRoom");
         });
+        backButton.on("pointerup", () => backContainer.setScale(1));
     }
 }
 
@@ -1039,16 +1122,10 @@ class Game_RadioRoom extends Phaser.Scene {
             bgm.stop();
         }
         this.radiobeeping = playLoopingSound(this, 'radiobeeping');
-        this.talkshow = playLoopingSound(this, 'talkshow');
-
-        /*
-        add radio sprite
-        add some sound effect as you approach -- radiobeeping.mp3?
-        radio sitting on table?
-        */
 
         this.add.image(960, 540, "grayBackground").setScale(4);
         this.add.image(960, 540, "border").setScale(2.1);
+        this.add.image(1160, 450, "radio").setScale(5).setDepth(2);
 
         const isRadioPuzzleSolved = () => window.radioPuzzleSolved === true;
         const doorGlowColor = isRadioPuzzleSolved() ? 0x44ff44 : 0xff3333;
@@ -1073,21 +1150,6 @@ class Game_RadioRoom extends Phaser.Scene {
             }
             showCompletionPanel(this);
         });
-
-        /*this.radio = this.add.image(1160, 450, "radio").setScale(5);
-        this.add.image(1172, 462, "radio").setScale(5).setTint(0x000000).setAlpha(0.28); // radio shadow
-        const radioBottomY = this.radio.y + (this.radio.displayHeight / 2);
-        this.desk = this.add.image(this.radio.x, radioBottomY, "desk");
-        this.desk.setOrigin(0.5, 0);
-        this.desk.setScale(10);*/
-
-        /*const radioBaseY = 450;
-        const radioHeightEstimated = 150; // Approximated from your hitbox zone height
-        const radioBottomY = radioBaseY + ((radioHeightEstimated * 5) / 2);
-        this.desk = this.add.image(1160, radioBottomY - 20, "desk");
-        this.desk.setOrigin(0.5, 0);
-        this.desk.setScale(10);
-        this.radio = this.add.image(1160, radioBaseY, "radio").setScale(5); */
 
         // draw table
         const tableGraphics = this.add.graphics();
@@ -1128,7 +1190,7 @@ class Game_RadioRoom extends Phaser.Scene {
         this.physics.add.existing(radioArea, true);
 
         // debug visual for zone
-        this.add.rectangle(1160, 450, 200, 150).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
+        //this.add.rectangle(1160, 450, 200, 150).setStrokeStyle(2, 0xffd700).setAlpha(0.5);
 
         radioArea.on("pointerdown", () => {
             if (!this.physics.overlap(this.sprite, radioArea) || this.isChangingScenes)
@@ -1161,7 +1223,7 @@ class Game_DemoRadio extends Phaser.Scene {
 
         addGameSettingsButton(this, { playBgmOnOpen: false });
         addInventoryButton(this);
-        this.talkshow = playLoopingSound(this, 'radiobeeping');
+        this.talkshow = playLoopingSound(this, 'talkshow');
 
 
 
@@ -1169,7 +1231,7 @@ class Game_DemoRadio extends Phaser.Scene {
             fontFamily: "Arial", fontSize: "26px", color: "#b8c4d4", align: "center"
         }).setOrigin(0.5);
 
-        const correctFrequency = Phaser.Math.Between(20, 110);
+        const correctFrequency = Phaser.Math.Between(20, 160);
         this.frequency = 30;
         window.radioPuzzleSolved = false;
 
@@ -1184,6 +1246,8 @@ class Game_DemoRadio extends Phaser.Scene {
         }).setOrigin(0.5);
 
         const update = () => {
+            const difference = Math.abs(this.frequency - correctFrequency);
+            setSoundInstanceVolume(this.talkshow, Phaser.Math.Clamp(1 - (difference / 100), 0, 1));
             frequencyText.setText(`${this.frequency} MHz`);
             if (this.frequency === correctFrequency) {
                 window.radioPuzzleSolved = true;
@@ -1193,7 +1257,6 @@ class Game_DemoRadio extends Phaser.Scene {
                 statusText.setColor("#44ff44");
             } else {
                 window.radioPuzzleSolved = false;
-                const difference = Math.abs(this.frequency - correctFrequency);
                 if (difference <= 5) {
                     signalText.setText("~ almost... ~");
                     signalText.setColor("#ffaa44");
@@ -1225,7 +1288,7 @@ class Game_DemoRadio extends Phaser.Scene {
             fontFamily: "Arial", fontSize: "36px", color: "#f5f1e8"
         }).setOrigin(0.5);
         buttonRight.on("pointerdown", () => {
-            this.frequency = Math.min(110, this.frequency + 1);
+            this.frequency = Math.min(160, this.frequency + 1);
             update();
         });
 
@@ -1247,37 +1310,48 @@ class Game_DemoRadio extends Phaser.Scene {
             fontFamily: "Arial", fontSize: "24px", color: "#b8c4d4"
         }).setOrigin(0.5);
         buttonRightFive.on("pointerdown", () => {
-            this.frequency = Math.min(110, this.frequency + 5);
+            this.frequency = Math.min(160, this.frequency + 5);
             update();
         });
 
         update();
 
-        addRoomLabel(this, 4, "Radio");
-
-        const backButton = this.add.rectangle(220, 920, 300, 64, 0x242a35)
-            .setStrokeStyle(3, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
-
-        const backLabel = this.add.text(220, 920, "Back to Radio Room", {
-            fontFamily: "Arial",
-            fontSize: "22px",
-            color: "#f5f1e8"
+        const backWidth = 300;
+        const backHeight = 64;
+        const backButton = this.add.graphics();
+        const drawBackButton = (fill = 0x17212b, stroke = 0x7dd3fc) => {
+            backButton.clear();
+            backButton.fillStyle(fill, 0.94);
+            backButton.fillRoundedRect(-backWidth / 2, -backHeight / 2, backWidth, backHeight, 12);
+            backButton.lineStyle(3, stroke, 1);
+            backButton.strokeRoundedRect(-backWidth / 2, -backHeight / 2, backWidth, backHeight, 12);
+        };
+        const backLabel = this.add.text(0, 0, "Back to Radio Room", {
+            fontFamily: "Arial", fontSize: "22px", color: "#f5f1e8"
         }).setOrigin(0.5);
-
+        const backContainer = this.add.container(220, 920, [backButton, backLabel]);
+        drawBackButton();
+        backButton.setInteractive(
+            new Phaser.Geom.Rectangle(-backWidth / 2, -backHeight / 2, backWidth, backHeight),
+            Phaser.Geom.Rectangle.Contains
+        );
+        backButton.input.cursor = "pointer";
         backButton.on("pointerover", () => {
-            backButton.setFillStyle(0x334155);
+            drawBackButton(0x24384a, 0xb7f3ff);
             backLabel.setColor("#ffffff");
         });
-
         backButton.on("pointerout", () => {
-            backButton.setFillStyle(0x242a35);
+            backContainer.setScale(1);
+            drawBackButton();
             backLabel.setColor("#f5f1e8");
         });
-
-        backButton.once("pointerdown", () => {
+        backButton.on("pointerdown", () => {
+            backContainer.setScale(0.92);
+            drawBackButton(0x0f1821, 0xb7f3ff);
+            this.time.delayedCall(90, () => backContainer.setScale(1));
             startWithFade(this, "Game_RadioRoom");
         });
+        backButton.on("pointerup", () => backContainer.setScale(1));
     }
 }
 

@@ -42,6 +42,17 @@ const Menu_Button_Text = {
     color: "#f5f1e8"
 };
 
+const Menu_Button_Theme = {
+    fill: 0x17212b,
+    hoverFill: 0x24384a,
+    downFill: 0x0f1821,
+    stroke: 0x7dd3fc,
+    hoverStroke: 0xb7f3ff,
+    textColor: "#f5f1e8",
+    hoverTextColor: "#ffffff",
+    radius: 16
+};
+
 const Settings_Title = {
     fontFamily: "Arial",
     fontSize: "72px",
@@ -60,26 +71,71 @@ const Settings_Value = {
     color: "#b8c4d4"
 };
 
-// Reusable text-and-rectangle menu button used by settings and overlay actions.
+// Reusable rounded menu button used by settings and overlay actions.
 class MenuButton extends Phaser.GameObjects.Container {
-    constructor(scene, x, y, label, callback, width = 345, height = 96) {
-        const button = scene.add.rectangle(0, 0, width, height, 0x242a35)
-            .setStrokeStyle(3, 0x6f7c91)
-            .setInteractive({ useHandCursor: true });
+    constructor(scene, x, y, label, callback, width = 345, height = 96, theme = {}) {
+        const buttonTheme = { ...Menu_Button_Theme, ...theme };
+        const button = scene.add.graphics();
 
-        const buttonText = scene.add.text(0, 0, label, Menu_Button_Text).setOrigin(0.5);
+        const buttonText = scene.add.text(0, 0, label, {
+            ...Menu_Button_Text,
+            fontSize: theme.fontSize || Menu_Button_Text.fontSize,
+            color: buttonTheme.textColor
+        }).setOrigin(0.5);
 
         super(scene, x, y, [button, buttonText]);
 
-        button.on("pointerover", () => button.setFillStyle(0x334155));
-        button.on("pointerout", () => button.setFillStyle(0x242a35));
+        this.button = button;
+        this.buttonText = buttonText;
+        this.buttonTheme = buttonTheme;
+        this.buttonWidth = width;
+        this.buttonHeight = height;
+
+        const drawButton = (fill, stroke) => {
+            button.clear();
+            button.fillStyle(fill, 0.94);
+            button.fillRoundedRect(-width / 2, -height / 2, width, height, buttonTheme.radius);
+            button.lineStyle(3, stroke, 1);
+            button.strokeRoundedRect(-width / 2, -height / 2, width, height, buttonTheme.radius);
+        };
+
+        this.setButtonTheme = (nextTheme = {}) => {
+            this.buttonTheme = { ...this.buttonTheme, ...nextTheme };
+            drawButton(this.buttonTheme.fill, this.buttonTheme.stroke);
+            buttonText.setColor(this.buttonTheme.textColor);
+        };
+
+        this.setLabel = (nextLabel) => {
+            buttonText.setText(nextLabel);
+        };
+
+        drawButton(buttonTheme.fill, buttonTheme.stroke);
+        button.setInteractive(
+            new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
+            Phaser.Geom.Rectangle.Contains
+        );
+        button.input.cursor = "pointer";
+
+        button.on("pointerover", () => {
+            drawButton(this.buttonTheme.hoverFill, this.buttonTheme.hoverStroke);
+            buttonText.setColor(this.buttonTheme.hoverTextColor);
+        });
+        button.on("pointerout", () => {
+            this.setScale(1);
+            drawButton(this.buttonTheme.fill, this.buttonTheme.stroke);
+            buttonText.setColor(this.buttonTheme.textColor);
+        });
         button.on("pointerdown", (pointer, localX, localY, event) => {
             if (event) {
                 event.stopPropagation();
             }
 
+            this.setScale(0.92);
+            drawButton(this.buttonTheme.downFill, this.buttonTheme.hoverStroke);
+            scene.time.delayedCall(90, () => this.setScale(1));
             callback();
         });
+        button.on("pointerup", () => this.setScale(1));
 
         scene.add.existing(this);
     }
