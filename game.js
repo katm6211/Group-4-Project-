@@ -194,6 +194,7 @@ function playGameBgm(scene) {
 
     if (!bgm.isPlaying) {
         bgm.play();
+        showCaption(scene, Audio_Captions['bgm'], 3000);
     }
 }
 
@@ -466,7 +467,13 @@ class Game_ChaseScene extends Phaser.Scene {
             this.anims.create({ key: 'mob-walk', frames: this.anims.generateFrameNumbers('mob', { start: 0, end: 2 }), frameRate: 10, repeat: -1 });
         }
 
+        this.events.once('shutdown', () => {
+            const mob = this.sound.get('mobsound');
+            if (mob) mob.stop();
+        });
+
         const alienEnter = () => {
+            playLoopingSound(this, 'mobsound');
             const alien = this.add.sprite(0, groundY - 50, 'mob').setScale(4).setDepth(5);
             alien.anims.play('mob-walk');
             this.events.on('update', (time, delta) => {
@@ -1216,7 +1223,7 @@ class Game_ChasingScene extends Phaser.Scene {
         this.physics.world.gravity.y = 600;
         this.physics.world.setBounds(0, 0, 1920, 1304);
 
-        this.add.rectangle(1870, groundY - 100, 60, 200, 0x1a3a2a).setStrokeStyle(3, 0x44ff44);
+        this.add.image(1870, groundY - 100, 'door').setDisplaySize(60, 200);
         const doorZone = this.add.zone(1870, groundY - 100, 60, 200);
         this.physics.add.existing(doorZone, true);
 
