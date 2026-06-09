@@ -568,6 +568,26 @@ class Game_ChaseScene extends Phaser.Scene {
         });
 
         addInventoryButton(this);
+
+        // make clock note usable from the inventory
+        const clockNoteOverlay = this.add.container(960, 540).setDepth(20).setVisible(false);
+        const clockNoteBg = this.add.rectangle(0, 0, 620, 300, 0x101010).setStrokeStyle(3, 0xffd700);
+        const clockNoteTitle = this.add.text(0, -105, "— Clock Note —", {
+            fontFamily: "Arial", fontSize: "28px", color: "#ffd700"
+        }).setOrigin(0.5);
+        const clockNoteBody = this.add.text(0, 0, "Only one hand can unwind time.", {
+            fontFamily: "Arial", fontSize: "34px", color: "#f5f1e8", align: "center", wordWrap: { width: 520 }
+        }).setOrigin(0.5);
+        const clockNoteClose = this.add.text(0, 105, "[ Close ]", {
+            fontFamily: "Arial", fontSize: "22px", color: "#aaaaaa"
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        clockNoteClose.on("pointerdown", () => clockNoteOverlay.setVisible(false));
+        clockNoteOverlay.add([clockNoteBg, clockNoteTitle, clockNoteBody, clockNoteClose]);
+
+        window.inventoryItemActions = window.inventoryItemActions || {};
+        window.inventoryItemActions["Clock Note"] = () => clockNoteOverlay.setVisible(true);
+        this.events.once("shutdown", () => { delete window.inventoryItemActions["Clock Note"]; });
     }
 }
 
@@ -1191,7 +1211,7 @@ class Game_RadioRoom extends Phaser.Scene {
     constructor() {
         super("Game_RadioRoom");
     }
-    
+
 
     create() {
         this.cameras.main.setBackgroundColor("#101716");
@@ -1259,7 +1279,7 @@ class Game_RadioRoom extends Phaser.Scene {
         tableGraphics.fillRoundedRect(1012, 555, 36, 220, 6);
         tableGraphics.strokeRoundedRect(1012, 555, 36, 220, 6);
         tableGraphics.fillRoundedRect(1472, 555, 36, 220, 6);
-        tableGraphics.strokeRoundedRect(1472, 555, 36, 220, 6); 
+        tableGraphics.strokeRoundedRect(1472, 555, 36, 220, 6);
 
 
         // small nails / bolts
@@ -1345,8 +1365,17 @@ class Game_DemoRadio extends Phaser.Scene {
 
         const update = () => {
             const difference = Math.abs(this.frequency - correctFrequency);
-            setSoundInstanceVolume(this.talkshow, Phaser.Math.Clamp(1 - (difference / 100), 0, 1));
+            const maxDifference = 50;
+            const maxVolume = 0.5;
+
+            const volume = difference >= maxDifference
+                ? 0
+                : maxVolume * (1 - difference / maxDifference);
+
+            setSoundInstanceVolume(this.talkshow, volume);
+
             frequencyText.setText(`${this.frequency} MHz`);
+
             if (this.frequency === correctFrequency) {
                 window.radioPuzzleSolved = true;
                 signalText.setText("◆ SIGNAL FOUND ◆");
