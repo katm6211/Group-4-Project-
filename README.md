@@ -1,4 +1,4 @@
-# Game name
+# The Outer Limit
 
 # Introduction
 
