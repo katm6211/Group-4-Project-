@@ -561,6 +561,7 @@ class Game_PowerBox extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#101716");
         this.add.image(960, 540, "grayBackground").setScale(4);
         playGameBgm(this);
+        playLoopingSound(this, 'powerboxsound');
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
 
@@ -604,6 +605,7 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#101716");
         this.wirePuzzleSolved = false;
         playGameBgm(this);
+        playLoopingSound(this, 'powerboxsound');
 
         addGameSettingsButton(this);
         addInventoryButton(this);
@@ -1244,8 +1246,15 @@ class Game_ChasingScene extends Phaser.Scene {
         this.physics.add.overlap(sprite, doorZone, () => {
             if (this.transitioning) return;
             this.transitioning = true;
+            const mob = this.sound.get('mobsound');
+            if (mob) mob.stop();
             this.cameras.main.fade(500, 0, 0, 0);
             this.time.delayedCall(500, () => this.scene.start('Game_ChaseScene'));
+        });
+
+        this.events.once('shutdown', () => {
+            const mob = this.sound.get('mobsound');
+            if (mob) mob.stop();
         });
 
         const jumpscareRect = this.add.image(960, 540, 'jumpscare')
@@ -1275,6 +1284,7 @@ class Game_ChasingScene extends Phaser.Scene {
                         sprite.anims.play('right', true);
                         alien.body.enable = true;
                         alien.body.velocity.x = 195;
+                        playLoopingSound(this, 'mobsound');
                     }
                 });
             });
