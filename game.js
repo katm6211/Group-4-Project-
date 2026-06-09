@@ -194,6 +194,7 @@ function playGameBgm(scene) {
 
     if (!bgm.isPlaying) {
         bgm.play();
+        showCaption(scene, Audio_Captions['bgm'], 3000);
     }
 }
 
@@ -267,7 +268,8 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.image('door', 'assets/art/door.png');
         this.load.image('jumpscare', 'assets/art/jumpscarescene.png');
         this.load.image('note', 'assets/art/note.png');
-        this.load.image('desk', 'assets/art/desk2.png');
+        this.load.image('noteDesk', 'assets/art/desk2.png');
+        this.load.json('gameData', 'data/levels.json');
 
 
 
@@ -470,7 +472,13 @@ class Game_ChaseScene extends Phaser.Scene {
             this.anims.create({ key: 'mob-walk', frames: this.anims.generateFrameNumbers('mob', { start: 0, end: 2 }), frameRate: 10, repeat: -1 });
         }
 
+        this.events.once('shutdown', () => {
+            const mob = this.sound.get('mobsound');
+            if (mob) mob.stop();
+        });
+
         const alienEnter = () => {
+            playLoopingSound(this, 'mobsound');
             const alien = this.add.sprite(0, groundY - 50, 'mob').setScale(4).setDepth(5);
             alien.anims.play('mob-walk');
             this.events.on('update', (time, delta) => {
@@ -681,10 +689,7 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
             fontFamily: "Arial", fontSize: "24px", color: "#b8c4d4", align: "center", wordWrap: { width: 1200 }
         }).setOrigin(0.5);
 
-        const symbols = ["△", "○", "□", "✕"];
-        const rightCodes = ["XR-1", "QM-2", "AL-0", "TZ-3"];
-        const rightSymOrder = [2, 3, 1, 0];
-        const correctPairs = [1, 0, 3, 2];
+        const { symbols, rightCodes, rightSymOrder, correctPairs } = this.cache.json.get('gameData').wirePuzzle;
         const leftX = 460, rightX = 1460, yStart = 280, yGap = 150;
 
         const leftNodes = symbols.map((sym, i) => {
@@ -1292,7 +1297,7 @@ class Game_ChasingScene extends Phaser.Scene {
         this.physics.world.gravity.y = 600;
         this.physics.world.setBounds(0, 0, 1920, 1304);
 
-        this.add.rectangle(1870, groundY - 100, 60, 200, 0x1a3a2a).setStrokeStyle(3, 0x44ff44);
+        this.add.image(1870, groundY - 100, 'door').setDisplaySize(60, 200);
         const doorZone = this.add.zone(1870, groundY - 100, 60, 200);
         this.physics.add.existing(doorZone, true);
 

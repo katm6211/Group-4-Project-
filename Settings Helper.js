@@ -1,3 +1,40 @@
+const Audio_Captions = {
+    bgm: "♪ [Ambient space music]",
+    jump: "[Jump]",
+    powerboxsound: "[Electrical buzzing]",
+    radiobeeping: "[Radio static beeping]",
+    talkshow: "♪ [Radio broadcast playing]",
+    mobsound: "[Alien creature approaching]"
+};
+
+function showCaption(scene, text, duration = 2500) {
+    if (!scene || !scene.add) return;
+
+    let bg = scene.data.get('_captionBg');
+    let label = scene.data.get('_captionLabel');
+    let timer = scene.data.get('_captionTimer');
+
+    if (!bg) {
+        bg = scene.add.rectangle(960, 1030, 1800, 96, 0x000000, 0.75).setDepth(5000).setScrollFactor(0);
+        label = scene.add.text(960, 1030, '', { fontFamily: 'Arial', fontSize: '52px', color: '#ffffff' }).setOrigin(0.5).setDepth(5001).setScrollFactor(0);
+        scene.data.set('_captionBg', bg);
+        scene.data.set('_captionLabel', label);
+    }
+
+    if (timer) timer.remove();
+
+    label.setText(text);
+    bg.setVisible(true);
+    label.setVisible(true);
+
+    if (duration > 0) {
+        scene.data.set('_captionTimer', scene.time.delayedCall(duration, () => {
+            bg.setVisible(false);
+            label.setVisible(false);
+        }));
+    }
+}
+
 const Menu_Button_Text = {
     fontFamily: "Arial",
     fontSize: "39px",
@@ -141,6 +178,7 @@ function playSoundEffect(scene, key, config = {}) {
         ...config,
         volume: getAudioVolume(scene, key)
     });
+    if (Audio_Captions[key]) showCaption(scene, Audio_Captions[key]);
 }
 
 // Gets or creates a looping sound, applies category volume, and starts it if needed.
@@ -154,6 +192,7 @@ function playLoopingSound(scene, key, config = {}) {
 
     if (!sound.isPlaying) {
         sound.play();
+        if (Audio_Captions[key]) showCaption(scene, Audio_Captions[key], 3000);
     }
 
     return sound;
@@ -208,13 +247,20 @@ class SettingsOverlay extends Phaser.Scene {
         this.createVolumeSlider(960, 375, "Sound Volume", "soundVolume");
         this.createVolumeSlider(960, 525, "Music Volume", "musicVolume");
 
-        const fsBtn = new MenuButton(this, 960, 655, this.scale.isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen", () => {
-            if (this.scale.isFullscreen) {
-                this.scale.stopFullscreen();
-            } else {
-                this.scale.startFullscreen();
-            }
-        }, 420, 90);
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS) {
+            this.add.text(960, 655, "Fullscreen on iOS: tap Share → Add to Home Screen", {
+                fontFamily: "Arial", fontSize: "28px", color: "#b8c4d4", align: "center", wordWrap: { width: 900 }
+            }).setOrigin(0.5);
+        } else {
+            new MenuButton(this, 960, 655, this.scale.isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen", () => {
+                if (this.scale.isFullscreen) {
+                    this.scale.stopFullscreen();
+                } else {
+                    this.scale.startFullscreen();
+                }
+            }, 420, 90);
+        }
 
         new MenuButton(this, 750, 780, "Close", () => {
             if (this.previousScene) {
