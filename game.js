@@ -23,7 +23,7 @@ const Game_Audio_Assets = [
 
 function getGameSettingsValues(scene) {
     let fromStorage = {};
-    try { fromStorage = JSON.parse(localStorage.getItem('gameSettings') || '{}'); } catch (e) {}
+    try { fromStorage = JSON.parse(localStorage.getItem('gameSettings') || '{}'); } catch (e) { }
     const settingsValues = {
         ...Game_Default_Settings_Values,
         ...fromStorage,
@@ -267,15 +267,15 @@ class Game_StartCinematic extends Phaser.Scene {
         this.load.image('door', 'assets/art/door.png');
         this.load.image('jumpscare', 'assets/art/jumpscarescene.png');
         this.load.image('note', 'assets/art/note.png');
-        this.load.image('noteDesk', 'assets/art/desk2.png');
+        this.load.image('desk', 'assets/art/desk2.png');
 
-        
+
 
     }
 
     create() {
         this.cameras.main.setBackgroundColor("#000000");
-        playGameBgm(this);
+        //playGameBgm(this);
 
         this.fadeRect = this.add.image(300, 250, "logoDraft").setScale(3);
         this.fadeRect.setOrigin(0, 0);
@@ -311,7 +311,7 @@ class Game_CinematicMainMenu extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#151923");
-        playGameBgm(this);
+
 
         // Check if the unique key 'bg_loop' already exists in the global manager
         if (!this.anims.exists('bg_loop')) {
@@ -408,6 +408,10 @@ class Game_ChaseScene extends Phaser.Scene {
     }
 
     create() {
+        /*this.time.delayedCall(3000, () => {
+            playGameBgm(this);
+        }, [], this); */
+
         this.escaping = false;
         this.cameras.main.fadeIn(1000, 0, 0, 0);
         this.cameras.main.setBackgroundColor("#0d1117");
@@ -561,9 +565,38 @@ class Game_PowerBox extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#101716");
         this.add.image(960, 540, "grayBackground").setScale(4);
         playGameBgm(this);
-        playLoopingSound(this, 'powerboxsound');
+        //playLoopingSound(this, 'powerboxsound');
         GameSpritemovement.call(this);
         addGameSettingsButton(this);
+
+        /*this.powerboxsound = this.sound.add('powerboxsound', { loop: true });
+        this.powerboxsound.play();
+
+        // 2. Add the shutdown listener to turn off this specific track
+        this.events.once('shutdown', () => {
+            if (this.powerboxsound) {
+                this.powerboxsound.stop();
+            }
+        }); */
+
+        /*this.powerboxsound = this.sound.get('powerboxsound');
+
+        if (!this.powerboxsound) {
+            // Create and play it only if it doesn't exist yet
+            this.powerboxsound = this.sound.add('powerboxsound', { loop: true });
+            this.powerboxsound.play();
+        } else if (!this.powerboxsound.isPlaying) {
+            this.powerboxsound.play();
+        }
+
+        // Only kill the sound if we are NOT going to the wire puzzle scene
+        this.events.once('shutdown', () => {
+            // Check if the next scene is the puzzle. If it isn't, stop the sound completely.
+            if (!this.scene.isActive('Game_DemoWirePuzzle')) {
+                const snd = this.sound.get('powerboxsound');
+                if (snd) snd.stop();
+            }
+        }); */
 
 
 
@@ -605,7 +638,37 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#101716");
         this.wirePuzzleSolved = false;
         playGameBgm(this);
-        playLoopingSound(this, 'powerboxsound');
+
+        /*this.powerboxsound = this.sound.get('powerboxsound');
+
+        if (!this.powerboxsound) {
+            this.powerboxsound = this.sound.add('powerboxsound', { loop: true });
+            this.powerboxsound.play();
+        } else if (!this.powerboxsound.isPlaying) {
+            this.powerboxsound.play();
+        }
+
+        // Only kill the sound if we are NOT returning to the main powerbox scene
+        this.events.once('shutdown', () => {
+            if (!this.scene.isActive('Game_PowerBox')) {
+                const snd = this.sound.get('powerboxsound');
+                if (snd) snd.stop();
+            }
+        }); */
+
+        //playLoopingSound(this, 'powerboxsound');
+
+        /*this.powerboxsound = this.sound.add('powerboxsound', { loop: true });
+        this.powerboxsound.play();
+
+        // 2. Add the shutdown listener to turn off this specific track
+        this.events.once('shutdown', () => {
+            if (this.powerboxsound) {
+                this.powerboxsound.stop();
+            }
+        }); */
+
+
 
         addGameSettingsButton(this);
         addInventoryButton(this);
@@ -618,10 +681,10 @@ class Game_DemoWirePuzzle extends Phaser.Scene {
             fontFamily: "Arial", fontSize: "24px", color: "#b8c4d4", align: "center", wordWrap: { width: 1200 }
         }).setOrigin(0.5);
 
-        const symbols    = ["△", "○", "□", "✕"];
+        const symbols = ["△", "○", "□", "✕"];
         const rightCodes = ["XR-1", "QM-2", "AL-0", "TZ-3"];
         const rightSymOrder = [2, 3, 1, 0];
-        const correctPairs  = [1, 0, 3, 2];
+        const correctPairs = [1, 0, 3, 2];
         const leftX = 460, rightX = 1460, yStart = 280, yGap = 150;
 
         const leftNodes = symbols.map((sym, i) => {
@@ -959,6 +1022,7 @@ class Game_RadioRoom extends Phaser.Scene {
     constructor() {
         super("Game_RadioRoom");
     }
+    
 
     create() {
         this.cameras.main.setBackgroundColor("#101716");
@@ -1005,8 +1069,20 @@ class Game_RadioRoom extends Phaser.Scene {
             showCompletionPanel(this);
         });
 
-        this.radio = this.add.image(1160, 450, "radio").setScale(5);
+        /*this.radio = this.add.image(1160, 450, "radio").setScale(5);
         this.add.image(1172, 462, "radio").setScale(5).setTint(0x000000).setAlpha(0.28); // radio shadow
+        const radioBottomY = this.radio.y + (this.radio.displayHeight / 2);
+        this.desk = this.add.image(this.radio.x, radioBottomY, "desk");
+        this.desk.setOrigin(0.5, 0);
+        this.desk.setScale(10);*/
+
+        /*const radioBaseY = 450;
+        const radioHeightEstimated = 150; // Approximated from your hitbox zone height
+        const radioBottomY = radioBaseY + ((radioHeightEstimated * 5) / 2);
+        this.desk = this.add.image(1160, radioBottomY - 20, "desk");
+        this.desk.setOrigin(0.5, 0);
+        this.desk.setScale(10);
+        this.radio = this.add.image(1160, radioBaseY, "radio").setScale(5); */
 
         // draw table
         const tableGraphics = this.add.graphics();
@@ -1029,7 +1105,7 @@ class Game_RadioRoom extends Phaser.Scene {
         tableGraphics.fillRoundedRect(1012, 555, 36, 220, 6);
         tableGraphics.strokeRoundedRect(1012, 555, 36, 220, 6);
         tableGraphics.fillRoundedRect(1472, 555, 36, 220, 6);
-        tableGraphics.strokeRoundedRect(1472, 555, 36, 220, 6);
+        tableGraphics.strokeRoundedRect(1472, 555, 36, 220, 6); 
 
 
         // small nails / bolts
